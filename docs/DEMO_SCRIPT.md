@@ -1,53 +1,43 @@
 # Paylock AI — 2 minute 45 second demo
 
-## Before recording
+## Recording prerequisites
 
-Use a real model key and PayPal **sandbox** credentials. Create a fresh sandbox agreement; practice fixtures are only for rehearsal. Use fictitious project/contact data. Show no secrets, seller bearer link, or sandbox password on camera. Use a clean browser at 1440×900 or similar. Prepare submission text off-screen. Avoid third-party copyrighted music and logo overlays. Do not claim a live integration until the flow actually succeeds.
+The practice walkthrough is a rehearsal. For submission, configure a real model and PayPal sandbox credentials and successfully run the connected flow first. Create a fresh sandbox agreement with the website source criteria from README; use its real seller portal for the correction. The practice-only sample revision shortcut is intentionally unavailable for sandbox agreements. Show no credentials, buyer key, or seller bearer URL on camera. Use fictional project data. Record the actual product; do not imply simulated activity is a provider transaction.
 
-## 0:00–0:20 · Problem, with the product already on screen
+## 0:00–0:20 — The problem
 
-“A $900 freelance project often begins with a vague brief and ends with a difficult question: is this work actually done? Paylock turns that brief into measurable milestones and gives both sides a shared record before money moves.”
+Screen: the Northstar website agreement, first milestone selected.
 
-Show Overview, then open New agreement. Audience: small ecommerce teams buying fixed-scope freelance work.
+“An independent merchant hires a freelancer to build a product page. The hard question is whether the delivered work matches what they agreed to pay for. Paylock connects the agreement, the evidence, and the buyer's payment decision.”
 
-## 0:20–0:50 · AI makes the agreement concrete
+## 0:20–0:45 — Agree and authorize
 
-Paste the Shopify optimization brief, seller email, and $900 budget. Click Generate milestones. Show the **AI-generated** label and inspect one criterion. Edit a criterion to demonstrate buyer control. Create the agreement.
+Show the three specific source requirements. Briefly show live AI planning and buyer edits from the connected run. Authorize the $300 milestone with PayPal sandbox checkout. Show the recorded authorization status without exposing account credentials.
 
-“AI proposes the scope, payment split, and evidence we should expect. The buyer edits and approves the agreement before any payment authorization.”
+“Each milestone has a clear price and acceptance criteria. PayPal authorizes the payment; capture happens only after buyer approval.”
 
-Do not substitute a fallback generation and narrate it as live AI. If using an edited video, label time cuts honestly.
+## 0:45–1:20 — Inspect a real gap
 
-## 0:50–1:15 · PayPal authorizes a milestone
+Submit the first HTML artifact through the seller portal. Show the missing delivery note, exact source excerpts, and the connected model's interpretation.
 
-Authorize the first milestone through PayPal Checkout using the sandbox buyer. Show the resulting authorized state and provider authorization reference in Activity.
+“The seller supplied the actual HTML source. Two requirements are present, but the delivery note is missing. Deterministic source checks establish those facts; AI helps interpret the evidence. This does not prove that a live website or its checkout works.”
 
-“This is a real PayPal sandbox authorization. Paylock uses Orders v2 to authorize, then Payments v2 to capture after approval. It is not permanent escrow: holds have an expiration.”
+## 1:20–1:50 — Revise, with history
 
-## 1:15–1:55 · Evidence, not a magic score
+Request revision and save the feedback. Submit corrected source through the seller portal. Show three supported criteria and briefly expand the old version.
 
-Open the seller portal. Submit text addressing each criterion and an optional delivery URL. Return to the buyer's review screen. Show the **LIVE AI REVIEW** label, a supported quote, and any missing evidence.
+“The buyer requests a specific correction. The new artifact passes the source checks, while the original submission remains in the record.”
 
-“The AI must account for every criterion and quote the submitted evidence. Links aren't silently treated as proof. The model recommends; it cannot trigger a payment.”
+## 1:50–2:25 — Human approval and PayPal capture
 
-If the recommendation is revise, show why. Either request a revision and use a prepared corrected submission, or explain a manual approval after inspecting the artifact. Do not guarantee a score or force the model result.
+Inspect the corrected work. Enter the buyer decision note, check explicit authorization, and confirm. Show the sandbox capture reference and ledger entry. Record only a successful real sandbox transaction for this section.
 
-## 1:55–2:25 · Human decision → real sandbox capture
+“AI never moves money. The buyer approves, and Paylock captures the PayPal sandbox authorization. The receipt stays linked to the work and the decision.”
 
-Click Approve & release, enter what you verified, check the confirmation, and confirm. Open Activity or Payment ledger to show the capture ID.
+## 2:25–2:45 — Close with the boundary
 
-“Only this buyer decision captures the authorization. Duplicate requests reuse the same payment operation. Pending provider responses stay pending rather than becoming a fake success.”
+“Paylock helps small teams make inspectable payment decisions. This prototype uses time-limited authorization and capture, not escrow. It checks submitted source, not deployed behavior. Next we will test the workflow with merchants and freelancers.”
 
-“For this prototype, funds settle to the configured sandbox merchant. Seller marketplace payouts are a future integration.”
+## Submission assets
 
-## 2:25–2:45 · Close with the specific value
-
-Show the updated balance and download the evidence packet.
-
-“Paylock gives small teams a clear agreement, an evidence-based review, and a traceable payment decision. The same boundary can support agent-produced work: an agent supplies the deliverable, but money moves only within an agreed scope and an explicit human approval.”
-
-End on the product. Display your actual public repository and demo URL or local setup instructions. Keep the final video below 3:00.
-
-## Rehearsal variant
-
-Use `/demo` without keys to rehearse navigation. Say “practice authorization” and “prewritten example review.” Do not submit a video that only presents these simulations as the PayPal/AI integration.
+Public YouTube video under three minutes; public licensed repository when the owner authorizes visibility; verified local setup instructions or hosted demo; exact model/service used in the recording. Avoid third-party music or unrelated trademark overlays. Do not invent user results or claim untested integrations.

@@ -442,11 +442,13 @@ export function AgreementDetail({
                     <div>
                       <small>CRITERIA SUPPORTED</small>
                       <h3>
-                        {sub.aiRecommendation === "release"
-                          ? "Ready for your approval"
-                          : sub.aiRecommendation === "revise"
-                            ? "A requirement is missing"
-                            : "Needs investigation"}
+                        {m.status === "RELEASED"
+                          ? "Evidence accepted"
+                          : sub.aiRecommendation === "release"
+                            ? "Ready for your approval"
+                            : sub.aiRecommendation === "revise"
+                              ? "A requirement is missing"
+                              : "Needs investigation"}
                       </h3>
                       <span>
                         {review.checklist.filter((c) => c.passed).length} of{" "}
@@ -476,12 +478,14 @@ export function AgreementDetail({
                     ))}
                   </div>
                   {review.riskFlags.length > 0 && (
-                    <div className="risk-box">
-                      <strong>Keep in mind</strong>
+                    <details className="risk-box">
+                      <summary>
+                        Verification scope and artifact fingerprint
+                      </summary>
                       {review.riskFlags.map((r, i) => (
                         <p key={i}>{r}</p>
                       ))}
-                    </div>
+                    </details>
                   )}
                   <div className="decision-zone">
                     <p>

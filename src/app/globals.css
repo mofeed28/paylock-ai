@@ -3010,3 +3010,37 @@ summary {
     font-size: 10px;
   }
 }
+
+.focused-detail .score-row > .score-ring > span {
+  font-size: 28px;
+  color: #285c41;
+}
+@media (max-width: 680px) {
+  .sidebar nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .sidebar .nav-link {
+    min-width: 0;
+    justify-content: center;
+    gap: 5px;
+    padding: 10px 3px;
+    font-size: 11px;
+  }
+  .sidebar .nav-link svg {
+    flex-shrink: 0;
+    width: 14px;
+  }
+  .journey-list {
+    grid-template-columns: 1fr 1fr;
+  }
+  .journey-list li {
+    display: block;
+  }
+  .journey-list li > span {
+    margin-bottom: 8px;
+  }
+  .work-toolbar .search {
+    min-width: 0;
+  }
+}

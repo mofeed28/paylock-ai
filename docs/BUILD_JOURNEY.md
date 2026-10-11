@@ -43,3 +43,11 @@ Repository includes the application, setup instructions, license, automated chec
 ## Logging convention
 
 Each meaningful implementation checkpoint gets a descriptive Git commit and a dated log entry with: problem, change, verification, and known limitations. Record outcomes as observed, never as assumed or promised.
+
+## 2026-10-11 — Redesign validated locally
+
+Completed the focused workspace and HTML evidence walkthrough. Added explicit source-check patterns that accept custom product names, link labels, and delivery notes. Unsupported criteria remain AI/manual review. A model recommendation cannot override a failed recognized source check. Corrected an empty-citation validation gap discovered while extending evidence tests.
+
+Validation: ESLint and TypeScript pass; all 16 tests pass; optimized build succeeds. Browser inspection completed at desktop and two narrow widths. The end-to-end practice test produced 2/3 → revision → 3/3 → explicit approval → a $300 simulated receipt. The first visual check exposed a 3px navigation overflow in the narrow panel; a responsive navigation grid fixed it. No user agreements were deleted.
+
+Updated README, demo script, submission draft, and verification record for the current product. Preserved the initial verification as historical evidence. Actual model and PayPal sandbox testing still needs credentials; no claim of connected testing is made.

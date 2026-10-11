@@ -16,11 +16,11 @@ Small ecommerce teams need specialist help, but “done” is often undefined. A
 
 The buyer describes a fixed-scope project. AI proposes milestones, acceptance criteria, risk flags, and a budget split. The buyer edits the plan and authorizes each milestone through PayPal sandbox checkout. The seller submits evidence through a private link. AI evaluates each criterion, provides a supporting excerpt or explains missing evidence, and recommends release, revision, or investigation. The buyer makes the final decision. Approved work triggers a PayPal sandbox capture, with the provider reference recorded beside the work and decision note.
 
-The dashboard tracks authorized and released amounts. A revision loop keeps feedback and submission versions together. Internal disputes block release. A downloadable evidence packet makes the record portable.
+The workspace highlights the next buyer decision and presents agreements as responsive cards. The website walkthrough parses submitted HTML, identifies a missing delivery note, and checks the corrected artifact. Recognized source requirements take precedence over AI interpretation; artifact fingerprints and submission history make the evidence inspectable. A revision loop keeps feedback and submission versions together. Internal disputes block release. A downloadable evidence packet makes the record portable.
 
 ## How we built it
 
-Next.js App Router, TypeScript, Tailwind CSS, Radix/shadcn-style UI primitives, Prisma, and SQLite. PayPal JS SDK and Orders v2 handle authorization; Payments v2 handles capture. OpenAI-compatible structured outputs and Zod enforce the agreement and review schemas. Submission content is untrusted data; the AI has no payment tools. Server checks validate every criterion and verify quoted evidence against submitted text.
+Next.js App Router, TypeScript, Tailwind CSS, Radix/shadcn-style UI primitives, Prisma, and SQLite. PayPal JS SDK and Orders v2 handle authorization; Payments v2 handles capture. OpenAI-compatible structured outputs and Zod enforce the agreement and review schemas. Submission content is untrusted data; the AI has no payment tools. Server checks validate checklist coverage and verify quoted evidence against submitted text. node-html-parser evaluates explicit heading, purchase-link, and delivery-note source criteria without executing HTML.
 
 ## What makes it different
 
@@ -28,11 +28,11 @@ Paylock links three stages that are often disconnected: the acceptance criteria 
 
 ## Challenges and limitations
 
-PayPal authorization is time-limited and is not regulated escrow. This MVP settles to a single configured sandbox merchant; arbitrary seller payouts and onboarding are outside scope. The reviewer evaluates submitted text and does not verify external URLs. Human inspection remains necessary. Provider failures do not silently turn into simulated successes. Practice mode and model fallback are explicitly labeled.
+PayPal authorization is time-limited and is not regulated escrow. This MVP settles to a single configured sandbox merchant; arbitrary seller payouts and onboarding are outside scope. The reviewer evaluates submitted text and explicit HTML source requirements. It does not verify external URLs, rendered layout, deployment, or functioning checkout. Human inspection remains necessary. Provider failures do not silently turn into simulated successes. Practice mode and model fallback are explicitly labeled.
 
 ## What we learned
 
-[Replace with your actual experience after running the connected sandbox and model workflow. Include a concrete failure you observed and corrected. Do not claim experiences you have not had.]
+Early feedback identified a scattered interface and a table that clipped in a narrow browser panel. We replaced that dashboard with agreement cards and a clear next action. We also replaced the prewritten sample review with computed HTML checks: a missing delivery note now produces a concrete revision request. Actual connected PayPal and model testing remains outstanding; this draft must be updated after that testing.
 
 ## What's next
 
@@ -40,7 +40,7 @@ Merchant onboarding, verified artifact retrieval in an isolated environment, aut
 
 ## Built with
 
-Next.js, React, TypeScript, Tailwind CSS, Prisma, SQLite, PayPal JS SDK, PayPal Orders v2, PayPal Payments v2, OpenAI-compatible API, Zod, Lucide.
+Next.js, React, TypeScript, Tailwind CSS, Prisma, SQLite, PayPal JS SDK, PayPal Orders v2, PayPal Payments v2, OpenAI-compatible API (configured model must be named after live verification), node-html-parser, Zod, Lucide.
 
 ## Evidence to attach before submission
 

@@ -1,4 +1,23 @@
-# Verification record
+# Current verification — focused website walkthrough
+
+Verified October 11, 2026 on Windows with Node.js 22.17.1.
+
+- TypeScript and ESLint pass.
+- 16 automated tests pass. Added coverage for missing and corrected HTML, source fingerprints, hidden/script/comment decoys, custom products, executable links, ambiguous multiple artifacts, model/source-check conflicts, and empty citations.
+- Isolated SQLite workflow confirms demo reopening does not create duplicates, fresh walkthroughs keep old records, sample revision requires a buyer revision request, and both submitted versions are preserved.
+- Optimized production build succeeds.
+- Browser walkthrough: initial computed 2/3 result → buyer revision request → corrected source → computed 3/3 result → explicit buyer confirmation → $300 simulated capture and receipt.
+- Desktop layout inspected at a 1440px viewport. At 390px and 320px viewports, the loaded agreement detail and cards have no document-level horizontal overflow (375px and 305px content widths after the scrollbar). Search filters cards correctly.
+- Replaced clipping tables with responsive agreement cards. Fixed the additional narrow-navigation overflow observed during QA.
+- Dependency installation reported zero audit vulnerabilities after adding node-html-parser; this is a point-in-time check.
+
+The GitHub repository is private by owner request. Real PayPal sandbox calls, real model calls, user research, hosted deployment, public video, and submission remain outstanding. Model and PayPal adapter tests use HTTP doubles; they are not provider connectivity tests.
+
+The historical record below refers to the prior four-milestone sample and must not be mistaken for the current walkthrough. New screenshots show the focused redesign.
+
+---
+
+# Historical baseline — initial MVP
 
 Verified October 11, 2026 on Windows, Node.js 22.17.1, Next.js 16.4.0, Prisma 6.12.0, and SQLite.
 

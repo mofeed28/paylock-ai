@@ -10,6 +10,7 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
   const { db } = await import("../src/lib/db");
   const {
     seedDemo,
+    submitDemoRevision,
     milestone,
     capture,
     decide,
@@ -47,6 +48,14 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
     assert.equal(agreement.totalAmount, 90000);
     assert.equal(first.paymentStatus, "AUTHORIZED");
     assert.equal(first.status, "IN_REVIEW");
+    assert.equal(
+      (await seedDemo()).id,
+      a.id,
+      "reopening does not duplicate the demo",
+    );
+    assert.equal((await milestone(first.id)).submissions[0].aiScore, 67);
+    await assert.rejects(submitDemoRevision(first.id), /Request a revision/);
+
     await decide(
       first.id,
       "revise",
@@ -111,6 +120,25 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
     await assert.rejects(
       decide(first.id, "dispute", "Trying to change released work."),
       /closed/,
+    );
+    const fresh = await seedDemo(true);
+    assert.notEqual(fresh.id, a.id);
+    const demoMilestone = await db.milestone.findFirstOrThrow({
+      where: { agreementId: fresh.id, position: 0 },
+    });
+    await decide(
+      demoMilestone.id,
+      "revise",
+      "Please add the missing delivery note.",
+    );
+    await submitDemoRevision(demoMilestone.id);
+    const corrected = await milestone(demoMilestone.id);
+    assert.equal(corrected.submissions.length, 2);
+    assert.equal(corrected.submissions[0].aiScore, 100);
+    assert.equal(corrected.submissions[0].aiSource, "checks");
+    await assert.rejects(
+      submitDemoRevision(demoMilestone.id),
+      /Request a revision/,
     );
     const second = await db.milestone.findFirstOrThrow({
       where: { agreementId: a.id, position: 1 },
