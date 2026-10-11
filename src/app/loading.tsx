@@ -1,0 +1,16 @@
+export default function Loading() {
+  return (
+    <div className="page">
+      <div className="skeleton skeleton-title" />
+      <div className="stats-grid">
+        {[0, 1, 2, 3].map((i) => (
+          <div className="skeleton skeleton-card" key={i} />
+        ))}
+      </div>
+      <div className="skeleton skeleton-large" />
+      <p className="muted" role="status">
+        Loading your workspace…
+      </p>
+    </div>
+  );
+}

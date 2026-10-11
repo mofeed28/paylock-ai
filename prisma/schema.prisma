@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "sqlite"
+  url = env("DATABASE_URL")
+}
+model Agreement {
+  id String @id @default(cuid())
+  title String
+  buyerName String @default("Alex Morgan")
+  buyerEmail String @default("buyer@example.com")
+  sellerEmail String
+  sellerToken String @unique
+  description String
+  totalAmount Int
+  currency String @default("USD")
+  status String @default("ACTIVE")
+  paymentMode String
+  aiSource String
+  riskFlags String
+  deadline String?
+  createdAt DateTime @default(now())
+  milestones Milestone[]
+  payments PaymentEvent[]
+  timeline TimelineEvent[]
+}
+model Milestone {
+  id String @id @default(cuid())
+  agreementId String
+  agreement Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  position Int
+  title String
+  description String
+  acceptanceCriteria String
+  amount Int
+  status String @default("PENDING")
+  paymentStatus String @default("UNFUNDED")
+  dueDate String?
+  aiRiskNotes String
+  orderId String? @unique
+  authorizationId String? @unique
+  captureId String? @unique
+  authorizedAt DateTime?
+  expiresAt DateTime?
+  submissions Submission[]
+  payments PaymentEvent[]
+  @@index([agreementId])
+}
+model Submission {
+  id String @id @default(cuid())
+  milestoneId String
+  milestone Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  content String
+  url String?
+  aiScore Int
+  aiRecommendation String
+  aiSource String
+  aiReviewJson String
+  createdAt DateTime @default(now())
+  @@index([milestoneId])
+}
+model PaymentEvent {
+  id String @id @default(cuid())
+  agreementId String
+  agreement Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  milestoneId String?
+  milestone Milestone? @relation(fields: [milestoneId], references: [id])
+  provider String
+  providerOrderId String?
+  providerAuthorizationId String?
+  providerCaptureId String?
+  operationKey String @unique
+  type String
+  amount Int
+  status String
+  rawJson String
+  createdAt DateTime @default(now())
+  @@index([agreementId])
+}
+model TimelineEvent {
+  id String @id @default(cuid())
+  agreementId String
+  agreement Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  actor String
+  type String
+  message String
+  metadataJson String @default("{}")
+  createdAt DateTime @default(now())
+  @@index([agreementId])
+}
