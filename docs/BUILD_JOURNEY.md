@@ -51,3 +51,7 @@ Completed the focused workspace and HTML evidence walkthrough. Added explicit so
 Validation: ESLint and TypeScript pass; all 16 tests pass; optimized build succeeds. Browser inspection completed at desktop and two narrow widths. The end-to-end practice test produced 2/3 → revision → 3/3 → explicit approval → a $300 simulated receipt. The first visual check exposed a 3px navigation overflow in the narrow panel; a responsive navigation grid fixed it. No user agreements were deleted.
 
 Updated README, demo script, submission draft, and verification record for the current product. Preserved the initial verification as historical evidence. Actual model and PayPal sandbox testing still needs credentials; no claim of connected testing is made.
+
+## 2026-10-11 — GitHub verification passed
+
+GitHub Actions run [38171644616](https://github.com/mofeed28/paylock-ai/actions/runs/38171644616) passed on implementation commit `a8388c7`: clean npm install, migration deploy, lint, typecheck, all 16 tests, and production build on Ubuntu/Node 22. The first checkpoint run failed on an unused import; the validated implementation removed it. The source is now tested on both Windows locally and Linux CI. This entry is a documentation-only checkpoint after the successful run.
