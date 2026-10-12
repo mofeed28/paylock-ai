@@ -4,7 +4,9 @@ permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # Chromium's sandbox needs user namespaces; newer runner AppArmor defaults
+    # block the downloaded Playwright binary. Keep the browser sandbox enabled.
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
