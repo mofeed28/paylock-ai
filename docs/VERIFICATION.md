@@ -62,3 +62,15 @@ Verified October 11, 2026 on Windows, Node.js 22.17.1, Next.js 16.4.0, Prisma 6.
 - Multi-user/multi-instance operation, real-money payments, seller payouts, webhooks, refunds, and production security certification are outside this prototype.
 
 The screenshot in `dashboard.png` shows the working practice workspace following the browser tests. The distributable zip excludes `.env`, local databases, build output, and `node_modules`.
+
+
+## Browser agent checkpoint — October 12, 2026
+
+- 21 automated tests pass locally, including a real Chromium 404/revision/200 flow with isolated SQLite and duplicate-capture prevention.
+- Function-calling behavior is tested with mock responses; no live-model success is claimed.
+- Permission tests reject revoked/expired grants, mismatched amounts, stale or incomplete evidence, disputes, blocked requests, and non-live sandbox planners.
+- Lint, TypeScript, and optimized production build pass.
+- UI: explicit practice grant, browser failure with no capture, corrected submission, passing observations, simulated capture and receipt. Three protected screenshot images loaded successfully.
+- Responsive inspection at 390px and 1440px: no horizontal document overflow.
+- Screenshot: [agent-verification.jpg](agent-verification.jpg).
+- Outstanding: live model/provider credentials and actual PayPal sandbox authorization/capture; deployed-site integration; multi-user/production hardening. Local sample results must not be presented as completed live integration.

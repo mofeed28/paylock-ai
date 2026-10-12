@@ -2,7 +2,12 @@ import { randomBytes } from "node:crypto";
 import { db } from "./db";
 import { ApiError } from "./auth";
 import { agreementSchema } from "./schema";
-import { reviewSubmission } from "./ai";
+import { reviewSubmission, fallbackReview } from "./ai";
+import {
+  browserPolicySchema,
+  capturePermission,
+  type AgentResult,
+} from "./agent-contract";
 import { paymentMode, paypal } from "./paypal";
 import { money } from "./utils";
 import {
@@ -73,12 +78,25 @@ export async function submitWork(
   assertOpen(m);
   if (m.status === "IN_REVIEW")
     throw new ApiError(409, "This submission is awaiting a buyer decision.");
-  const result = await reviewSubmission(
-    m.title,
-    JSON.parse(m.acceptanceCriteria),
-    content,
-    url,
-  );
+  const policy = m.browserPolicyJson
+    ? browserPolicySchema.parse(JSON.parse(m.browserPolicyJson))
+    : null;
+  if (policy && url !== policy.targetUrl)
+    throw new ApiError(
+      400,
+      "Use the buyer-approved website URL exactly. Changing the target requires a new agreement.",
+    );
+  const result = policy
+    ? {
+        review: fallbackReview(JSON.parse(m.acceptanceCriteria), content),
+        source: "agent-pending",
+      }
+    : await reviewSubmission(
+        m.title,
+        JSON.parse(m.acceptanceCriteria),
+        content,
+        url,
+      );
   await db.$transaction(async (tx) => {
     await tx.submission.create({
       data: {
@@ -101,10 +119,18 @@ export async function submitWork(
       },
     });
   });
+  if (policy) {
+    const { runAgent } = await import("./agent-service");
+    return runAgent(id);
+  }
   return { ok: true };
 }
 export async function rereview(id: string) {
   const m = await milestone(id);
+  if (m.browserPolicyJson) {
+    const { runAgent } = await import("./agent-service");
+    return runAgent(id);
+  }
   assertOpen(m);
   const s = m.submissions[0];
   if (!s) throw new ApiError(409, "Submit work before requesting review.");
@@ -299,7 +325,7 @@ export async function authorize(id: string, orderId?: string) {
   ]);
   return { ok: true };
 }
-export async function capture(id: string, reason: string) {
+export async function capture(id: string, reason: string, agentRunId?: string) {
   const m = await milestone(id);
   if (m.paymentStatus === "CAPTURED")
     return { ok: true, alreadyCaptured: true };
@@ -319,6 +345,35 @@ export async function capture(id: string, reason: string) {
       409,
       "Authorization expired. Reauthorization is not supported in this MVP; create a new agreement.",
     );
+  if (agentRunId) {
+    const run = await db.agentRun.findUnique({ where: { id: agentRunId } });
+    if (
+      !run ||
+      run.milestoneId !== id ||
+      run.submissionId !== m.submissions[0]?.id ||
+      run.policyJson !== m.browserPolicyJson ||
+      run.status !== "VERIFIED" ||
+      !run.completedAt ||
+      Date.now() - run.completedAt.getTime() > 10 * 60000
+    )
+      throw new ApiError(
+        409,
+        "Fresh verification bound to the current submission is required.",
+      );
+    const evidence = JSON.parse(run.resultJson) as AgentResult;
+    const denied = capturePermission({
+      enabled: m.autoCapture,
+      until: m.autoCaptureUntil,
+      limit: m.autoCaptureLimit,
+      amount: m.amount,
+      paymentStatus: m.paymentStatus,
+      status: m.status,
+      planner: run.planner,
+      paymentMode: m.agreement.paymentMode,
+      ...evidence,
+    });
+    if (denied) throw new ApiError(409, denied);
+  }
   const practice = m.agreement.paymentMode === "practice";
   const key = `capture:${id}`;
   const previous = await db.paymentEvent.findUnique({
@@ -387,11 +442,12 @@ export async function capture(id: string, reason: string) {
     await tx.timelineEvent.create({
       data: {
         agreementId: m.agreementId,
-        actor: "buyer",
+        actor: agentRunId ? "verification agent" : "buyer",
         type: status === "COMPLETED" ? "RELEASED" : "CAPTURE_PENDING",
         message: `${status === "COMPLETED" ? "Approved and captured" : "Capture awaiting provider confirmation"}: ${money(m.amount)} · ${m.title}${practice ? " (practice)" : ""}. Buyer note: ${reason}`,
         metadataJson: JSON.stringify({
           captureId,
+          agentRunId,
           submissionId: m.submissions[0].id,
           reason,
         }),

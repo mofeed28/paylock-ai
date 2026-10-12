@@ -55,3 +55,16 @@ Updated README, demo script, submission draft, and verification record for the c
 ## 2026-10-11 — GitHub verification passed
 
 GitHub Actions run [38171644616](https://github.com/mofeed28/paylock-ai/actions/runs/38171644616) passed on implementation commit `a8388c7`: clean npm install, migration deploy, lint, typecheck, all 16 tests, and production build on Ubuntu/Node 22. The first checkpoint run failed on an unused import; the validated implementation removed it. The source is now tested on both Windows locally and Linux CI. This entry is a documentation-only checkpoint after the successful run.
+
+
+## 2026-10-12 — Bounded browser agent implemented and verified locally
+
+The prior source-review workflow did not independently inspect a rendered website. Added an actual function-calling planner with four read-only Chromium tools: product heading, delivery text, purchase destination, and mobile overflow/visibility. Tool outputs feed back into the planner; the five-step loop may stop with a concrete failure or complete all checks. No key is explicitly labeled deterministic; an unavailable or invalid planner becomes fallback, which cannot authorize automatic sandbox capture.
+
+Added immutable buyer-defined verification scope, exact-URL seller submissions, persistent run records and screenshots, automatic revision feedback, and automatic rechecking on resubmission. Payment authority starts off. An explicit 24-hour buyer grant binds one capture to the milestone amount; the payment service rechecks permission, current submission, scope, run freshness, completeness, and payment state. Requests remain serialized in this single-process prototype; revocation is not in-flight cancellation.
+
+Created `/agent` with one focused practice story: a product page whose purchase destination returns 404, then a corrected 200 response. Browser observations and screenshots are computed from actual rendered offline HTML. No model or provider activity is fabricated. The original source demo remains available. Updated the main navigation, seller portal, README, submission draft, and under-three-minute recording script.
+
+Validation: all 21 tests pass, including real Chromium against an isolated SQLite database, permission revocation, stale evidence rejection, original/revised submission retention, and exactly one capture on retry. Mock-model tests verify observation feedback, early finish, and invalid-tool fallback. Private/local IP and URL guards are covered. ESLint, TypeScript, and production build pass. Browser UI verification produced 3/4 → automatic revision → 4/4 → a single $300 simulated capture. All three evidence images loaded. Desktop 1440px and mobile 390px viewport inspection showed no horizontal overflow. See [captured proof](agent-verification.jpg).
+
+Limits: actual live-model and PayPal sandbox end-to-end calls still require credentials. JavaScript is disabled; purchase-destination reachability does not verify transactional checkout. This is one workspace and one process, with no background queue, in-flight cancellation, webhooks, seller payouts, or automatic reconciliation. Run arbitrary public deliveries only within a dedicated OS/container sandbox with outbound restrictions. Repository remains private at the owner's request. Linux CI results for this checkpoint will be recorded after the run completes.

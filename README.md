@@ -1,10 +1,10 @@
-> Development status: private hackathon build. The focused website walkthrough includes computed source checks and a revision loop; historical verification is separated from current changes in [the build journey](docs/BUILD_JOURNEY.md). Real PayPal sandbox and live-model verification remain outstanding.
+> Development status: private hackathon build. The browser agent now verifies rendered pages, requests revisions, and applies explicit buyer payment permissions; historical verification is separated from current changes in [the build journey](docs/BUILD_JOURNEY.md). Real PayPal sandbox and live-model verification remain outstanding.
 
 # Paylock AI
 
 **Work agreed. Evidence reviewed. Payment earned.**
 
-A working PayPal AI Hackathon MVP for small freelance projects: turn a brief into measurable milestones, collect evidence, inspect an AI review, and capture a PayPal sandbox authorization only after a buyer decision.
+A working PayPal AI Hackathon MVP for small freelance projects: turn a brief into measurable milestones, collect evidence, inspect an AI review, and capture a PayPal sandbox authorization after manual approval or an explicit, time-limited buyer policy.
 
 This repository is a **single-workspace prototype**, not a regulated escrow service or a production marketplace. Practice mode is usable without any external credentials. The connected sandbox path requires your own PayPal and model credentials.
 
@@ -14,6 +14,7 @@ Requirements: Node.js 22 LTS recommended (20.12+ supported), npm, internet for d
 
 ```bash
 npm install
+npx playwright install chromium
 cp .env.example .env
 npm run db:deploy
 npm run dev
@@ -21,7 +22,7 @@ npm run dev
 
 On Windows PowerShell, replace `cp .env.example .env` with `Copy-Item .env.example .env`.
 
-Open **http://127.0.0.1:3000**. Visit `/demo` and choose **Open website walkthrough**. It reopens the latest sample; the expandable restart section creates a fresh walkthrough when needed. No API keys are necessary for practice. SQLite data persists across restarts in `prisma/dev.db`. The included migration is versioned; `npm run db:deploy` applies it without creating a new migration. A small bootstrap script creates an empty SQLite file if needed for Prisma's Windows engine; it never overwrites existing data.
+Open **http://127.0.0.1:3000**. Visit `/agent` and choose **Try the browser agent**. The older HTML-source walkthrough remains at `/demo`. It reopens the latest sample; the expandable restart section creates a fresh walkthrough when needed. No API keys are necessary for practice. SQLite data persists across restarts in `prisma/dev.db`. The included migration is versioned; `npm run db:deploy` applies it without creating a new migration. A small bootstrap script creates an empty SQLite file if needed for Prisma's Windows engine; it never overwrites existing data.
 
 For a production-mode local run:
 
@@ -30,7 +31,25 @@ npm run build
 npm start
 ```
 
-## Try the complete workflow
+## Browser agent workflow
+
+1. Open `/agent` and start the Northstar sample. It has a $300 verification milestone and a $100 manual handoff milestone. The first payment is authorized in practice mode.
+2. Optionally check the explicit authorization box and enable one $300 simulated capture for 24 hours. Automatic capture starts **off**.
+3. Run browser verification. Chromium renders the actual offline sample HTML; its purchase destination returns HTTP 404. The agent records screenshots and observations and requests a revision. No payment is captured.
+4. Choose **Submit corrected page & recheck**. The corrected destination returns HTTP 200. All four requirements are inspected again.
+5. With valid buyer permission, Paylock records one simulated capture. With permission off or revoked, the passing result waits for manual approval. Inspect the tool activity, screenshots, original submission, and ledger.
+
+Without `OPENAI_API_KEY`, this is a clearly labeled **deterministic browser rehearsal**. With a configured function-calling model, the planner selects browser tools, receives observations, and chooses its next tool or stops with findings. The mock-model tests validate this protocol; they do not establish live-provider connectivity.
+
+For a real deployed site, expand **Verify a deployed website** and define its exact HTTPS URL, product heading, delivery text, purchase link label, and destination heading. The seller must submit that exact URL. Submissions automatically trigger verification. Set `PAYMENT_MODE=sandbox` before creating the agreement for actual PayPal sandbox integration; authorize its payment using the PayPal button. The sample remains practice-only and cannot verify a sandbox capture.
+
+Tools: `inspect_heading`, `inspect_delivery`, `test_purchase_link`, and `inspect_mobile`. The model has no payment tool. Server-side policy checks require all four passing observations, no blocked requests, an unchanged current submission, a fresh completed run, exact authorized amount, a valid PayPal authorization, an open milestone, and an unexpired buyer grant. Sandbox automatic capture additionally requires a successful live planner. A failed planner never silently gains payment authority.
+
+Browser scope: fresh Chromium context, JavaScript disabled, no stored credentials or form submissions, HTTPS GET requests restricted to the approved origin, public-IP validation with DNS pinning, and bounded requests/time/bytes. Script-dependent, cross-origin, login-protected, or incomplete deliveries need human review. A reachable purchase destination is **not** proof of working checkout. Deploy Chromium in a dedicated OS/container sandbox with outbound network restrictions before accepting arbitrary public submissions. Install its Linux dependencies using `npx playwright install --with-deps chromium`.
+
+Run metadata, observations, policy snapshot, traces, screenshots, and artifact fingerprint persist in SQLite. Screenshot endpoints require buyer access. The JSON evidence packet includes the latest five runs per milestone and references their screenshot indices; image bytes and older runs remain in the database. This MVP executes synchronously in one process; mutations are serialized, so revocation queued behind an active run only takes effect after that run. Set permission before starting a run; cancellation and background scheduling are not implemented.
+
+## Original source-review workflow
 
 1. Open the website walkthrough: a three-milestone $900 product page job. The $300 source milestone is authorized in practice mode.
 2. Inspect the submitted HTML. The server computes **2/3 requirements supported**: product heading and HTTPS purchase link are present; the delivery note is missing.
@@ -48,8 +67,8 @@ PayPal is the payment state transition, not a decorative checkout link:
 
 ```
 Buyer checkout → Orders v2 AUTHORIZE → saved authorization ID
-Seller evidence → AI recommendation → human decision
-Buyer release → Payments v2 capture → saved capture ID → released milestone
+Seller evidence → browser observations / AI review → buyer policy or manual decision
+Approved release → Payments v2 capture → saved capture ID → released milestone
 ```
 
 Each milestone has a separate order. The server chooses the amount and currency from the database, binds the order to that milestone, verifies authorization/capture amounts, and uses stable `PayPal-Request-Id` values. A pending capture does not mark work paid: the buyer checks provider status before completion. Repeated capture requests return the stored result.
@@ -97,7 +116,7 @@ Set `OPENAI_API_KEY` and `OPENAI_MODEL` in `.env`. The default model is `gpt-4o-
 
 No key, refusal, timeout, malformed JSON, wrong total, or invalid dates: use a **labeled deterministic fallback**. Fallback agreement templates remain editable; fallback reviews score 0 and ask for human verification. The current website walkthrough uses computed source checks instead of a prewritten score. Recognized criteria are evaluated even without a model; unrecognized criteria retain the conservative fallback. Older saved samples may still carry the clearly labeled historical fixture. A buyer may still manually approve after checking the evidence and providing a decision note.
 
-Seller text is treated as untrusted input. External URLs are displayed but not fetched. Text evidence is not independent verification of completion, and the model is not a dispute arbitrator. These constraints are displayed in the product.
+Seller text is treated as untrusted input. Ordinary text-review URLs are displayed but not fetched. Browser-verification milestones fetch only their buyer-approved target under the restrictions above. Text evidence is not independent verification of completion, and the model is not a dispute arbitrator. These constraints are displayed in the product.
 
 Reference: [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs?api-mode=chat).
 

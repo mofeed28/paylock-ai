@@ -30,6 +30,7 @@ import type { Review } from "@/lib/schema";
 import { money, date } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { api, CopyButton, Notice, Status } from "./common";
+import { AgentPanel } from "./agent-panel";
 import { PayPalButton } from "./paypal-button";
 import { extractHtml, WEBSITE_DEMO_TITLE } from "@/lib/website-sample";
 export function AgreementDetail({
@@ -146,10 +147,14 @@ export function AgreementDetail({
         {practice
           ? "Practice agreement · no real funds are held or transferred"
           : "PayPal sandbox · authorization and capture with test funds"}
-        <span className="note-right">AI advises. You approve.</span>
+        <span className="note-right">
+          {m.browserPolicyJson
+            ? "Your policy controls payment."
+            : "AI advises. You approve."}
+        </span>
       </div>
       <ol className="workflow-strip" aria-label="Milestone progress">
-        {["Agreed", "Authorized", "Evidence review", "Buyer approval"].map(
+        {["Agreed", "Authorized", "Evidence review", "Payment approval"].map(
           (label, i) => {
             const complete =
               i === 0 ||
@@ -187,6 +192,15 @@ export function AgreementDetail({
       </div>
       {error && <Notice error>{error}</Notice>}
       {success && <Notice>{success}</Notice>}
+      {tab === "Milestones" && m.browserPolicyJson && (
+        <AgentPanel
+          key={m.id}
+          milestone={m}
+          practice={practice}
+          busy={busy}
+          run={run}
+        />
+      )}
       {tab === "Milestones" ? (
         <div className="detail-grid">
           <div>
@@ -338,23 +352,27 @@ export function AgreementDetail({
                       <pre>{html}</pre>
                     </div>
                   ) : (
-                    <p className="submission-content">{sub.content}</p>
+                    <p className="submission-content">
+                      {sub.content.replace(/^AGENT_FIXTURE_V[12]:\s*/, "")}
+                    </p>
                   )}
-                  {sub.url && (
-                    <a
-                      className="evidence-link"
-                      href={sub.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <Link2 size={15} />
-                      <span>{sub.url}</span>
-                      <ExternalLink size={14} />
-                    </a>
-                  )}
+                  {sub.url &&
+                    !m.browserPolicyJson?.includes('"fixture":true') && (
+                      <a
+                        className="evidence-link"
+                        href={sub.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <Link2 size={15} />
+                        <span>{sub.url}</span>
+                        <ExternalLink size={14} />
+                      </a>
+                    )}
                   <p className="fine-print">
-                    Links are supplied by the seller. Paylock does not browse or
-                    verify their contents.
+                    {m.browserPolicyJson
+                      ? "The browser checks only the buyer-approved URL. Inspect the findings and screenshots above."
+                      : "Links are supplied by the seller. Text reviews do not browse or verify their contents."}
                   </p>
                   {m.submissions.length > 1 && (
                     <details>
@@ -396,7 +414,11 @@ export function AgreementDetail({
                   <Sparkles size={20} />
                 </span>
                 <div>
-                  <h3>Evidence review</h3>
+                  <h3>
+                    {m.browserPolicyJson
+                      ? "Payment decision"
+                      : "Evidence review"}
+                  </h3>
                   <small>Clear reasoning. Your decision.</small>
                 </div>
               </div>
@@ -416,76 +438,88 @@ export function AgreementDetail({
                       </p>
                     </div>
                   )}
-                  <div className={`source-label source-${sub.aiSource}`}>
-                    {sub.aiSource === "live+checks"
-                      ? "LIVE AI + HTML SOURCE CHECKS"
-                      : sub.aiSource === "checks"
-                        ? "HTML SOURCE CHECKS · NO AI MODEL"
-                        : sub.aiSource === "live"
-                          ? "LIVE AI REVIEW"
-                          : sub.aiSource === "demo"
-                            ? "DEMO FIXTURE · PREWRITTEN REVIEW"
-                            : "FALLBACK · MODEL NOT USED"}
-                  </div>
-                  <div className="score-row">
-                    <div
-                      className="score-ring"
-                      style={
-                        { "--score": `${sub.aiScore}%` } as React.CSSProperties
-                      }
-                    >
-                      <span>
-                        {passedCount}
-                        <small>/ {criteria.length}</small>
-                      </span>
-                    </div>
-                    <div>
-                      <small>CRITERIA SUPPORTED</small>
-                      <h3>
-                        {m.status === "RELEASED"
-                          ? "Evidence accepted"
-                          : sub.aiRecommendation === "release"
-                            ? "Ready for your approval"
-                            : sub.aiRecommendation === "revise"
-                              ? "A requirement is missing"
-                              : "Needs investigation"}
-                      </h3>
-                      <span>
-                        {review.checklist.filter((c) => c.passed).length} of{" "}
-                        {criteria.length} criteria supported
-                      </span>
-                    </div>
-                  </div>
-                  <p className="review-explanation">{review.explanation}</p>
-                  <h4>Criterion-by-criterion</h4>
-                  <div className="evidence-checklist">
-                    {review.checklist.map((c) => (
-                      <div key={c.criterionIndex}>
-                        <span
-                          className={c.passed ? "check-pass" : "check-fail"}
+                  {!m.browserPolicyJson && (
+                    <>
+                      <div className={`source-label source-${sub.aiSource}`}>
+                        {sub.aiSource.startsWith("agent-")
+                          ? sub.aiSource === "agent-live"
+                            ? "LIVE AI BROWSER AGENT"
+                            : sub.aiSource === "agent-pending"
+                              ? "BROWSER VERIFICATION PENDING"
+                              : "BROWSER REHEARSAL · NO LIVE AI"
+                          : sub.aiSource === "live+checks"
+                            ? "LIVE AI + HTML SOURCE CHECKS"
+                            : sub.aiSource === "checks"
+                              ? "HTML SOURCE CHECKS · NO AI MODEL"
+                              : sub.aiSource === "live"
+                                ? "LIVE AI REVIEW"
+                                : sub.aiSource === "demo"
+                                  ? "DEMO FIXTURE · PREWRITTEN REVIEW"
+                                  : "FALLBACK · MODEL NOT USED"}
+                      </div>
+                      <div className="score-row">
+                        <div
+                          className="score-ring"
+                          style={
+                            {
+                              "--score": `${sub.aiScore}%`,
+                            } as React.CSSProperties
+                          }
                         >
-                          {c.passed ? (
-                            <CheckCircle2 size={17} />
-                          ) : (
-                            <Circle size={17} />
-                          )}
-                        </span>
+                          <span>
+                            {passedCount}
+                            <small>/ {criteria.length}</small>
+                          </span>
+                        </div>
                         <div>
-                          <strong>{criteria[c.criterionIndex]}</strong>
-                          <p>{c.evidence}</p>
+                          <small>CRITERIA SUPPORTED</small>
+                          <h3>
+                            {m.status === "RELEASED"
+                              ? "Evidence accepted"
+                              : sub.aiRecommendation === "release"
+                                ? "Ready for your approval"
+                                : sub.aiRecommendation === "revise"
+                                  ? "A requirement is missing"
+                                  : "Needs investigation"}
+                          </h3>
+                          <span>
+                            {review.checklist.filter((c) => c.passed).length} of{" "}
+                            {criteria.length} criteria supported
+                          </span>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                  {review.riskFlags.length > 0 && (
-                    <details className="risk-box">
-                      <summary>
-                        Verification scope and artifact fingerprint
-                      </summary>
-                      {review.riskFlags.map((r, i) => (
-                        <p key={i}>{r}</p>
-                      ))}
-                    </details>
+                      <p className="review-explanation">{review.explanation}</p>
+                      <h4>Criterion-by-criterion</h4>
+                      <div className="evidence-checklist">
+                        {review.checklist.map((c) => (
+                          <div key={c.criterionIndex}>
+                            <span
+                              className={c.passed ? "check-pass" : "check-fail"}
+                            >
+                              {c.passed ? (
+                                <CheckCircle2 size={17} />
+                              ) : (
+                                <Circle size={17} />
+                              )}
+                            </span>
+                            <div>
+                              <strong>{criteria[c.criterionIndex]}</strong>
+                              <p>{c.evidence}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {review.riskFlags.length > 0 && (
+                        <details className="risk-box">
+                          <summary>
+                            Verification scope and artifact fingerprint
+                          </summary>
+                          {review.riskFlags.map((r, i) => (
+                            <p key={i}>{r}</p>
+                          ))}
+                        </details>
+                      )}
+                    </>
                   )}
                   <div className="decision-zone">
                     <p>
@@ -632,7 +666,8 @@ export function AgreementDetail({
                       </>
                     )}
                   </div>
-                  {!["RELEASED", "DISPUTED"].includes(m.status) &&
+                  {!m.browserPolicyJson &&
+                    !["RELEASED", "DISPUTED"].includes(m.status) &&
                     m.paymentStatus !== "CAPTURE_PENDING" && (
                       <button
                         className="text-link rerun"

@@ -6,7 +6,7 @@ import {
   BookOpen,
   FlaskConical,
   FolderOpen,
-  LayoutDashboard,
+  ScanEye,
   LockKeyhole,
   ReceiptText,
   Settings2,
@@ -17,7 +17,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const seller = path.startsWith("/seller");
   const links = [
-    { href: "/", label: "Workspace", icon: LayoutDashboard },
+    { href: "/agent", label: "Verification agent", icon: ScanEye },
     { href: "/agreements", label: "Agreements", icon: FolderOpen },
     { href: "/ledger", label: "Payment ledger", icon: ReceiptText },
   ];
@@ -72,8 +72,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="sidebar-bottom">
           <div className="trust-note">
             <ShieldCheck size={19} />
-            <strong>Your judgment. AI assistance.</strong>
-            <p>Every release starts with a human decision.</p>
+            <strong>Your policy. Verified work.</strong>
+            <p>You set the scope and payment permission.</p>
             <Link href="/demo">
               Explore the workflow <ArrowUpRight size={13} />
             </Link>
@@ -114,9 +114,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
                       ? "Agreements"
                       : path === "/ledger"
                         ? "Payment ledger"
-                        : path === "/demo"
-                          ? "Demo studio"
-                          : "Integrations"}
+                        : path === "/agent"
+                          ? "Verification agent"
+                          : path === "/demo"
+                            ? "Demo studio"
+                            : "Integrations"}
             </strong>
           </div>
           <div className="topbar-right">

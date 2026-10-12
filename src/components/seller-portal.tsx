@@ -35,6 +35,9 @@ export function SellerPortal({ agreement: a }: { agreement: SellerAgreement }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const m = a.milestones.find((m) => m.id === selected)!;
+  const approvedUrl = m.browserPolicyJson
+    ? (JSON.parse(m.browserPolicyJson).targetUrl as string)
+    : "";
   const blocked =
     !["PENDING", "REVISION_REQUESTED"].includes(m.status) ||
     m.paymentStatus === "CAPTURE_PENDING";
@@ -47,7 +50,7 @@ export function SellerPortal({ agreement: a }: { agreement: SellerAgreement }) {
       await api(`seller/${a.sellerToken}/submit`, {
         milestoneId: m.id,
         content,
-        url,
+        url: approvedUrl || url,
       });
       setSuccess(
         "Work submitted and review recorded. The buyer can now approve, request revisions, or open a dispute.",
@@ -142,18 +145,21 @@ export function SellerPortal({ agreement: a }: { agreement: SellerAgreement }) {
               </div>
               <div className="field">
                 <label htmlFor="url">
-                  Deliverable URL <span>optional</span>
+                  Deliverable URL{" "}
+                  <span>{approvedUrl ? "buyer-approved" : "optional"}</span>
                 </label>
                 <input
                   id="url"
                   type="url"
-                  value={url}
+                  value={approvedUrl || url}
+                  readOnly={!!approvedUrl}
                   onChange={(e) => setUrl(e.target.value)}
                   placeholder="https://…"
                 />
                 <small>
-                  The reviewer only reads your submitted text; it does not open
-                  this URL.
+                  {approvedUrl
+                    ? "Submitting starts browser verification of this approved URL. Findings and any revision request appear in the record."
+                    : "The reviewer only reads your submitted text; it does not open this URL."}
                 </small>
               </div>
               <Button type="submit" disabled={busy}>

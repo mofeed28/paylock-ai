@@ -3,7 +3,25 @@ import { buyerPage } from "./auth";
 export const agreementInclude = {
   milestones: {
     orderBy: { position: "asc" as const },
-    include: { submissions: { orderBy: { createdAt: "desc" as const } } },
+    include: {
+      submissions: { orderBy: { createdAt: "desc" as const } },
+      agentRuns: {
+        orderBy: { createdAt: "desc" as const },
+        take: 5,
+        select: {
+          id: true,
+          milestoneId: true,
+          submissionId: true,
+          status: true,
+          planner: true,
+          summary: true,
+          traceJson: true,
+          resultJson: true,
+          createdAt: true,
+          completedAt: true,
+        },
+      },
+    },
   },
   payments: { orderBy: { createdAt: "desc" as const } },
   timeline: { orderBy: { createdAt: "desc" as const } },

@@ -1,43 +1,35 @@
-# Paylock AI — 2 minute 45 second demo
+# Paylock AI — 2 minute 45 second agent demo
 
-## Recording prerequisites
+## Before recording
 
-The practice walkthrough is a rehearsal. For submission, configure a real model and PayPal sandbox credentials and successfully run the connected flow first. Create a fresh sandbox agreement with the website source criteria from README; use its real seller portal for the correction. The practice-only sample revision shortcut is intentionally unavailable for sandbox agreements. Show no credentials, buyer key, or seller bearer URL on camera. Use fictional project data. Record the actual product; do not imply simulated activity is a provider transaction.
+The local sample is a rehearsal: real Chromium inspection, offline fixture pages, simulated payments, and deterministic planning unless a model is configured. For the submitted video, first verify a live model and PayPal sandbox credentials with a real deployed test website. Use a new sandbox verification agreement, not the practice fixture. Keep credentials and seller tokens off camera. Show the product actually functioning. Do not label mock-provider tests as live integration.
 
 ## 0:00–0:20 — The problem
 
-Screen: the Northstar website agreement, first milestone selected.
+“A freelancer says the product page is ready. It looks right, but does the work meet the requirements before we pay? Paylock connects browser evidence to a buyer-controlled PayPal payment.”
 
-“An independent merchant hires a freelancer to build a product page. The hard question is whether the delivered work matches what they agreed to pay for. Paylock connects the agreement, the evidence, and the buyer's payment decision.”
+Show the four criteria and $300 milestone.
 
-## 0:20–0:45 — Agree and authorize
+## 0:20–0:45 — Authorize the boundaries
 
-Show the three specific source requirements. Briefly show live AI planning and buyer edits from the connected run. Authorize the $300 milestone with PayPal sandbox checkout. Show the recorded authorization status without exposing account credentials.
+Show the PayPal sandbox authorization and the explicit 24-hour, exact-amount buyer grant. Explain that permission defaults off, applies to this milestone only, and requires all checks to pass.
 
-“Each milestone has a clear price and acceptance criteria. PayPal authorizes the payment; capture happens only after buyer approval.”
+## 0:45–1:20 — The agent finds the failure
 
-## 0:45–1:20 — Inspect a real gap
+Submit the approved product URL in the seller portal. Show the model's tool activity, destination screenshot, and HTTP 404. The agent records a specific revision request and leaves the authorization uncaptured.
 
-Submit the first HTML artifact through the seller portal. Show the missing delivery note, exact source excerpts, and the connected model's interpretation.
+“The model chooses tools and receives browser observations. Website content cannot change the buyer's payment policy.”
 
-“The seller supplied the actual HTML source. Two requirements are present, but the delivery note is missing. Deterministic source checks establish those facts; AI helps interpret the evidence. This does not prove that a live website or its checkout works.”
+## 1:20–1:55 — Recheck the corrected delivery
 
-## 1:20–1:50 — Revise, with history
+Fix the deployed test destination and submit a revision. Show a new run, the successful destination, and mobile evidence. The original failure remains in the record. For local rehearsal, use the corrected sample button and keep its simulation labels visible.
 
-Request revision and save the feedback. Submit corrected source through the seller portal. Show three supported criteria and briefly expand the old version.
+## 1:55–2:25 — Apply the policy
 
-“The buyer requests a specific correction. The new artifact passes the source checks, while the original submission remains in the record.”
+Show all four passing checks, the saved permission, the PayPal sandbox capture reference, and one ledger entry. Record this as a real sandbox transaction only after it has actually succeeded. With permission off, show the result waiting for manual approval instead.
 
-## 1:50–2:25 — Human approval and PayPal capture
+## 2:25–2:45 — State the scope
 
-Inspect the corrected work. Enter the buyer decision note, check explicit authorization, and confirm. Show the sandbox capture reference and ledger entry. Record only a successful real sandbox transaction for this section.
+“Paylock verifies these agreed browser requirements and connects their evidence to payment. This is sandbox authorization and capture, not escrow or seller payouts. JavaScript is disabled; the destination check does not test an actual checkout transaction. Incomplete evidence stays with the buyer.”
 
-“AI never moves money. The buyer approves, and Paylock captures the PayPal sandbox authorization. The receipt stays linked to the work and the decision.”
-
-## 2:25–2:45 — Close with the boundary
-
-“Paylock helps small teams make inspectable payment decisions. This prototype uses time-limited authorization and capture, not escrow. It checks submitted source, not deployed behavior. Next we will test the workflow with merchants and freelancers.”
-
-## Submission assets
-
-Public YouTube video under three minutes; public licensed repository when the owner authorizes visibility; verified local setup instructions or hosted demo; exact model/service used in the recording. Avoid third-party music or unrelated trademark overlays. Do not invent user results or claim untested integrations.
+The public licensed repository and public YouTube URL still require the owner's direction. Submission accepts complete run instructions or a hosted working demo.

@@ -43,6 +43,11 @@ model Milestone {
   captureId String? @unique
   authorizedAt DateTime?
   expiresAt DateTime?
+  browserPolicyJson String?
+  autoCapture Boolean @default(false)
+  autoCaptureUntil DateTime?
+  autoCaptureLimit Int @default(0)
+  agentRuns AgentRun[]
   submissions Submission[]
   payments PaymentEvent[]
   @@index([agreementId])
@@ -88,4 +93,21 @@ model TimelineEvent {
   metadataJson String @default("{}")
   createdAt DateTime @default(now())
   @@index([agreementId])
+}
+
+model AgentRun {
+  id String @id @default(cuid())
+  milestoneId String
+  milestone Milestone @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+  submissionId String
+  status String @default("RUNNING")
+  planner String @default("pending")
+  summary String @default("")
+  policyJson String
+  traceJson String @default("[]")
+  resultJson String @default("{}")
+  screenshotsJson String @default("[]")
+  createdAt DateTime @default(now())
+  completedAt DateTime?
+  @@index([milestoneId])
 }

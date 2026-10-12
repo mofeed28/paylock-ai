@@ -26,7 +26,7 @@ export default function Page() {
             icon: CreditCard,
             title: "PayPal sandbox",
             ready: paypal,
-            desc: "Authorize with Orders v2. Capture after human approval with Payments v2.",
+            desc: "Authorize with Orders v2. Capture after buyer approval or a saved policy with Payments v2.",
             vars: [
               "PAYMENT_MODE=sandbox",
               "PAYPAL_ENV=sandbox",
@@ -93,8 +93,9 @@ export default function Page() {
             escrow, a marketplace payout service, or a PayPal dispute service.
           </li>
           <li>
-            External URLs are not fetched. A supported criterion is evidence in
-            submitted text, not proof of real-world completion.
+            Browser milestones inspect the approved URL with JavaScript
+            disabled. Ordinary text reviews do not fetch links. A passing
+            destination check does not establish checkout functionality.
           </li>
         </ul>
         <div className="button-row">

@@ -24,6 +24,14 @@ import {
   submitWork,
 } from "@/lib/service";
 import { getAgreement } from "@/lib/data";
+import { db } from "@/lib/db";
+import {
+  createAgentJob,
+  runAgent,
+  seedAgentDemo,
+  setAgentAuthority,
+  submitAgentFixtureRevision,
+} from "@/lib/agent-service";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const idSchema = z.string().min(1).max(100);
@@ -36,6 +44,20 @@ async function handle(
     const route = path.join("/");
     if (request.method === "GET") {
       await requireBuyer();
+      if (path[0] === "agent-runs" && path[2] === "screenshot") {
+        const run = await db.agentRun.findUnique({
+          where: { id: idSchema.parse(path[1]) },
+        });
+        const index = z.coerce.number().int().min(0).max(8).parse(path[3]);
+        const screenshot = run ? JSON.parse(run.screenshotsJson)[index] : null;
+        if (!screenshot) throw new ApiError(404, "Screenshot not found.");
+        return new NextResponse(Buffer.from(screenshot.data, "base64"), {
+          headers: {
+            "Content-Type": "image/jpeg",
+            "Cache-Control": "private, no-store",
+          },
+        });
+      }
       if (path[0] === "agreements" && path[2] === "export") {
         const data = await getAgreement(path[1]);
         if (!data) throw new ApiError(404, "Agreement not found.");
@@ -102,6 +124,11 @@ async function handle(
       if (route === "ai/generate")
         return generateAgreementMilestones(briefSchema.parse(body));
       if (route === "agreements") return createAgreement(body);
+      if (route === "agent/demo")
+        return seedAgentDemo(
+          z.object({ fresh: z.boolean().optional() }).parse(body).fresh,
+        );
+      if (route === "agent/jobs") return createAgentJob(body);
       if (route === "demo")
         return seedDemo(
           z.object({ fresh: z.boolean().optional() }).parse(body).fresh,
@@ -128,6 +155,14 @@ async function handle(
               "Practice actions are disabled for sandbox agreements.",
             );
           return authorize(id);
+        }
+        if (path[2] === "agent-run") return runAgent(id);
+        if (path[2] === "agent-revision") return submitAgentFixtureRevision(id);
+        if (path[2] === "agent-policy") {
+          const policy = z
+            .object({ enabled: z.boolean(), confirmed: z.boolean() })
+            .parse(body);
+          return setAgentAuthority(id, policy.enabled, policy.confirmed);
         }
         if (path[2] === "review") return rereview(id);
         if (path[2] === "demo-revision") return submitDemoRevision(id);

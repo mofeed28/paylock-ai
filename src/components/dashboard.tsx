@@ -5,8 +5,9 @@ import { ArrowRight, Check, FileCheck2, Plus, Search } from "lucide-react";
 import type { AgreementView } from "@/lib/data";
 import { money, date } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { DemoButton, Status } from "./common";
+import { Status } from "./common";
 import { WEBSITE_DEMO_TITLE } from "@/lib/website-sample";
+import { AGENT_DEMO_TITLE } from "@/lib/agent-fixture";
 
 export function Dashboard({
   agreements,
@@ -18,9 +19,13 @@ export function Dashboard({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
   const [showOlderSamples, setShowOlderSamples] = useState(false);
-  const demo = agreements.find(
-    (a) => a.aiSource === "demo" && a.title === WEBSITE_DEMO_TITLE,
-  );
+  const demo =
+    agreements.find(
+      (a) => a.aiSource === "demo" && a.title === AGENT_DEMO_TITLE,
+    ) ||
+    agreements.find(
+      (a) => a.aiSource === "demo" && a.title === WEBSITE_DEMO_TITLE,
+    );
   const olderSamples = agreements.filter(
     (a) => a.aiSource === "demo" && a.id !== demo?.id,
   );
@@ -79,12 +84,12 @@ export function Dashboard({
               ? next.status === "REVISION_REQUESTED"
                 ? "A revision is on the way."
                 : "Is the work ready to pay for?"
-              : "Catch the missing detail. Then approve the payment."}
+              : "Let the agent verify the work."}
           </h2>
           <p>
             {next && featured
               ? `${featured.title} · ${next.title}`
-              : "A merchant’s product page is missing its delivery note. See the evidence, request a fix, and follow the payment through."}
+              : "A product page looks finished, but its purchase link is broken. Watch the browser agent inspect, request a fix, and recheck."}
           </p>
           {next && featured ? (
             <Button asChild>
@@ -96,7 +101,12 @@ export function Dashboard({
               </Link>
             </Button>
           ) : (
-            <DemoButton label="Try the website walkthrough" />
+            <Button asChild>
+              <Link href="/agent">
+                Try the browser agent
+                <ArrowRight size={16} />
+              </Link>
+            </Button>
           )}
           <small>
             {featured?.paymentMode === "sandbox"
@@ -108,8 +118,11 @@ export function Dashboard({
           {[
             ["Agree", "Specific deliverables and a clear price."],
             ["Authorize", "Buyer authorizes a milestone payment."],
-            ["Review", "Evidence first. AI assists when connected."],
-            ["Approve", "Buyer decides. PayPal captures payment."],
+            [
+              "Verify",
+              "Browser tools gather evidence. AI plans when connected.",
+            ],
+            ["Pay", "Your approval or saved policy controls capture."],
           ].map(([title, description], i) => (
             <li key={title}>
               <span>{String(i + 1).padStart(2, "0")}</span>
@@ -131,7 +144,7 @@ export function Dashboard({
                 : "Your saved agreements and sample walkthrough"}
             </p>
           </div>
-          <Link href="/demo" className="text-link">
+          <Link href="/agent" className="text-link">
             About the demo <ArrowRight size={15} />
           </Link>
         </div>
