@@ -77,3 +77,9 @@ The first agent CI run, `38214845687`, passed lint, typecheck, and 20 tests but 
 ## 2026-10-12 — Test migration harness corrected
 
 Run `38215048633` confirmed the sandboxed Chromium workflow passes on Ubuntu 22.04. It also exposed an intermittent table-rename failure in the older SQLite test setup. That setup split migration SQL into separate Prisma calls, which does not guarantee connection-scoped PRAGMA state across a migration. Both isolated workflow tests now use the real Prisma migration engine against a new temporary database. No application migration was changed. All 21 tests, lint, and typecheck pass locally after the correction; Linux retest is pending.
+
+## 2026-10-12 — Agent checkpoint passed Linux CI
+
+[GitHub Actions run 38215332691](https://github.com/mofeed28/paylock-ai/actions/runs/38215332691) passed on `8bf0b9a`: dependency installation, migration deploy, lint, typecheck, all 21 tests including sandboxed Chromium, and optimized production build. This verifies the implementation on Windows locally and Ubuntu 22.04 in CI. Live-model and actual PayPal sandbox transactions remain outstanding.
+
+The user selected a new local Paylock workspace. Cloned the same private repository there and preserved local configuration, demo data, and the installed browser runtime. Added `work/` to ignored paths for local dependency caches. No repository visibility change was made.

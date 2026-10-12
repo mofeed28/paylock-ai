@@ -74,3 +74,4 @@ The screenshot in `dashboard.png` shows the working practice workspace following
 - Responsive inspection at 390px and 1440px: no horizontal document overflow.
 - Screenshot: [agent-verification.jpg](agent-verification.jpg).
 - Outstanding: live model/provider credentials and actual PayPal sandbox authorization/capture; deployed-site integration; multi-user/production hardening. Local sample results must not be presented as completed live integration.
+- Linux CI: [run 38215332691](https://github.com/mofeed28/paylock-ai/actions/runs/38215332691) passed all 21 tests, lint, typecheck, migration deploy, and production build on commit `8bf0b9a`, using Ubuntu 22.04 with Chromium sandboxing enabled.
