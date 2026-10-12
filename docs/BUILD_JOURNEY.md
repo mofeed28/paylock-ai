@@ -72,3 +72,8 @@ Limits: actual live-model and PayPal sandbox end-to-end calls still require cred
 ## 2026-10-12 — Linux browser CI environment correction
 
 The first agent CI run, `38214845687`, passed lint, typecheck, and 20 tests but failed the browser workflow because Chromium sandbox startup was blocked by the default Linux runner. Pinned CI to Ubuntu 22.04, whose user-namespace environment supports the sandboxed browser. The application keeps `chromiumSandbox: true`; no test is skipped and sandbox protections are not disabled. Retest pending at this checkpoint.
+
+
+## 2026-10-12 — Test migration harness corrected
+
+Run `38215048633` confirmed the sandboxed Chromium workflow passes on Ubuntu 22.04. It also exposed an intermittent table-rename failure in the older SQLite test setup. That setup split migration SQL into separate Prisma calls, which does not guarantee connection-scoped PRAGMA state across a migration. Both isolated workflow tests now use the real Prisma migration engine against a new temporary database. No application migration was changed. All 21 tests, lint, and typecheck pass locally after the correction; Linux retest is pending.

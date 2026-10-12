@@ -1,6 +1,7 @@
 import { test } from "node:test";
+import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 test("complete isolated SQLite workflow: evidence, revision, dispute, authorization, idempotent capture", async () => {
@@ -21,20 +22,20 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
   } = await import("../src/lib/service");
   const { fallbackPlan } = await import("../src/lib/ai");
   try {
-    const migrationDir = resolve("prisma/migrations");
-    for (const name of readdirSync(migrationDir)
-      .filter((x) => x !== "migration_lock.toml")
-      .sort()) {
-      const sql = readFileSync(
-        join(migrationDir, name, "migration.sql"),
-        "utf8",
-      );
-      for (const statement of sql
-        .split(";")
-        .map((x) => x.trim())
-        .filter(Boolean))
-        await db.$executeRawUnsafe(statement);
-    }
+    // Use the actual migration engine: PRAGMA state must stay on one connection.
+    // Splitting migration SQL across Prisma's pool is not a valid migration runner.
+    writeFileSync(join(dir, "test.db"), "");
+    execFileSync(
+      process.execPath,
+      [
+        resolve("node_modules/prisma/build/index.js"),
+        "migrate",
+        "deploy",
+        "--schema",
+        resolve("prisma/schema.prisma"),
+      ],
+      { env: process.env, stdio: "pipe" },
+    );
     const a = await seedDemo();
     const first = (
       await db.milestone.findMany({

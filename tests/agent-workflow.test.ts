@@ -1,6 +1,7 @@
 import { test } from "node:test";
+import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -21,18 +22,20 @@ test(
     const { milestone, capture, submitWork } =
       await import("../src/lib/service");
     try {
-      const migrationDir = resolve("prisma/migrations");
-      for (const name of readdirSync(migrationDir)
-        .filter((n) => n !== "migration_lock.toml")
-        .sort())
-        for (const statement of readFileSync(
-          join(migrationDir, name, "migration.sql"),
-          "utf8",
-        )
-          .split(";")
-          .map((s) => s.trim())
-          .filter(Boolean))
-          await db.$executeRawUnsafe(statement);
+      // Use the actual migration engine: PRAGMA state must stay on one connection.
+      // Splitting migration SQL across Prisma's pool is not a valid migration runner.
+      writeFileSync(join(dir, "test.db"), "");
+      execFileSync(
+        process.execPath,
+        [
+          resolve("node_modules/prisma/build/index.js"),
+          "migrate",
+          "deploy",
+          "--schema",
+          resolve("prisma/schema.prisma"),
+        ],
+        { env: process.env, stdio: "pipe" },
+      );
       const demo = await seedAgentDemo();
       const m = await db.milestone.findFirstOrThrow({
         where: { agreementId: demo.id, position: 0 },
