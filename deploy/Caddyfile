@@ -1,0 +1,5 @@
+# Replace with a DNS hostname pointing to the Lightsail static IP.
+YOUR_DEMO_HOSTNAME {
+    header X-Robots-Tag "noindex, nofollow, noarchive"
+    reverse_proxy 127.0.0.1:3000
+}

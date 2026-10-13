@@ -1,3 +1,4 @@
+import { workspaceId, judgeDemo } from "./workspace";
 import { z } from "zod";
 import { db } from "./db";
 import { ApiError } from "./auth";
@@ -31,6 +32,16 @@ export async function createAgentJob(input: unknown, demo = false) {
   const v = agentJobSchema.parse(input);
   const policy = browserPolicySchema.parse({ ...v, fixture: demo });
   allowedTarget(policy.targetUrl);
+  if (judgeDemo() && !demo) {
+    const allowed = (process.env.DEMO_ALLOWED_ORIGINS || "")
+      .split(",")
+      .filter(Boolean);
+    if (!allowed.includes(new URL(policy.targetUrl).origin))
+      throw new ApiError(
+        400,
+        "This judge demo only inspects the supplied sample or an organizer-configured demo website.",
+      );
+  }
   const a = await createAgreement(
     {
       title: demo
@@ -118,6 +129,7 @@ export async function seedAgentDemo(fresh = false) {
   if (!fresh) {
     const existing = await db.agreement.findFirst({
       where: {
+        workspaceId: workspaceId(),
         title: AGENT_DEMO_TITLE,
         aiSource: "demo",
         paymentMode: "practice",

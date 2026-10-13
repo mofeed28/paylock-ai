@@ -4,8 +4,9 @@ import { db } from "@/lib/db";
 import { money, date } from "@/lib/utils";
 import { buyerPage } from "@/lib/auth";
 export default async function Page() {
-  await buyerPage();
+  const workspaceId = await buyerPage();
   const events = await db.paymentEvent.findMany({
+    where: { agreement: { workspaceId } },
     include: { agreement: true, milestone: true },
     orderBy: { createdAt: "desc" },
   });

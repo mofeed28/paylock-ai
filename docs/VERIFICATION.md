@@ -1,4 +1,24 @@
-# Current verification — focused website walkthrough
+# Latest verification — Bedrock adapter and judge demo, October 13, 2026
+
+- PayPal sandbox OAuth returns HTTP 200. The user completed sandbox authorization,
+  submission, manual approval and capture. A direct read-only PayPal capture lookup
+  returned HTTP 200, COMPLETED, USD 200.00, matching the local payment record.
+- That submission used fallback review, so this is **not** live-AI verification.
+- 23 automated tests pass, including native Bedrock Converse HTTP doubles,
+  tool-result feedback, invalid/truncated model results, judge session isolation,
+  forged-cookie rejection, expired demo access and persistent model quota rollback.
+- Production HTTP checks with an isolated database and dummy credentials pass:
+  separate judge samples, secure/HttpOnly cookies, authenticated APIs, protected
+  exports, seller content, screenshots, dashboard, ledger and payment mutations.
+  Run `node scripts/verify-judge-http.mjs` after `npm run build` to repeat.
+- ESLint, TypeScript and production build pass. The additive migration preserves
+  existing agreements in the local workspace. Backup files under `work/` are now
+  excluded from lint and typecheck.
+- Bedrock provider connectivity, AWS provisioning, Linux systemd/Chromium runtime,
+  domain/TLS setup, hosted checkout and live-model quality remain unverified.
+- No cloud resources created, no public repository publication and no video uploaded.
+
+# Earlier verification — focused website walkthrough
 
 Verified October 11, 2026 on Windows with Node.js 22.17.1.
 

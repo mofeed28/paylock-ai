@@ -1,0 +1,26 @@
+[Unit]
+Description=Paylock judges-only sandbox demo
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=paylock
+Group=paylock
+WorkingDirectory=/opt/paylock/current
+EnvironmentFile=/etc/paylock.env
+ExecStartPre=/usr/bin/node scripts/check-demo-config.mjs
+ExecStart=/usr/bin/node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3000
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=100
+UMask=0077
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/paylock /opt/paylock/current/.next
+# Keep Chromium's own OS sandbox enabled. Do not add --no-sandbox.
+# One server process is intentional: SQLite writes and browser runs serialize.
+
+[Install]
+WantedBy=multi-user.target

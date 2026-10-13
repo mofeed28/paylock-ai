@@ -5,7 +5,12 @@ datasource db {
   provider = "sqlite"
   url = env("DATABASE_URL")
 }
+model DemoUsage {
+  key String @id
+  count Int @default(0)
+}
 model Agreement {
+  workspaceId String @default("local")
   id String @id @default(cuid())
   title String
   buyerName String @default("Alex Morgan")
@@ -21,6 +26,7 @@ model Agreement {
   riskFlags String
   deadline String?
   createdAt DateTime @default(now())
+  @@index([workspaceId])
   milestones Milestone[]
   payments PaymentEvent[]
   timeline TimelineEvent[]

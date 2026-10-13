@@ -475,12 +475,16 @@ export function AgreementDetail({
                           <small>CRITERIA SUPPORTED</small>
                           <h3>
                             {m.status === "RELEASED"
-                              ? "Evidence accepted"
-                              : sub.aiRecommendation === "release"
-                                ? "Ready for your approval"
-                                : sub.aiRecommendation === "revise"
-                                  ? "A requirement is missing"
-                                  : "Needs investigation"}
+                              ? sub.aiSource === "fallback"
+                                ? "Manually approved · AI review unavailable"
+                                : "Evidence accepted"
+                              : sub.aiSource === "fallback"
+                                ? "Manual review required"
+                                : sub.aiRecommendation === "release"
+                                  ? "Ready for your approval"
+                                  : sub.aiRecommendation === "revise"
+                                    ? "A requirement is missing"
+                                    : "Needs investigation"}
                           </h3>
                           <span>
                             {review.checklist.filter((c) => c.passed).length} of{" "}

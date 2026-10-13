@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { agreementInclude, jsonData } from "@/lib/data";
 import { SellerPortal } from "@/components/seller-portal";
+import { judgeDemo } from "@/lib/workspace";
+import { buyerPage } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 export default async function Page({
   params,
@@ -15,6 +17,7 @@ export default async function Page({
     include: agreementInclude,
   });
   if (!a) notFound();
+  if (judgeDemo() && a.workspaceId !== (await buyerPage())) notFound();
   const safe = {
     id: a.id,
     title: a.title,

@@ -1,3 +1,4 @@
+import { workspaceId, judgeDemo } from "./workspace";
 import { randomBytes } from "node:crypto";
 import { db } from "./db";
 import { ApiError } from "./auth";
@@ -17,8 +18,17 @@ import {
 } from "./website-sample";
 export async function createAgreement(input: unknown, mode = paymentMode()) {
   const v = agreementSchema.parse(input);
+  if (
+    judgeDemo() &&
+    (await db.agreement.count({ where: { workspaceId: workspaceId() } })) >= 8
+  )
+    throw new ApiError(
+      429,
+      "This judge session has reached its eight-agreement limit.",
+    );
   return db.agreement.create({
     data: {
+      workspaceId: workspaceId(),
       title: v.title,
       sellerEmail: v.sellerEmail,
       description: v.description,
@@ -53,7 +63,8 @@ export async function milestone(id: string) {
       submissions: { orderBy: { createdAt: "desc" } },
     },
   });
-  if (!m) throw new ApiError(404, "Milestone not found.");
+  if (!m || m.agreement.workspaceId !== workspaceId())
+    throw new ApiError(404, "Milestone not found.");
   return m;
 }
 function assertOpen(m: { status: string; paymentStatus: string }) {
@@ -468,6 +479,7 @@ export async function seedDemo(fresh = false) {
   if (!fresh) {
     const existing = await db.agreement.findFirst({
       where: {
+        workspaceId: workspaceId(),
         title: WEBSITE_DEMO_TITLE,
         aiSource: "demo",
         paymentMode: "practice",

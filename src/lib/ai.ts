@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { modelConfigured, structuredOutput } from "./model";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { checkWebsiteSource } from "./website-evidence";
 import {
@@ -17,40 +18,14 @@ async function structured<T extends z.ZodTypeAny>(
   prompt: string,
   data: unknown,
 ): Promise<z.infer<T>> {
-  const response = await fetch(
-    `${(process.env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "")}/chat/completions`,
-    {
-      method: "POST",
-      signal: AbortSignal.timeout(30000),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-        messages: [
-          { role: "system", content: prompt },
-          { role: "user", content: JSON.stringify(data) },
-        ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name,
-            strict: true,
-            schema: zodToJsonSchema(schema, { $refStrategy: "none" }),
-          },
-        },
-      }),
-    },
+  return schema.parse(
+    await structuredOutput(
+      zodToJsonSchema(schema, { $refStrategy: "none" }),
+      name,
+      prompt,
+      data,
+    ),
   );
-  if (!response.ok) throw new Error(`Model HTTP ${response.status}`);
-  const body = await response.json();
-  if (
-    body.choices?.[0]?.finish_reason !== "stop" ||
-    body.choices?.[0]?.message?.refusal
-  )
-    throw new Error("Incomplete model response");
-  return schema.parse(JSON.parse(body.choices[0].message.content));
 }
 export function fallbackPlan(brief: Brief): Plan {
   const shop = /shopify|power bank/i.test(brief.description);
@@ -133,7 +108,7 @@ export function fallbackPlan(brief: Brief): Plan {
 }
 export async function generateAgreementMilestones(input: Brief) {
   const brief = briefSchema.parse(input);
-  if (process.env.OPENAI_API_KEY)
+  if (modelConfigured())
     try {
       const plan = await structured(
         planSchema,
@@ -163,7 +138,7 @@ export async function generateAgreementMilestones(input: Brief) {
     plan: fallbackPlan(brief),
     source: "fallback" as const,
     notice:
-      "No model key configured. This is a deterministic template, not an AI-generated agreement.",
+      "No AI provider configured. This is a deterministic template, not an AI-generated agreement.",
   };
 }
 export function fallbackReview(criteria: string[], content: string): Review {
@@ -239,7 +214,7 @@ async function modelReview(
   url?: string,
   sourceChecks?: ReturnType<typeof checkWebsiteSource>,
 ) {
-  if (process.env.OPENAI_API_KEY)
+  if (modelConfigured())
     try {
       const result = await structured(
         reviewSchema,

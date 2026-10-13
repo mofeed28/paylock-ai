@@ -1,4 +1,5 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual, randomBytes } from "node:crypto";
+import { demoAvailable, judgeDemo } from "./workspace";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 export class ApiError extends Error {
@@ -21,28 +22,49 @@ export function equal(a: string, b: string) {
 }
 export function session() {
   const expiry = String(Date.now() + 8 * 3600000);
-  return `${expiry}.${sign(expiry)}`;
+  const workspace = judgeDemo() ? randomBytes(24).toString("hex") : "local";
+  const payload = `${expiry}.${workspace}`;
+  return `${payload}.${sign(payload)}`;
 }
-export async function isBuyer() {
+export function sessionWorkspace(value: string): string | null {
+  if (!demoAvailable()) return null;
+  const [expiry, workspace, sig, extra] = value.split(".");
+  if (
+    extra ||
+    !sig ||
+    !Number.isFinite(Number(expiry)) ||
+    Number(expiry) <= Date.now()
+  )
+    return null;
+  if (judgeDemo() ? !/^[a-f0-9]{48}$/.test(workspace) : workspace !== "local")
+    return null;
+  return equal(sig, sign(`${expiry}.${workspace}`)) ? workspace : null;
+}
+export async function buyerWorkspace(): Promise<string | null> {
+  if (!demoAvailable()) return null;
   if (!process.env.BUYER_ACCESS_KEY) {
     const h = await headers();
     const host = (h.get("host") || "").split(":")[0];
     const forwarded = (h.get("x-forwarded-host") || host).split(":")[0];
-    return (
-      ["localhost", "127.0.0.1"].includes(host) &&
+    return ["localhost", "127.0.0.1"].includes(host) &&
       ["localhost", "127.0.0.1"].includes(forwarded)
-    );
+      ? "local"
+      : null;
   }
   const value = (await cookies()).get("paylock-buyer")?.value || "";
-  const [expiry, sig] = value.split(".");
-  return !!sig && Number(expiry) > Date.now() && equal(sig, sign(expiry));
+  return sessionWorkspace(value);
+}
+export async function isBuyer() {
+  return !!(await buyerWorkspace());
 }
 export async function requireBuyer() {
   if (!(await isBuyer()))
     throw new ApiError(401, "Buyer access required. Sign in to continue.");
 }
 export async function buyerPage() {
-  if (!(await isBuyer())) redirect("/login");
+  const workspace = await buyerWorkspace();
+  if (!workspace) redirect("/login");
+  return workspace;
 }
 export function guardOrigin(request: Request) {
   const origin = request.headers.get("origin");

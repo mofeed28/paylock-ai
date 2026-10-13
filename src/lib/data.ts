@@ -27,12 +27,16 @@ export const agreementInclude = {
   timeline: { orderBy: { createdAt: "desc" as const } },
 };
 export async function getAgreement(id: string) {
-  await buyerPage();
-  return db.agreement.findUnique({ where: { id }, include: agreementInclude });
+  const workspaceId = await buyerPage();
+  return db.agreement.findFirst({
+    where: { id, workspaceId },
+    include: agreementInclude,
+  });
 }
 export async function getDashboard() {
-  await buyerPage();
+  const workspaceId = await buyerPage();
   return db.agreement.findMany({
+    where: { workspaceId },
     orderBy: { createdAt: "desc" },
     include: agreementInclude,
   });

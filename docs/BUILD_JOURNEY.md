@@ -83,3 +83,28 @@ Run `38215048633` confirmed the sandboxed Chromium workflow passes on Ubuntu 22.
 [GitHub Actions run 38215332691](https://github.com/mofeed28/paylock-ai/actions/runs/38215332691) passed on `8bf0b9a`: dependency installation, migration deploy, lint, typecheck, all 21 tests including sandboxed Chromium, and optimized production build. This verifies the implementation on Windows locally and Ubuntu 22.04 in CI. Live-model and actual PayPal sandbox transactions remain outstanding.
 
 The user selected a new local Paylock workspace. Cloned the same private repository there and preserved local configuration, demo data, and the installed browser runtime. Added `work/` to ignored paths for local dependency caches. No repository visibility change was made.
+# October 13, 2026 — sandbox capture and judges-only hosting preparation
+
+The owner completed a PayPal sandbox authorization and manually approved a $200
+capture. A subsequent read-only API lookup confirmed COMPLETED/USD 200.00. The
+evidence review was a labeled fallback; no live AI success is claimed.
+
+The owner selected Bedrock and a hosted demo only for judges, with a $20/month
+budget and region left to implementation judgment. Prepared us-east-1 Lightsail
+hosting at the published $12/month 2 GB IPv4 bundle, leaving an allowance for
+Bedrock and incidental costs. No paid infrastructure has been created. The
+existing AWS profile belongs to another named project, so account/profile choice
+and a demo hostname remain pending owner input.
+
+Implemented native Bedrock Converse for structured results and browser tool use,
+keeping server-side schema/evidence validation and payment permissions intact.
+Judge mode adds signed isolated workspaces, protected seller links, expiry,
+persistent monthly/daily AI limits, and an owned-origin browser allowlist. Added
+a judge guide, deployment configuration/preflight, and clarified manual-approval
+wording when a model was unavailable. Existing local records were preserved.
+
+Validation: 23 tests, lint, typecheck and production build pass. An isolated
+production HTTP check verified cross-session protections for buyer mutations,
+exports, screenshots, seller content, ledger and dashboard. Bedrock tests use
+HTTP doubles; real credentials/model access and a deployed Linux browser still
+need verification. The repository remains private.

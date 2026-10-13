@@ -13,7 +13,13 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-export function Shell({ children }: { children: React.ReactNode }) {
+export function Shell({
+  children,
+  judgeDemo = false,
+}: {
+  children: React.ReactNode;
+  judgeDemo?: boolean;
+}) {
   const path = usePathname();
   const seller = path.startsWith("/seller");
   const links = [
@@ -34,11 +40,22 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <div className="workspace">
           <span className="workspace-avatar">P</span>
           <div>
-            <strong>Paylock workspace</strong>
-            <small>{seller ? "Seller portal" : "Buyer workspace"}</small>
+            <strong>{judgeDemo ? "Judge demo" : "Paylock workspace"}</strong>
+            <small>
+              {seller
+                ? "Seller portal"
+                : judgeDemo
+                  ? "Your private test session"
+                  : "Buyer workspace"}
+            </small>
           </div>
           <span className="workspace-dot" />
         </div>
+        {judgeDemo && (
+          <Link className="nav-link" href="/judge">
+            Judge demo guide
+          </Link>
+        )}
         <span className="nav-caption">WORKSPACE</span>
         <nav>
           {links.map(({ href, label, icon: Icon }) => (

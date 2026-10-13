@@ -8,5 +8,5 @@ export default defineConfig([
     plugins: { "react-hooks": hooks },
     rules: { ...hooks.configs.recommended.rules },
   },
-  globalIgnores([".next/**", "next-env.d.ts"]),
+  globalIgnores([".next/**", "work/**", "next-env.d.ts"]),
 ]);

@@ -18,7 +18,7 @@ export default function Page() {
           setBusy(true);
           try {
             await api("login", { key });
-            router.push("/");
+            router.push("/judge");
             router.refresh();
           } catch (e) {
             setError((e as Error).message);
@@ -31,10 +31,11 @@ export default function Page() {
         </span>
         <h1>Welcome to Paylock.</h1>
         <p className="muted">
-          Enter the buyer access key configured for this workspace.
+          Enter the access code supplied with the demo or your local buyer
+          access key.
         </p>
         <div className="field">
-          <label htmlFor="key">Buyer access key</label>
+          <label htmlFor="key">Demo access code</label>
           <input
             type="password"
             id="key"

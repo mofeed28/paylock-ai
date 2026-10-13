@@ -6,9 +6,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { paypalConfigured, paymentMode } from "@/lib/paypal";
+import { modelConfigured, modelName, modelProvider } from "@/lib/model";
 export default function Page() {
   const paypal = paypalConfigured();
-  const ai = !!process.env.OPENAI_API_KEY;
+  const ai = modelConfigured();
   return (
     <div className="page narrow">
       <div className="page-heading">
@@ -37,14 +38,23 @@ export default function Page() {
           },
           {
             icon: Sparkles,
-            title: "AI evidence reviewer",
+            title: `AI evidence reviewer · ${modelProvider() === "bedrock" ? "Amazon Bedrock" : "OpenAI compatible"}`,
             ready: ai,
             desc: "Structured milestone generation and criterion-by-criterion submission review.",
-            vars: [
-              "OPENAI_API_KEY",
-              "OPENAI_MODEL",
-              "OPENAI_BASE_URL (optional)",
-            ],
+            vars:
+              modelProvider() === "bedrock"
+                ? [
+                    "AI_PROVIDER=bedrock",
+                    "AWS_REGION",
+                    "BEDROCK_MODEL_ID",
+                    "AWS_BEARER_TOKEN_BEDROCK or AWS IAM credentials",
+                    `Model: ${modelName()}`,
+                  ]
+                : [
+                    "OPENAI_API_KEY",
+                    "OPENAI_MODEL",
+                    "OPENAI_BASE_URL (optional)",
+                  ],
           },
         ].map((x) => (
           <section className="card form-card" key={x.title}>

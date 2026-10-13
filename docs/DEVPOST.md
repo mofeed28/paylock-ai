@@ -34,7 +34,7 @@ PayPal authorization is time-limited and is not regulated escrow. This MVP settl
 
 ## What we learned
 
-Early feedback identified a scattered interface and a table that clipped in a narrow browser panel. We replaced that dashboard with agreement cards and a clear next action. We also replaced the prewritten sample review with computed HTML checks: a missing delivery note now produces a concrete revision request. Actual connected PayPal and model testing remains outstanding; this draft must be updated after that testing.
+Early feedback identified a scattered interface and a table that clipped in a narrow browser panel. We replaced that dashboard with agreement cards and a clear next action. We also replaced the prewritten sample review with computed HTML checks: a missing delivery note now produces a concrete revision request. PayPal sandbox authorization and a manually approved $200 capture have now been exercised and the capture independently verified against PayPal. Live model and hosted deployment testing remain outstanding.
 
 ## What's next
 
@@ -58,6 +58,6 @@ Prioritize technical implementation, product completeness, and demo clarity. Tar
 
 Source: https://paypalaihackathon.devpost.com/ (reviewed October 11, 2026). Recheck official rules and eligibility before submitting.
 
-## Current verification status — 2026-10-12
+## Current verification status — 2026-10-13
 
-The real-browser practice loop and mock-model function-calling tests pass locally. Actual live-model and PayPal sandbox end-to-end verification remain outstanding pending credentials. Do not submit this draft as a claim of completed live integration. The source repository remains private at the owner's request; submission requires authorized publication and a public demo video.
+The real-browser practice loop and provider-contract tests pass locally. PayPal sandbox authorization, submission and manual capture were completed, with a direct provider lookup confirming the USD 200 capture. Native Bedrock Converse support and isolated judge sessions are implemented; Bedrock tests use HTTP doubles and live model access remains unverified. The protected Lightsail deployment is prepared but not provisioned. The source repository remains private at the owner's request; submission requires authorized publication and a public demo video.

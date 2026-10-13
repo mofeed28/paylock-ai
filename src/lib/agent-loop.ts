@@ -8,6 +8,12 @@ import {
   type Observation,
 } from "./agent-contract";
 import { z } from "zod";
+import {
+  chooseTool,
+  modelConfigured,
+  modelName,
+  type ModelMessage,
+} from "./model";
 
 const decisionSchema = z.object({ reason: z.string().min(1).max(400) });
 const descriptions: Record<AgentTool, string> = {
@@ -20,12 +26,6 @@ const descriptions: Record<AgentTool, string> = {
   inspect_mobile:
     "Inspect the rendered page at 390px, measure overflow, verify visible heading and purchase link, and capture a screenshot.",
 };
-type Message = {
-  role: string;
-  content?: string | null;
-  tool_call_id?: string;
-  tool_calls?: unknown[];
-};
 export async function verificationLoop(
   policy: BrowserPolicy,
   execute: (tool: AgentTool) => Promise<Observation>,
@@ -33,8 +33,8 @@ export async function verificationLoop(
 ) {
   const observations: Observation[] = [];
   const trace: AgentTrace[] = [];
-  let planner = process.env.OPENAI_API_KEY ? "live" : "deterministic";
-  const messages: Message[] = [
+  let planner = modelConfigured() ? "live" : "deterministic";
+  const messages: ModelMessage[] = [
     {
       role: "system",
       content:
@@ -60,7 +60,7 @@ export async function verificationLoop(
   await record(
     "plan",
     planner === "live"
-      ? `AI tool loop · ${process.env.OPENAI_AGENT_MODEL || process.env.OPENAI_MODEL || "gpt-4o-mini"}`
+      ? `AI tool loop · ${modelName(true)}`
       : "Deterministic browser rehearsal · no AI model configured.",
   );
   for (let step = 0; step < 5; step++) {
@@ -77,54 +77,23 @@ export async function verificationLoop(
     if (planner === "live") {
       try {
         const names = [...remaining, "finish"];
-        const response = await fetch(
-          `${(process.env.OPENAI_BASE_URL || "https://api.openai.com/v1").replace(/\/$/, "")}/chat/completions`,
-          {
-            method: "POST",
-            signal: AbortSignal.timeout(15000),
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        const calls = await chooseTool(
+          messages,
+          names.map((name) => ({
+            name,
+            description:
+              name === "finish"
+                ? "Stop verification and return the observed findings. Unchecked criteria remain unresolved."
+                : descriptions[name as AgentTool],
+            parameters: {
+              type: "object",
+              properties: { reason: { type: "string" } },
+              required: ["reason"],
+              additionalProperties: false,
             },
-            body: JSON.stringify({
-              model:
-                process.env.OPENAI_AGENT_MODEL ||
-                process.env.OPENAI_MODEL ||
-                "gpt-4o-mini",
-              messages,
-              parallel_tool_calls: false,
-              tool_choice: "required",
-              tools: names.map((name) => ({
-                type: "function",
-                function: {
-                  name,
-                  description:
-                    name === "finish"
-                      ? "Stop verification and return the observed findings. Unchecked criteria remain unresolved."
-                      : descriptions[name as AgentTool],
-                  strict: true,
-                  parameters: {
-                    type: "object",
-                    properties: { reason: { type: "string" } },
-                    required: ["reason"],
-                    additionalProperties: false,
-                  },
-                },
-              })),
-            }),
-          },
+          })),
         );
-        if (!response.ok) throw new Error("Model unavailable.");
-        const body = await response.json();
-        const message = body.choices?.[0]?.message;
-        const calls = message?.tool_calls;
-        if (
-          message?.refusal ||
-          calls?.length !== 1 ||
-          !names.includes(calls[0].function?.name)
-        )
-          throw new Error("Invalid tool choice.");
-        chosen = calls[0].function.name;
+        chosen = calls[0].function.name as AgentTool | "finish";
         reason = decisionSchema.parse(
           JSON.parse(calls[0].function.arguments),
         ).reason;

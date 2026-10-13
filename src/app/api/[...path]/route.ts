@@ -9,7 +9,9 @@ import {
   requireBuyer,
   serialized,
   session,
+  buyerWorkspace,
 } from "@/lib/auth";
+import { demoAvailable, judgeDemo, inWorkspace } from "@/lib/workspace";
 import { generateAgreementMilestones } from "@/lib/ai";
 import { briefSchema, submissionSchema } from "@/lib/schema";
 import {
@@ -42,11 +44,21 @@ async function handle(
   try {
     const { path } = await context.params;
     const route = path.join("/");
+    if (!demoAvailable())
+      throw new ApiError(
+        503,
+        "The judges' demo is closed or awaiting configuration.",
+      );
     if (request.method === "GET") {
       await requireBuyer();
       if (path[0] === "agent-runs" && path[2] === "screenshot") {
-        const run = await db.agentRun.findUnique({
-          where: { id: idSchema.parse(path[1]) },
+        const run = await db.agentRun.findFirst({
+          where: {
+            id: idSchema.parse(path[1]),
+            milestone: {
+              agreement: { workspaceId: (await buyerWorkspace())! },
+            },
+          },
         });
         const index = z.coerce.number().int().min(0).max(8).parse(path[3]);
         const screenshot = run ? JSON.parse(run.screenshotsJson)[index] : null;
@@ -104,7 +116,7 @@ async function handle(
       (await cookies()).set("paylock-buyer", session(), {
         httpOnly: true,
         sameSite: "strict",
-        secure: new URL(request.url).protocol === "https:",
+        secure: judgeDemo() || new URL(request.url).protocol === "https:",
         path: "/",
         maxAge: 8 * 3600,
       });
@@ -114,70 +126,84 @@ async function handle(
       const input = submissionSchema
         .extend({ milestoneId: idSchema })
         .parse(body);
-      const result = await serialized(() =>
-        submitWork(input.milestoneId, path[1], input.content, input.url),
+      const agreement = await db.agreement.findUnique({
+        where: { sellerToken: path[1] },
+        select: { workspaceId: true },
+      });
+      if (
+        !agreement ||
+        (judgeDemo() && agreement.workspaceId !== (await buyerWorkspace()))
+      )
+        throw new ApiError(404, "Seller link not found in this session.");
+      const result = await inWorkspace(agreement.workspaceId, () =>
+        serialized(() =>
+          submitWork(input.milestoneId, path[1], input.content, input.url),
+        ),
       );
       return NextResponse.json(result);
     }
     await requireBuyer();
-    const result = await serialized(async () => {
-      if (route === "ai/generate")
-        return generateAgreementMilestones(briefSchema.parse(body));
-      if (route === "agreements") return createAgreement(body);
-      if (route === "agent/demo")
-        return seedAgentDemo(
-          z.object({ fresh: z.boolean().optional() }).parse(body).fresh,
-        );
-      if (route === "agent/jobs") return createAgentJob(body);
-      if (route === "demo")
-        return seedDemo(
-          z.object({ fresh: z.boolean().optional() }).parse(body).fresh,
-        );
-      if (route === "paypal/create-order")
-        return createOrder(idSchema.parse(body.milestoneId));
-      if (route === "paypal/authorize-order")
-        return authorize(
-          idSchema.parse(body.milestoneId),
-          idSchema.parse(body.orderId),
-        );
-      if (route === "paypal/capture-order")
-        return capture(
-          idSchema.parse(body.milestoneId),
-          z.string().trim().min(10).max(1000).parse(body.reason),
-        );
-      if (path[0] === "milestones") {
-        const id = idSchema.parse(path[1]);
-        if (path[2] === "practice-authorize") {
-          const { milestone } = await import("@/lib/service");
-          if ((await milestone(id)).agreement.paymentMode !== "practice")
-            throw new ApiError(
-              409,
-              "Practice actions are disabled for sandbox agreements.",
-            );
-          return authorize(id);
+    const result = await inWorkspace((await buyerWorkspace())!, () =>
+      serialized(async () => {
+        if (route === "ai/generate")
+          return generateAgreementMilestones(briefSchema.parse(body));
+        if (route === "agreements") return createAgreement(body);
+        if (route === "agent/demo")
+          return seedAgentDemo(
+            z.object({ fresh: z.boolean().optional() }).parse(body).fresh,
+          );
+        if (route === "agent/jobs") return createAgentJob(body);
+        if (route === "demo")
+          return seedDemo(
+            z.object({ fresh: z.boolean().optional() }).parse(body).fresh,
+          );
+        if (route === "paypal/create-order")
+          return createOrder(idSchema.parse(body.milestoneId));
+        if (route === "paypal/authorize-order")
+          return authorize(
+            idSchema.parse(body.milestoneId),
+            idSchema.parse(body.orderId),
+          );
+        if (route === "paypal/capture-order")
+          return capture(
+            idSchema.parse(body.milestoneId),
+            z.string().trim().min(10).max(1000).parse(body.reason),
+          );
+        if (path[0] === "milestones") {
+          const id = idSchema.parse(path[1]);
+          if (path[2] === "practice-authorize") {
+            const { milestone } = await import("@/lib/service");
+            if ((await milestone(id)).agreement.paymentMode !== "practice")
+              throw new ApiError(
+                409,
+                "Practice actions are disabled for sandbox agreements.",
+              );
+            return authorize(id);
+          }
+          if (path[2] === "agent-run") return runAgent(id);
+          if (path[2] === "agent-revision")
+            return submitAgentFixtureRevision(id);
+          if (path[2] === "agent-policy") {
+            const policy = z
+              .object({ enabled: z.boolean(), confirmed: z.boolean() })
+              .parse(body);
+            return setAgentAuthority(id, policy.enabled, policy.confirmed);
+          }
+          if (path[2] === "review") return rereview(id);
+          if (path[2] === "demo-revision") return submitDemoRevision(id);
+          if (path[2] === "decision") {
+            const input = z
+              .object({
+                action: z.enum(["revise", "dispute", "reopen"]),
+                reason: z.string().trim().min(10).max(1000),
+              })
+              .parse(body);
+            return decide(id, input.action, input.reason);
+          }
         }
-        if (path[2] === "agent-run") return runAgent(id);
-        if (path[2] === "agent-revision") return submitAgentFixtureRevision(id);
-        if (path[2] === "agent-policy") {
-          const policy = z
-            .object({ enabled: z.boolean(), confirmed: z.boolean() })
-            .parse(body);
-          return setAgentAuthority(id, policy.enabled, policy.confirmed);
-        }
-        if (path[2] === "review") return rereview(id);
-        if (path[2] === "demo-revision") return submitDemoRevision(id);
-        if (path[2] === "decision") {
-          const input = z
-            .object({
-              action: z.enum(["revise", "dispute", "reopen"]),
-              reason: z.string().trim().min(10).max(1000),
-            })
-            .parse(body);
-          return decide(id, input.action, input.reason);
-        }
-      }
-      throw new ApiError(404, "Endpoint not found.");
-    });
+        throw new ApiError(404, "Endpoint not found.");
+      }),
+    );
     return NextResponse.json(result, {
       headers: { "Cache-Control": "no-store" },
     });

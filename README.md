@@ -1,4 +1,4 @@
-> Development status: private hackathon build. The browser agent now verifies rendered pages, requests revisions, and applies explicit buyer payment permissions; historical verification is separated from current changes in [the build journey](docs/BUILD_JOURNEY.md). Real PayPal sandbox and live-model verification remain outstanding.
+> Development status: private hackathon build. PayPal sandbox authorization and a $200 capture have been exercised; the capture was independently read back as COMPLETED. Native Bedrock support and judges-only hosting configuration are prepared, but live Bedrock and hosted deployment remain outstanding. See [the build journey](docs/BUILD_JOURNEY.md).
 
 # Paylock AI
 
@@ -9,6 +9,14 @@ A working PayPal AI Hackathon MVP for small freelance projects: turn a brief int
 This repository is a **single-workspace prototype**, not a regulated escrow service or a production marketplace. Practice mode is usable without any external credentials. The connected sandbox path requires your own PayPal and model credentials.
 
 ## Run locally
+
+For the protected, budget-limited hosted demo, see [Judge deployment](docs/JUDGE_DEPLOYMENT.md).
+`AI_PROVIDER=bedrock` selects native Bedrock Converse for both structured reviews
+and the browser tool loop. Set `AWS_REGION`, `BEDROCK_MODEL_ID`, and a dedicated
+`AWS_BEARER_TOKEN_BEDROCK` or SDK credentials; no OpenAI key is needed in that mode.
+The model must support forced tool use. Provider settings alone do not prove access.
+The current $20/month deployment plan is a $12 Lightsail instance in us-east-1
+with the remaining allowance reserved for capped Bedrock use and incidental costs.
 
 Requirements: Node.js 22 LTS recommended (20.12+ supported), npm, internet for dependency installation.
 
