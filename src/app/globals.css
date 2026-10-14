@@ -3071,3 +3071,21 @@ summary {
 .agent-create { margin-top: 24px; }
 .agent-create > p { margin-top: 20px; }
 @media (max-width: 850px) { .agent-layout { grid-template-columns: minmax(0,1fr); gap: 24px; } .agent-panel { padding: 20px; } .agent-panel .card-heading { flex-wrap: wrap; gap: 12px; } }
+
+/* Agreement roles and access */
+.agreement-context { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; padding: 22px 24px; margin: 0 0 24px; border: 1px solid #dce6e0; border-radius: 12px; background: #f3f8f5; }
+.agreement-context strong { display: block; font-size: 13px; margin-bottom: 6px; }
+.agreement-context span { display: block; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.agreement-context .text-link { margin-top: 10px; }
+.seller-return { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 20px 0 28px; }
+.seller-return span { color: var(--muted); font-size: 13px; }
+.role-journey { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 24px; margin: 0 0 32px; }
+.role-journey li { padding: 22px 0; border-top: 2px solid #96b5a5; }
+.role-journey span { font-size: 11px; font-weight: 600; letter-spacing: 1.4px; color: #427561; }
+.role-journey h3 { margin: 12px 0 8px; }
+.role-journey p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+.demo-choices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; }
+.demo-choices .form-card { display: flex; flex-direction: column; align-items: flex-start; }
+.demo-choices .form-card h2 { margin-top: 14px; }
+.demo-choices .form-card .btn { margin-top: auto; }
+@media(max-width: 760px) { .agreement-context, .role-journey, .demo-choices { grid-template-columns: minmax(0,1fr); } .agreement-context { gap: 18px; padding: 20px; } .role-journey { gap: 0; } .role-journey li { padding: 16px 0; } .demo-choices { gap: 0; } }

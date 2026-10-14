@@ -37,10 +37,12 @@ export function AgreementDetail({
   agreement: a,
   initialMilestone,
   paypalClientId,
+  judgeDemo = false,
 }: {
   agreement: AgreementView;
   initialMilestone?: string;
   paypalClientId: string;
+  judgeDemo?: boolean;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState(
@@ -121,14 +123,14 @@ export function AgreementDetail({
       <div className="page-heading detail-heading">
         <div>
           <div className="eyebrow">
-            AGREEMENT · {a.id.slice(-8).toUpperCase()}
+            BUYER VIEW · AGREEMENT {a.id.slice(-8).toUpperCase()}
           </div>
           <h1>{a.title}</h1>
           <p>
             <span className="mini-avatar">
               {a.sellerEmail.slice(0, 2).toUpperCase()}
             </span>{" "}
-            {a.sellerEmail}
+            Seller: {a.sellerEmail}
             <span className="dot-separator">·</span>Created {date(a.createdAt)}
           </p>
         </div>
@@ -142,6 +144,39 @@ export function AgreementDetail({
           <Status value={a.status} />
         </div>
       </div>
+      <section
+        className="agreement-context"
+        aria-label="Agreement roles and access"
+      >
+        <div>
+          <strong>Requirements</strong>
+          <span>
+            {a.aiSource === "demo"
+              ? "Prepared example for this walkthrough"
+              : "Set and confirmed by you, the buyer"}
+          </span>
+        </div>
+        <div>
+          <strong>Who can see this?</strong>
+          <span>
+            {judgeDemo
+              ? "Only this demo session. Other judges have separate workspaces."
+              : "Buyer access; the private seller link opens this agreement’s submission view."}
+          </span>
+        </div>
+        <div>
+          <strong>Seller view</strong>
+          <span>
+            {judgeDemo
+              ? "Play the seller in this same session. No invitation has been sent."
+              : "Share the submission link with the seller. No invitation is sent automatically."}
+          </span>
+          <Link className="text-link" href={`/seller/${a.sellerToken}`}>
+            {judgeDemo ? "Try seller view" : "Open seller view"}{" "}
+            <ArrowRight size={14} />
+          </Link>
+        </div>
+      </section>
       <div className="environment-note">
         <span className="green-dot" />
         {practice
@@ -154,21 +189,24 @@ export function AgreementDetail({
         </span>
       </div>
       <ol className="workflow-strip" aria-label="Milestone progress">
-        {["Agreed", "Authorized", "Evidence review", "Payment approval"].map(
-          (label, i) => {
-            const complete =
-              i === 0 ||
-              (i === 1 && m.paymentStatus !== "UNFUNDED") ||
-              (i === 2 && !!review && !missingEvidence) ||
-              (i === 3 && m.status === "RELEASED");
-            return (
-              <li className={complete ? "complete" : ""} key={label}>
-                <span>{complete ? <Check size={15} /> : i + 1}</span>
-                {label}
-              </li>
-            );
-          },
-        )}
+        {[
+          "Requirements set",
+          "Buyer authorizes",
+          "Seller submits · AI reviews",
+          "Payment decision",
+        ].map((label, i) => {
+          const complete =
+            i === 0 ||
+            (i === 1 && m.paymentStatus !== "UNFUNDED") ||
+            (i === 2 && !!review && !missingEvidence) ||
+            (i === 3 && m.status === "RELEASED");
+          return (
+            <li className={complete ? "complete" : ""} key={label}>
+              <span>{complete ? <Check size={15} /> : i + 1}</span>
+              {label}
+            </li>
+          );
+        })}
       </ol>
       <div className="compact-balance">
         <span>{money(a.totalAmount)} agreement</span>
@@ -395,12 +433,13 @@ export function AgreementDetail({
                   <FileText size={28} />
                   <h3>Ready for the first submission</h3>
                   <p>
-                    Share the seller portal to collect the work and supporting
-                    evidence.
+                    {judgeDemo
+                      ? "Try the seller view to submit work and supporting evidence."
+                      : "Share the seller link to collect work and supporting evidence."}
                   </p>
                   <Button variant="outline" asChild>
                     <Link href={`/seller/${a.sellerToken}`}>
-                      Open seller portal <ArrowUpRight size={15} />
+                      Open seller view <ArrowUpRight size={15} />
                     </Link>
                   </Button>
                 </div>
@@ -590,7 +629,7 @@ export function AgreementDetail({
                         ) : (
                           <Button asChild variant="outline">
                             <Link href={`/seller/${a.sellerToken}`}>
-                              Open seller portal
+                              Open seller view
                             </Link>
                           </Button>
                         )}
@@ -706,15 +745,22 @@ export function AgreementDetail({
             </section>
             <section className="card share-card">
               <MessageSquare size={20} />
-              <h3>Keep your seller in the loop</h3>
+              <h3>
+                {judgeDemo
+                  ? "Next: try the seller’s side"
+                  : "Seller submission link"}
+              </h3>
               <p>
-                Send their private submission link. Anyone with this link can
-                submit work for this agreement.
+                {judgeDemo
+                  ? "Open the seller view to submit work, then return here to review it. This link works only in your current demo session."
+                  : "Anyone with this private link can see the submission view and submit work. Share it directly with your seller."}
               </p>
               <div className="button-row">
-                <CopyButton value={`/seller/${a.sellerToken}`} />
+                {!judgeDemo && (
+                  <CopyButton value={`/seller/${a.sellerToken}`} />
+                )}
                 <Link className="text-link" href={`/seller/${a.sellerToken}`}>
-                  Open <ArrowUpRight size={14} />
+                  Open seller view <ArrowUpRight size={14} />
                 </Link>
               </div>
             </section>
@@ -778,7 +824,7 @@ export function AgreementDetail({
             <p>
               <strong>Seller</strong>
               <br />
-              {a.sellerEmail}
+              Seller: {a.sellerEmail}
             </p>
             <p>
               <strong>Deadline</strong>

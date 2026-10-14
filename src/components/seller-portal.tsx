@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
@@ -22,7 +23,13 @@ type SellerAgreement = Pick<
   | "paymentMode"
   | "milestones"
 > & { timeline: { id: string; message: string; createdAt: string }[] };
-export function SellerPortal({ agreement: a }: { agreement: SellerAgreement }) {
+export function SellerPortal({
+  agreement: a,
+  judgeDemo = false,
+}: {
+  agreement: SellerAgreement;
+  judgeDemo?: boolean;
+}) {
   const router = useRouter();
   const [selected, setSelected] = useState(
     a.milestones.find((m) =>
@@ -68,16 +75,27 @@ export function SellerPortal({ agreement: a }: { agreement: SellerAgreement }) {
     <div className="page narrow">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">SELLER PORTAL</div>
-          <h1>Let your work speak.</h1>
+          <div className="eyebrow">
+            {judgeDemo ? "SELLER VIEW · DEMO" : "SELLER SUBMISSION VIEW"}
+          </div>
+          <h1>Submit work for the buyer’s review.</h1>
           <p>{a.title}</p>
         </div>
         <Status value={a.paymentMode} />
       </div>
       <Notice>
-        This private link allows submissions for {a.sellerEmail}. Keep it
-        private. Payment approval remains with the buyer.
+        {judgeDemo
+          ? "You are testing the seller’s side in your private demo session. The buyer set the requirements below. Submit evidence here, then switch back to review it."
+          : `Submit evidence for ${a.sellerEmail} against the buyer’s requirements. Payment approval remains with the buyer.`}
       </Notice>
+      {judgeDemo && (
+        <div className="seller-return">
+          <Button asChild variant="outline">
+            <Link href={`/agreements/${a.id}`}>Back to buyer view →</Link>
+          </Button>
+          <span>Same agreement · same private demo session</span>
+        </div>
+      )}
       <div className="form-layout">
         <form className="card form-card" onSubmit={submit}>
           <div className="card-heading">

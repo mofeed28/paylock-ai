@@ -160,3 +160,27 @@ billing continues until its instance and attached resources are removed.
 Final browser check after the UTC fix: judge guide, saved agreement and new
 agreement pages rendered without JavaScript/hydration errors at desktop width;
 the judge guide also had no horizontal overflow at 390px.
+
+### October 14 — Make agreement ownership and demo roles clear
+
+User testing showed that requirements, seller submissions and prepared examples
+were difficult to distinguish. The main navigation now leads with Your agreements;
+browser and text walkthroughs live under Demo & tools. The agreement list no longer
+has the large walkthrough banner above the saved work.
+
+The creation form explains that the buyer supplies the brief, edits the AI draft,
+and confirms the requirements. Seller email is explicitly contact information,
+not an invitation. Each agreement states who set its requirements and who can see
+it. Judge sessions get a Try seller view link and a Back to buyer view action on
+the submission page. Prepared requirements are labeled as examples; the workflow
+no longer implies that a seller has signed or accepted an agreement.
+
+The judge guide explains the buyer → seller → buyer flow and session privacy.
+This is still one judge testing both roles, not separate buyer/seller accounts.
+Existing workspace authorization and payment controls are unchanged.
+
+Validation: lint and TypeScript passed. The staged Linux production build and
+isolated HTTP access checks passed before switching the live release, preserving
+the persistent database. Hosted browser checks verified the buyer/seller return
+path on the same agreement, desktop pages, and mobile layouts at 390px without
+horizontal overflow or JavaScript errors. No new AI calls or payments were needed.

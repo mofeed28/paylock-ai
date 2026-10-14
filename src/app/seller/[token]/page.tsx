@@ -32,5 +32,5 @@ export default async function Page({
       )
       .map((t) => ({ id: t.id, message: t.message, createdAt: t.createdAt })),
   };
-  return <SellerPortal agreement={jsonData(safe)} />;
+  return <SellerPortal agreement={jsonData(safe)} judgeDemo={judgeDemo()} />;
 }

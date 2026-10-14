@@ -12,9 +12,11 @@ import { AGENT_DEMO_TITLE } from "@/lib/agent-fixture";
 export function Dashboard({
   agreements,
   listing = false,
+  judgeDemo = false,
 }: {
   agreements: AgreementView[];
   listing?: boolean;
+  judgeDemo?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
@@ -54,86 +56,90 @@ export function Dashboard({
     <div className="page focused-workspace">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">WORK AGREED. PAYMENT EARNED.</div>
+          <div className="eyebrow">BUYER WORKSPACE</div>
           <h1>
             {listing ? "Your agreements" : "Pay for work you can verify."}
           </h1>
           <p>
             {listing
-              ? "One place for the work, evidence, and your next decision."
+              ? judgeDemo
+                ? "You set the requirements. These agreements are private to your current demo session."
+                : "Agreements you create as the buyer. Define the work, collect evidence, and approve payment."
               : "Check the evidence. Request what’s missing. Approve with confidence."}
           </p>
         </div>
-        <Button asChild variant="outline">
+        <Button asChild>
           <Link href="/agreements/new">
             <Plus size={17} />
             New agreement
           </Link>
         </Button>
       </div>
-      <section className="focus-card">
-        <div className="focus-copy">
-          <span className="focus-kicker">
-            <FileCheck2 size={17} />
-            {next
-              ? "YOUR NEXT DECISION"
-              : "START WITH A TWO-MINUTE WALKTHROUGH"}
-          </span>
-          <h2>
-            {next
-              ? next.status === "REVISION_REQUESTED"
-                ? "A revision is on the way."
-                : "Is the work ready to pay for?"
-              : "Let the agent verify the work."}
-          </h2>
-          <p>
-            {next && featured
-              ? `${featured.title} · ${next.title}`
-              : "A product page looks finished, but its purchase link is broken. Watch the browser agent inspect, request a fix, and recheck."}
-          </p>
-          {next && featured ? (
-            <Button asChild>
-              <Link href={`/agreements/${featured.id}?milestone=${next.id}`}>
-                {next.status === "REVISION_REQUESTED"
-                  ? "Continue revision"
-                  : "Review submitted work"}
-                <ArrowRight size={16} />
-              </Link>
-            </Button>
-          ) : (
-            <Button asChild>
-              <Link href="/agent">
-                Try the browser agent
-                <ArrowRight size={16} />
-              </Link>
-            </Button>
-          )}
-          <small>
-            {featured?.paymentMode === "sandbox"
-              ? "PayPal sandbox · test funds"
-              : "Practice walkthrough · simulated payments"}
-          </small>
-        </div>
-        <ol className="journey-list">
-          {[
-            ["Agree", "Specific deliverables and a clear price."],
-            ["Authorize", "Buyer authorizes a milestone payment."],
-            [
-              "Verify",
-              "Browser tools gather evidence. AI plans when connected.",
-            ],
-            ["Pay", "Your approval or saved policy controls capture."],
-          ].map(([title, description], i) => (
-            <li key={title}>
-              <span>{String(i + 1).padStart(2, "0")}</span>
-              <div>
-                <strong>{title}</strong>
-                <p>{description}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
+      {!listing && (
+        <section className="focus-card">
+          <div className="focus-copy">
+            <span className="focus-kicker">
+              <FileCheck2 size={17} />
+              {next
+                ? "YOUR NEXT DECISION"
+                : "START WITH A TWO-MINUTE WALKTHROUGH"}
+            </span>
+            <h2>
+              {next
+                ? next.status === "REVISION_REQUESTED"
+                  ? "A revision is on the way."
+                  : "Is the work ready to pay for?"
+                : "Let the agent verify the work."}
+            </h2>
+            <p>
+              {next && featured
+                ? `${featured.title} · ${next.title}`
+                : "A product page looks finished, but its purchase link is broken. Watch the browser agent inspect, request a fix, and recheck."}
+            </p>
+            {next && featured ? (
+              <Button asChild>
+                <Link href={`/agreements/${featured.id}?milestone=${next.id}`}>
+                  {next.status === "REVISION_REQUESTED"
+                    ? "Continue revision"
+                    : "Review submitted work"}
+                  <ArrowRight size={16} />
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild>
+                <Link href="/agent">
+                  Try the browser agent
+                  <ArrowRight size={16} />
+                </Link>
+              </Button>
+            )}
+            <small>
+              {featured?.paymentMode === "sandbox"
+                ? "PayPal sandbox · test funds"
+                : "Practice walkthrough · simulated payments"}
+            </small>
+          </div>
+          <ol className="journey-list">
+            {[
+              ["Agree", "Specific deliverables and a clear price."],
+              ["Authorize", "Buyer authorizes a milestone payment."],
+              [
+                "Verify",
+                "Browser tools gather evidence. AI plans when connected.",
+              ],
+              ["Pay", "Your approval or saved policy controls capture."],
+            ].map(([title, description], i) => (
+              <li key={title}>
+                <span>{String(i + 1).padStart(2, "0")}</span>
+                <div>
+                  <strong>{title}</strong>
+                  <p>{description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
       <section className="work-list">
         <div className="work-list-heading">
           <div>
@@ -144,8 +150,8 @@ export function Dashboard({
                 : "Your saved agreements and sample walkthrough"}
             </p>
           </div>
-          <Link href="/agent" className="text-link">
-            About the demo <ArrowRight size={15} />
+          <Link href={judgeDemo ? "/judge" : "/agent"} className="text-link">
+            How it works <ArrowRight size={15} />
           </Link>
         </div>
         <div className="work-toolbar">
@@ -201,7 +207,7 @@ export function Dashboard({
                   <Status value={status} />
                 </div>
                 <h3>{a.title}</h3>
-                <p>{a.sellerEmail}</p>
+                <p>Seller: {a.sellerEmail}</p>
                 <div className="tile-progress">
                   {a.milestones.map((m) => (
                     <span
@@ -241,7 +247,7 @@ export function Dashboard({
             <p>
               {agreements.length
                 ? "Try another search or filter."
-                : "Start the walkthrough above or create your first agreement."}
+                : "Create an agreement to set the requirements and budget. AI will help you draft the milestones."}
             </p>
           </div>
         )}

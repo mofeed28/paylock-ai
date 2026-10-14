@@ -20,7 +20,13 @@ import {
 import { money } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { api, Notice, Status } from "./common";
-export function AgreementForm({ mode }: { mode: string }) {
+export function AgreementForm({
+  mode,
+  judgeDemo = false,
+}: {
+  mode: string;
+  judgeDemo?: boolean;
+}) {
   const router = useRouter();
   const [brief, setBrief] = useState({
     title: "",
@@ -94,15 +100,18 @@ export function AgreementForm({ mode }: { mode: string }) {
   }
   return (
     <div className="page narrow">
-      <Link className="back-link" href="/">
+      <Link className="back-link" href="/agreements">
         <ArrowLeft size={15} />
-        Overview
+        Your agreements
       </Link>
       <div className="page-heading">
         <div>
-          <div className="eyebrow">START WITH CLARITY</div>
+          <div className="eyebrow">BUYER · SET THE REQUIREMENTS</div>
           <h1>New agreement</h1>
-          <p>Describe the work. Make the expectations explicit.</p>
+          <p>
+            You define the work and budget. AI drafts milestones for you to
+            review.
+          </p>
         </div>
         <Status value={mode} />
       </div>
@@ -116,14 +125,14 @@ export function AgreementForm({ mode }: { mode: string }) {
         </span>
         <div />
         <span>
-          <i>3</i>Authorize & collaborate
+          <i>3</i>Save your agreement
         </span>
       </div>
       {error && <Notice error>{error}</Notice>}
       {!plan ? (
         <form onSubmit={generate} className="form-layout">
           <section className="card form-card">
-            <h3>The essentials</h3>
+            <h3>What are you hiring the seller to do?</h3>
             <div className="field">
               <label htmlFor="title">Project title</label>
               <input
@@ -138,7 +147,7 @@ export function AgreementForm({ mode }: { mode: string }) {
             </div>
             <div className="field-grid">
               <div className="field">
-                <label htmlFor="email">Seller email</label>
+                <label htmlFor="email">Seller contact email</label>
                 <input
                   id="email"
                   type="email"
@@ -149,6 +158,7 @@ export function AgreementForm({ mode }: { mode: string }) {
                   placeholder="seller@studio.com"
                   required
                 />
+                <small>Contact information only. No invitation is sent.</small>
               </div>
               <div className="field">
                 <label htmlFor="budget">Total budget · USD</label>
@@ -167,9 +177,7 @@ export function AgreementForm({ mode }: { mode: string }) {
               </div>
             </div>
             <div className="field">
-              <label htmlFor="description">
-                What does great work look like?
-              </label>
+              <label htmlFor="description">Your requirements</label>
               <textarea
                 id="description"
                 rows={6}
@@ -206,7 +214,7 @@ export function AgreementForm({ mode }: { mode: string }) {
               ) : (
                 <Sparkles size={16} />
               )}{" "}
-              {busy || "Generate milestones"}
+              {busy || "Draft milestones with AI"}
               <ArrowRight size={16} />
             </Button>
           </section>
@@ -214,19 +222,29 @@ export function AgreementForm({ mode }: { mode: string }) {
             <div className="stat-icon mint">
               <Sparkles size={22} />
             </div>
-            <h3>
-              A better brief.
-              <br />A smoother project.
-            </h3>
+            <h3>You own the requirements.</h3>
             <p>
-              We’ll propose 2–5 milestones, a payment split, and clear
-              acceptance criteria.
+              AI proposes the milestones and delivery checks. You edit and
+              confirm them before saving.
             </p>
             <ul>
-              <li>You can edit everything.</li>
-              <li>No payment is made at this step.</li>
-              <li>The buyer approves each release.</li>
+              <li>
+                <strong>Buyer:</strong> defines requirements and payment
+                permission.
+              </li>
+              <li>
+                <strong>Seller:</strong> submits work against those
+                requirements.
+              </li>
+              <li>
+                <strong>AI:</strong> reviews evidence to support your decision.
+              </li>
             </ul>
+            <p>
+              {judgeDemo
+                ? "Your agreement stays private to this demo session. You can test the seller view after saving. Other judges cannot see it."
+                : "Saving does not publish the agreement or email the seller. You can share a private submission link afterward."}
+            </p>
             <button
               className="text-link"
               type="button"
@@ -241,7 +259,7 @@ export function AgreementForm({ mode }: { mode: string }) {
                 })
               }
             >
-              Use the demo brief <ArrowRight size={14} />
+              Fill with example requirements <ArrowRight size={14} />
             </button>
           </aside>
         </form>
@@ -249,9 +267,10 @@ export function AgreementForm({ mode }: { mode: string }) {
         <>
           <div className="section-heading">
             <div>
-              <h2>Make it your agreement</h2>
+              <h2>Review your requirements before saving</h2>
               <p className="muted">
-                Edit deliverables and criteria before locking in the scope.
+                These are AI suggestions. You decide the final deliverables,
+                payment split, and acceptance criteria.
               </p>
             </div>
             <span className="subtle-pill">
@@ -408,7 +427,7 @@ export function AgreementForm({ mode }: { mode: string }) {
                 }
                 onClick={save}
               >
-                {busy || "Create agreement"}
+                {busy || "Confirm requirements & create"}
                 <ArrowRight size={15} />
               </Button>
             </div>

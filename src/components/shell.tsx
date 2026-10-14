@@ -23,8 +23,7 @@ export function Shell({
   const path = usePathname();
   const seller = path.startsWith("/seller");
   const links = [
-    { href: "/agent", label: "Verification agent", icon: ScanEye },
-    { href: "/agreements", label: "Agreements", icon: FolderOpen },
+    { href: "/agreements", label: "Your agreements", icon: FolderOpen },
     { href: "/ledger", label: "Payment ledger", icon: ReceiptText },
   ];
   if (path === "/login") return <>{children}</>;
@@ -40,10 +39,12 @@ export function Shell({
         <div className="workspace">
           <span className="workspace-avatar">P</span>
           <div>
-            <strong>{judgeDemo ? "Judge demo" : "Paylock workspace"}</strong>
+            <strong>{seller ? "Seller view" : "Buyer view"}</strong>
             <small>
               {seller
-                ? "Seller portal"
+                ? judgeDemo
+                  ? "Testing the seller’s side"
+                  : "Submit work for review"
                 : judgeDemo
                   ? "Your private test session"
                   : "Buyer workspace"}
@@ -56,7 +57,9 @@ export function Shell({
             Judge demo guide
           </Link>
         )}
-        <span className="nav-caption">WORKSPACE</span>
+        <span className="nav-caption">
+          {seller ? "BUYER WORKSPACE" : "YOUR WORKSPACE"}
+        </span>
         <nav>
           {links.map(({ href, label, icon: Icon }) => (
             <Link
@@ -69,14 +72,21 @@ export function Shell({
             </Link>
           ))}
         </nav>
-        <span className="nav-caption">BUILD & EXPLORE</span>
+        <span className="nav-caption">DEMO & TOOLS</span>
         <nav>
+          <Link
+            href="/agent"
+            className={`nav-link ${path === "/agent" ? "active" : ""}`}
+          >
+            <ScanEye size={18} />
+            Browser walkthrough
+          </Link>
           <Link
             href="/demo"
             className={`nav-link ${path === "/demo" ? "active" : ""}`}
           >
             <FlaskConical size={18} />
-            Walkthrough
+            Text walkthrough
           </Link>
           <Link
             href="/settings"
@@ -89,8 +99,16 @@ export function Shell({
         <div className="sidebar-bottom">
           <div className="trust-note">
             <ShieldCheck size={19} />
-            <strong>Your policy. Verified work.</strong>
-            <p>You set the scope and payment permission.</p>
+            <strong>
+              {seller
+                ? "Show the work you delivered."
+                : "Your requirements. Your decision."}
+            </strong>
+            <p>
+              {seller
+                ? "The buyer sets the requirements. Submit evidence for review."
+                : "Set the requirements, review evidence, and approve payment."}
+            </p>
             <Link href="/demo">
               Explore the workflow <ArrowUpRight size={13} />
             </Link>
@@ -108,9 +126,9 @@ export function Shell({
           <div className="profile">
             <span className="avatar">{seller ? "JS" : "AM"}</span>
             <div>
-              <strong>{seller ? "Seller access" : "Buyer access"}</strong>
+              <strong>{seller ? "Seller view" : "Buyer view"}</strong>
               <small>
-                {seller ? "Secure submission link" : "Workspace owner"}
+                {seller ? "Submit evidence" : "Set requirements & review work"}
               </small>
             </div>
           </div>
@@ -122,7 +140,9 @@ export function Shell({
             Workspace <span>/</span>
             <strong>
               {seller
-                ? "Seller portal"
+                ? judgeDemo
+                  ? "Testing the seller’s side"
+                  : "Submit work for review"
                 : path === "/"
                   ? "Overview"
                   : path.startsWith("/agreements/new")
@@ -132,7 +152,7 @@ export function Shell({
                       : path === "/ledger"
                         ? "Payment ledger"
                         : path === "/agent"
-                          ? "Verification agent"
+                          ? "Browser walkthrough"
                           : path === "/demo"
                             ? "Demo studio"
                             : path === "/judge"

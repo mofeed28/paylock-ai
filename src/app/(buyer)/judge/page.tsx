@@ -1,71 +1,92 @@
 import Link from "next/link";
-import { modelName, modelProvider } from "@/lib/model";
-
+import { Button } from "@/components/ui/button";
 export default function Page() {
   return (
     <div className="page narrow">
       <div className="page-heading">
         <div>
-          <div className="eyebrow">PAYLOCK · JUDGES' DEMO</div>
-          <h1>See the work behind the payment.</h1>
+          <div className="eyebrow">PAYLOCK · JUDGE DEMO</div>
+          <h1>You set the requirements. The seller delivers.</h1>
           <p>
-            Verify a delivery, request a correction, and follow the payment
-            decision.
+            Start as the buyer. In this demo, you can also try the seller’s
+            view.
           </p>
         </div>
       </div>
+      <ol className="role-journey" aria-label="How an agreement works">
+        <li>
+          <span>1 · BUYER</span>
+          <h3>Define the work</h3>
+          <p>
+            You write the requirements and budget. AI drafts milestones; you
+            edit and confirm them.
+          </p>
+        </li>
+        <li>
+          <span>2 · SELLER</span>
+          <h3>Submit the delivery</h3>
+          <p>
+            The seller submits work against your requirements. AI checks the
+            evidence.
+          </p>
+        </li>
+        <li>
+          <span>3 · BUYER</span>
+          <h3>Make the payment decision</h3>
+          <p>
+            You approve payment, request a revision, or set an explicit
+            permission for automatic capture.
+          </p>
+        </li>
+      </ol>
+      <div className="demo-choices">
+        <section className="card form-card">
+          <div className="eyebrow">START FROM YOUR REQUIREMENTS</div>
+          <h2>Create your own agreement</h2>
+          <p>
+            Write a brief, review AI’s proposed milestones, and save. Then open
+            the seller view to submit work and switch back to review it.
+          </p>
+          <p className="muted">
+            PayPal sandbox checkout uses test funds and a Personal sandbox buyer
+            login.
+          </p>
+          <Button asChild>
+            <Link href="/agreements/new">Create an agreement →</Link>
+          </Button>
+        </section>
+        <section className="card form-card">
+          <div className="eyebrow">EXPLORE A PREPARED EXAMPLE</div>
+          <h2>Try the browser walkthrough</h2>
+          <p>
+            The requirements and seller submission are already prepared. Let the
+            agent find a broken link, then submit the corrected page and
+            recheck.
+          </p>
+          <p className="muted">
+            Real browser checks. Simulated payments. Any unavailable AI is
+            labeled.
+          </p>
+          <Button asChild variant="outline">
+            <Link href="/agent">Open the walkthrough →</Link>
+          </Button>
+        </section>
+      </div>
       <section className="card form-card">
-        <h2>1. Try the browser agent</h2>
+        <h2>Who can see your agreements?</h2>
         <p>
-          A product page has a broken purchase destination. Run verification,
-          inspect the screenshots, then submit the corrected sample and recheck.
-          You choose whether to delegate the simulated payment.
+          Your agreements are private to this demo session. Other judges have
+          separate workspaces. Nothing is publicly listed.
         </p>
         <p className="muted">
-          The sample uses real Chromium inspection of bundled pages and
-          simulated payments. When available, the connected model chooses
-          browser tools; any fallback is labeled.
+          You test both roles in the same session. The seller email is contact
+          information; it does not send an invitation. Seller links work only in
+          your current session. Keep it open to revisit your work—signing in
+          again starts a new workspace.
         </p>
-        <Link className="text-link" href="/agent">
-          Open the browser walkthrough →
+        <Link className="text-link" href="/agreements">
+          Go to your agreements →
         </Link>
-      </section>
-      <section className="card form-card">
-        <h2>2. Test PayPal sandbox checkout</h2>
-        <p>
-          Create a small agreement, authorize a milestone through PayPal, open
-          its seller link to submit evidence, then return to review and approve
-          capture.
-        </p>
-        <p className="muted">
-          Use the separate Personal sandbox buyer credentials supplied with the
-          private judging instructions. Sandbox transactions use test funds. The
-          sample walkthrough does not exercise PayPal APIs.
-        </p>
-        <Link className="text-link" href="/agreements/new">
-          Create a sandbox agreement →
-        </Link>
-      </section>
-      <section className="card form-card">
-        <h2>Your demo session</h2>
-        <p>
-          In the hosted judge demo, each sign-in starts a separate workspace.
-          Keep this browser session open to revisit your work; signing in again
-          starts fresh. Seller links work within that session.
-        </p>
-        <p className="muted">
-          Configured AI:{" "}
-          {modelProvider() === "bedrock"
-            ? "Amazon Bedrock"
-            : "OpenAI compatible"}{" "}
-          · {modelName()}. Configuration alone does not confirm model access. AI
-          allowances are limited; unavailable reviews remain clearly labeled for
-          manual inspection.
-        </p>
-        <p className="fine-print">
-          Use test project information only. This is a hackathon demonstration,
-          with no real-money payments or escrow service.
-        </p>
       </section>
     </div>
   );
