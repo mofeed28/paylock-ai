@@ -20,5 +20,6 @@ jobs:
       - run: npm run typecheck
       - run: npx playwright install --with-deps chromium
       - run: npm test
-      - run: npm run build
+      # Exercise the same env-loading launcher used by the hosted build.
+      - run: node scripts/with-env.mjs .env node_modules/next/dist/bin/next build
       - run: npm run test:judge

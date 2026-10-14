@@ -110,3 +110,24 @@ a time. All 23 automated tests, lint and typecheck passed after the model change
 
 A dedicated Lightsail server has been provisioned, but hosted browser behavior,
 HTTPS and PayPal connectivity remain pending deployment completion.
+
+
+## Hosted workflow checkpoint — October 14, 2026
+
+- HTTPS login and no-index headers verified at the Lightsail demo hostname.
+- Independent signed sessions cannot read another session's agreement export
+  or screenshots, or invoke its browser verification.
+- Live Amazon Nova + sandboxed Linux Chromium found the fixture HTTP 404,
+  requested revision, verified the corrected fixture, and completed one
+  explicitly permitted simulated capture. This sample does not call PayPal.
+- Hosted live Nova milestone generation passed. The separate PayPal sandbox
+  path created an actual AUTHORIZE-intent order with the configured merchant.
+  Hosted buyer approval and capture were not performed by this check.
+- Agreement, evidence, payment state and session survived a service restart.
+- The app listens on localhost:3000; Caddy exposes only HTTP/HTTPS. SSH is
+  restricted to the administrator IP in the Lightsail firewall.
+- The first hosted build and isolated HTTP verification both passed.
+
+Final browser check after the UTC fix: judge guide, saved agreement and new
+agreement pages rendered without JavaScript/hydration errors at desktop width;
+the judge guide also had no horizontal overflow at 390px.

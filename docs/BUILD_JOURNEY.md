@@ -131,3 +131,32 @@ build-time dependencies even when NODE_ENV is production.
 Validation before hosting: all 23 tests, lint and typecheck passed. Live Nova
 planning/review used real model calls; the tool loop test used synthetic tool
 observations, so it is not evidence of hosted browser success.
+
+
+# October 14, 2026 — hosted judge workflow verified
+
+Renewed the paylock CLI login and updated SSH to the administrator's current IP.
+The Linux build required all dev dependencies and a clean Turbopack cache.
+Added scripts/with-env.mjs because Next's build workers rejected propagation of
+Node's --env-file flag into NODE_OPTIONS. CI now exercises this launcher.
+
+The production build and isolated HTTP checks passed on the 2 GB Lightsail host.
+Caddy serves the access-controlled demo over HTTPS. A hosted live Nova run found
+the fixture's broken purchase destination, requested revision, verified the
+corrected page, and recorded the buyer-authorized simulated capture. A separate
+Nova plan and actual PayPal sandbox order creation also passed. The hosted test
+did not approve or capture that PayPal order. The prior USD 200 sandbox capture
+remains a separately verified local result.
+
+Verified cross-session read/write and screenshot isolation, localhost-only port
+3000, and preservation of the session, agreement, evidence and simulated payment
+after restarting the service. Browser inspection found a timestamp hydration
+mismatch between server and client timezones; UTC formatting fixes the affected
+expiry and activity timestamps. The guide breadcrumb now names the judge demo.
+
+The code repository remains private. Demo access expires December 16; server
+billing continues until its instance and attached resources are removed.
+
+Final browser check after the UTC fix: judge guide, saved agreement and new
+agreement pages rendered without JavaScript/hydration errors at desktop width;
+the judge guide also had no horizontal overflow at 390px.

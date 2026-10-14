@@ -34,7 +34,7 @@ PayPal authorization is time-limited and is not regulated escrow. This MVP settl
 
 ## What we learned
 
-Early feedback identified a scattered interface and a table that clipped in a narrow browser panel. We replaced that dashboard with agreement cards and a clear next action. We also replaced the prewritten sample review with computed HTML checks: a missing delivery note now produces a concrete revision request. PayPal sandbox authorization and a manually approved $200 capture have now been exercised and the capture independently verified against PayPal. Live Amazon Nova 2 Lite planning, evidence review and tool-result checks now pass; hosted deployment testing remains outstanding.
+Early feedback identified a scattered interface and a table that clipped in a narrow browser panel. We replaced that dashboard with agreement cards and a clear next action. We also replaced the prewritten sample review with computed HTML checks: a missing delivery note now produces a concrete revision request. PayPal sandbox authorization and a manually approved $200 capture have now been exercised and the capture independently verified against PayPal. Live Amazon Nova 2 Lite planning, evidence review and tool-result checks now pass; the hosted Nova browser workflow and sandbox order creation also pass.
 
 ## What's next
 
@@ -60,4 +60,4 @@ Source: https://paypalaihackathon.devpost.com/ (reviewed October 11, 2026). Rech
 
 ## Current verification status — 2026-10-14
 
-The real-browser practice loop and provider-contract tests pass locally. PayPal sandbox authorization, submission and manual capture were completed, with a direct provider lookup confirming the USD 200 capture. Native Bedrock Converse support and isolated judge sessions are implemented. Amazon Nova 2 Lite passed live planning, evidence review and sequential tool-result checks; HTTP doubles cover failure handling. A dedicated Lightsail server is provisioned; the hosted build and HTTPS checks are still in progress. The source repository remains private at the owner's request; submission requires authorized publication and a public demo video.
+The real-browser practice loop and provider-contract tests pass locally. PayPal sandbox authorization, submission and manual capture were completed, with a direct provider lookup confirming the USD 200 capture. Native Bedrock Converse support and isolated judge sessions are implemented. Amazon Nova 2 Lite passed live planning, evidence review and sequential tool-result checks; HTTP doubles cover failure handling. The protected Lightsail demo passed HTTPS, workspace isolation, live Nova browser verification, correction and simulated capture, plus PayPal sandbox order creation. Hosted buyer approval and capture still need an interactive sandbox login; the prior completed USD 200 capture was local. The source repository remains private at the owner's request; submission requires authorized publication and a public demo video.

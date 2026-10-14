@@ -1,4 +1,4 @@
-> Development status: private hackathon build. PayPal sandbox authorization and a $200 capture have been exercised; the capture was independently read back as COMPLETED. Amazon Nova 2 Lite has passed live Bedrock planning, evidence-review and tool-result checks. A dedicated judge server is provisioned; hosted build and HTTPS verification are in progress. See [the build journey](docs/BUILD_JOURNEY.md).
+> Development status: private hackathon build. PayPal sandbox authorization and a $200 capture have been exercised; the capture was independently read back as COMPLETED. Amazon Nova 2 Lite has passed live Bedrock planning, evidence-review and tool-result checks. The protected judge demo is hosted on Lightsail with HTTPS; live Nova browser verification, revision, simulated capture and hosted PayPal sandbox order creation have been exercised. See [the build journey](docs/BUILD_JOURNEY.md).
 
 # Paylock AI
 
@@ -6,7 +6,7 @@
 
 A working PayPal AI Hackathon MVP for small freelance projects: turn a brief into measurable milestones, collect evidence, inspect an AI review, and capture a PayPal sandbox authorization after manual approval or an explicit, time-limited buyer policy.
 
-This repository is a **single-workspace prototype**, not a regulated escrow service or a production marketplace. Practice mode is usable without any external credentials. The connected sandbox path requires your own PayPal and model credentials.
+This repository is a **single-merchant prototype with isolated judge sessions**, not a regulated escrow service or a production marketplace. Practice mode is usable without any external credentials. The connected sandbox path requires your own PayPal and model credentials.
 
 ## Run locally
 

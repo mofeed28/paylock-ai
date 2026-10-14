@@ -10,6 +10,14 @@ export const money = (cents: number) =>
     maximumFractionDigits: cents % 100 ? 2 : 0,
   }).format(cents / 100);
 export const date = (value: string | Date) =>
-  new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(
-    new Date(value),
-  );
+  new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(value));
+export const timestamp = (value: string | Date) =>
+  `${new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "UTC",
+  }).format(new Date(value))} UTC`;

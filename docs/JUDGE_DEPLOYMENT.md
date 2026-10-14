@@ -2,7 +2,8 @@
 
 Updated October 14, 2026. The dedicated Lightsail instance and static IP are provisioned.
 Amazon Nova 2 Lite passed live structured planning, evidence review and sequential tool-result checks.
-The hosted build, HTTPS and hosted checkout are still being verified.
+The hosted build, HTTPS, session isolation, live Nova browser loop and PayPal sandbox order creation passed.
+A complete hosted buyer authorization/capture still needs an interactive Personal sandbox login.
 
 ## Budget and region
 
@@ -25,6 +26,13 @@ Provider code supports a dedicated Bedrock API key or the AWS SDK credential
 chain. This deployment uses a dedicated IAM user restricted to InvokeModel for
 Nova 2 Lite and its US inference profile, with access expiring December 16.
 Root/profile credentials stay on the administrator computer.
+
+Hosted demo: https://paylock-demo.52.202.219.38.sslip.io/login
+
+Resource names: instance `paylock-demo`, attached static IP `paylock-demo-ip`,
+SSH key pair `paylock-judges`, IAM user `/paylock/paylock-demo-bedrock`.
+The access code and runtime secrets are stored outside Git. The free sslip.io
+hostname depends on third-party DNS; Caddy manages its HTTPS certificate.
 Use credentials permitted only for the intended model/profile. A local AWS CLI
 profile for another project is not automatically authorized for this deployment.
 
@@ -88,12 +96,15 @@ cannot edit it. Do not pass secrets on command lines or print the file in logs.
 With `/etc/paylock.env` configured, run as the paylock user from the release directory:
 
 ```sh
-node --env-file=/etc/paylock.env scripts/check-demo-config.mjs
-node --env-file=/etc/paylock.env /usr/share/nodejs/npm/bin/npm-cli.js ci --include=dev
-node --env-file=/etc/paylock.env node_modules/prisma/build/index.js migrate deploy
-node --env-file=/etc/paylock.env node_modules/playwright/cli.js install chromium
-node --env-file=/etc/paylock.env node_modules/next/dist/bin/next build
+node scripts/with-env.mjs /etc/paylock.env scripts/check-demo-config.mjs
+node scripts/with-env.mjs /etc/paylock.env /usr/share/nodejs/npm/bin/npm-cli.js ci --include=dev
+node scripts/with-env.mjs /etc/paylock.env node_modules/prisma/build/index.js migrate deploy
+node scripts/with-env.mjs /etc/paylock.env node_modules/playwright/cli.js install chromium
+node scripts/with-env.mjs /etc/paylock.env node_modules/next/dist/bin/next build
 ```
+
+The wrapper loads the environment before starting Node, avoiding propagation of
+`--env-file` into Next build-worker NODE_OPTIONS.
 
 The npm CLI location depends on the Node installation; use its actual path if
 different. Make `/opt/paylock-browsers` writable by paylock before installing

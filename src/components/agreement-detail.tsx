@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import type { AgreementView } from "@/lib/data";
 import type { Review } from "@/lib/schema";
-import { money, date } from "@/lib/utils";
+import { money, date, timestamp } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { api, CopyButton, Notice, Status } from "./common";
 import { AgentPanel } from "./agent-panel";
@@ -734,7 +734,7 @@ export function AgreementDetail({
               <div>
                 <p>{t.message}</p>
                 <small>
-                  {t.actor} · {new Date(t.createdAt).toLocaleString()}
+                  {t.actor} · {timestamp(t.createdAt)}
                 </small>
               </div>
             </div>

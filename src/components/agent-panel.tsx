@@ -13,7 +13,7 @@ import type {
   AgentTrace,
   BrowserPolicy,
 } from "@/lib/agent-contract";
-import { money } from "@/lib/utils";
+import { money, timestamp } from "@/lib/utils";
 import { Button } from "./ui/button";
 
 export function AgentPanel({
@@ -190,7 +190,7 @@ export function AgentPanel({
           </p>
           {active && (
             <p className="fine-print">
-              Expires {new Date(m.autoCaptureUntil!).toLocaleString()}.
+              Expires {timestamp(m.autoCaptureUntil!)}.
             </p>
           )}
           {open &&

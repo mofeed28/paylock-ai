@@ -135,7 +135,9 @@ export function Shell({
                           ? "Verification agent"
                           : path === "/demo"
                             ? "Demo studio"
-                            : "Integrations"}
+                            : path === "/judge"
+                              ? "Judge demo"
+                              : "Integrations"}
             </strong>
           </div>
           <div className="topbar-right">
