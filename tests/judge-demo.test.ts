@@ -65,7 +65,7 @@ test("judge sessions isolate agreements and payment actions, reject forged sessi
     );
     const monthKey = `models:${new Date().toISOString().slice(0, 7)}`;
     const dayKey = `models:${a}:${new Date().toISOString().slice(0, 10)}`;
-    await db.demoUsage.create({ data: { key: monthKey, count: 59 } });
+    await db.demoUsage.create({ data: { key: monthKey, count: 149 } });
     await db.demoUsage.create({ data: { key: dayKey, count: 20 } });
     await assert.rejects(
       inWorkspace(a, () => reserveModelCall({ text: "hello" })),
@@ -74,7 +74,7 @@ test("judge sessions isolate agreements and payment actions, reject forged sessi
     assert.equal(
       (await db.demoUsage.findUniqueOrThrow({ where: { key: monthKey } }))
         .count,
-      59,
+      149,
       "failed per-session reservation rolls back global slot",
     );
     await inWorkspace(b, () => reserveModelCall({ text: "hello" }));

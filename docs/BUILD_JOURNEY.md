@@ -184,3 +184,27 @@ isolated HTTP access checks passed before switching the live release, preserving
 the persistent database. Hosted browser checks verified the buyer/seller return
 path on the same agreement, desktop pages, and mobile layouts at 390px without
 horizontal overflow or JavaScript errors. No new AI calls or payments were needed.
+
+### October 14 — Connect a public deliverable to the sandbox workflow
+
+Added a guided $5 PayPal sandbox website-verification preset and a public test
+storefront on the existing server. This path uses actual HTTPS delivery and
+preserves the rule that offline fixture evidence cannot verify sandbox payments.
+The site starts with a real missing checkout destination; a documented generator
+publishes the corrected page. Live Nova requested revision on HTTP 404, then
+verified all four checks after resubmission against the corrected site. No
+capture occurred without buyer authorization. The embedded browser's PayPal
+popup did not open; the remaining buyer step was handed to the owner in a
+regular browser. Hosted capture is still unverified.
+
+Increased the global model allowance from 60 to 150 calls after checking AWS
+Nova pricing, retaining request/output caps and 20 calls per session/day.
+Fixed the test runner so populated developer .env files cannot select a live
+provider during automated tests. All 23 tests then passed locally and on the
+server, followed by the production build and isolated HTTP checks.
+
+Prepared the submission checklist, hosted recording steps and updated deployment
+instructions. Scanned 330 historical Git objects against six known credential
+patterns and private-key markers; no matching paths were found. This limited
+scan does not substitute for final publication review. The repository remains
+private and the video is not yet recorded or published.

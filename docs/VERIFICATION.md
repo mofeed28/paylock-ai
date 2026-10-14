@@ -131,3 +131,28 @@ HTTPS and PayPal connectivity remain pending deployment completion.
 Final browser check after the UTC fix: judge guide, saved agreement and new
 agreement pages rendered without JavaScript/hydration errors at desktop width;
 the judge guide also had no horizontal overflow at 390px.
+
+## Public website / sandbox agreement checkpoint — October 14, 2026
+
+The guided sandbox preset creates a $5 browser-verification milestone and a
+separate $100 manual handoff. The public Northstar site is served over HTTPS
+on the existing Lightsail host, with its own hostname and no judge data.
+
+On a sandbox-mode agreement with `fixture: false`, live Nova and Chromium fetched
+the public site, observed the genuine HTTP 404 at `/checkout/`, and recorded a
+revision request. Publishing the missing destination and submitting the same
+approved URL produced a second live run: all four checks passed, including the
+HTTP 200 destination heading and 390px mobile layout. The original submission
+and failed run remain in the record. Payment stayed UNFUNDED and capture was
+disabled, as expected without buyer authorization.
+
+The PayPal SDK reached its checkout overlay in the in-app browser, but the
+popup did not appear there. The owner has been asked to authorize the $5 milestone
+in a regular browser with a Personal sandbox account. A hosted capture is still
+pending; this checkpoint does not claim one.
+
+All 23 tests passed locally and on Linux, along with lint, typecheck, the staged
+production build and isolated HTTP checks. The test launcher now excludes real
+developer credentials: previously Prisma's .env loading could select Bedrock in
+tests intended for mocks. Quota persistence and rejection tests use the updated
+150-call monthly boundary; the 20-call session/day limit remains.

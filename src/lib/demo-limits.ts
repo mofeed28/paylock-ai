@@ -12,7 +12,7 @@ export async function reserveModelCall(payload: unknown) {
   const day = new Date().toISOString().slice(0, 10);
   await db.$transaction(async (tx) => {
     for (const [key, limit] of [
-      [`models:${month}`, 60],
+      [`models:${month}`, 150],
       [`models:${workspaceId()}:${day}`, 20],
     ] as const) {
       const changed =

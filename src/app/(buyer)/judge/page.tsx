@@ -72,6 +72,23 @@ export default function Page() {
           </Button>
         </section>
       </div>
+      {process.env.DEMO_WEBSITE_URL && (
+        <section className="card form-card">
+          <h2>Try live AI with a PayPal sandbox payment</h2>
+          <p>
+            Use the hosted test storefront as your seller’s delivery. Confirm
+            the requirements, authorize a $5 milestone, and let the browser
+            agent verify it before payment.
+          </p>
+          <p className="muted">
+            Requires a Personal PayPal sandbox login. The $100 handoff milestone
+            stays separate and unpaid unless you authorize it.
+          </p>
+          <Link className="text-link" href="/agent#sandbox-website">
+            Open the guided sandbox setup →
+          </Link>
+        </section>
+      )}
       <section className="card form-card">
         <h2>Who can see your agreements?</h2>
         <p>

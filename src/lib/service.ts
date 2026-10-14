@@ -126,7 +126,7 @@ export async function submitWork(
         agreementId: m.agreementId,
         actor: "seller",
         type: "SUBMITTED",
-        message: `Work submitted for ${m.title}. ${result.source.startsWith("live") ? "AI evidence review completed." : result.source === "checks" ? "HTML source checks completed; no AI model used." : "Fallback review; manual verification required."}`,
+        message: `Work submitted for ${m.title}. ${result.source === "agent-pending" ? "Browser verification queued." : result.source.startsWith("live") ? "AI evidence review completed." : result.source === "checks" ? "HTML source checks completed; no AI model used." : "Fallback review; manual verification required."}`,
       },
     });
   });

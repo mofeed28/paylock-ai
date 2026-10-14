@@ -5,10 +5,15 @@ import { ArrowRight, ScanEye } from "lucide-react";
 import { Button } from "./ui/button";
 import { api, Notice } from "./common";
 
-export function AgentStudio() {
+export function AgentStudio({
+  demoWebsiteUrl = "",
+}: {
+  demoWebsiteUrl?: string;
+}) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [useExample, setUseExample] = useState(false);
   async function create(path: string, values: unknown) {
     setBusy(true);
     setError("");
@@ -52,8 +57,8 @@ export function AgentStudio() {
             <ArrowRight size={16} />
           </Button>
           <small>
-            Real browser checks on an offline sample. Payments are simulated. AI
-            planning requires a model key.
+            Offline sample with simulated payments. The run identifies whether
+            live AI or the deterministic fallback selected its checks.
           </small>
         </div>
         <ol className="journey-list">
@@ -79,15 +84,64 @@ export function AgentStudio() {
           ))}
         </ol>
       </section>
-      <details className="card form-card agent-create">
-        <summary>Verify a deployed website</summary>
+      <details
+        className="card form-card agent-create"
+        id="sandbox-website"
+        open={!!demoWebsiteUrl}
+      >
+        <summary>PayPal sandbox verification · deployed website</summary>
         <p className="muted">
           Define the exact requirements before the seller submits. Read-only
           HTTPS pages are supported with JavaScript disabled. Purchase links
           must stay on the same origin. A $100 manual handoff milestone is added
           to the verification amount.
         </p>
+        {demoWebsiteUrl && (
+          <>
+            <p>
+              This path uses an actual PayPal sandbox authorization and capture.
+              Use our public test storefront to try it; no real money moves.
+            </p>
+            <ol>
+              <li>Review the requirements below and create the agreement.</li>
+              <li>
+                Authorize the $5 verification milestone with a Personal PayPal
+                sandbox account.
+              </li>
+              <li>
+                Optionally enable the exact-amount payment permission, then open
+                seller view and submit the website.
+              </li>
+              <li>
+                Live AI inspects the site. Passing checks allow capture under
+                your permission; otherwise you review the result.
+              </li>
+            </ol>
+            <div className="button-row">
+              <Button
+                variant="outline"
+                disabled={busy}
+                onClick={() => setUseExample(true)}
+              >
+                Fill with test storefront requirements
+              </Button>
+              <a
+                href={demoWebsiteUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-link"
+              >
+                View test storefront ↗
+              </a>
+            </div>
+            <p className="muted">
+              The storefront is a demo deliverable. Its purchase link leads to a
+              preview; PayPal pays for the verification milestone in Paylock.
+            </p>
+          </>
+        )}
         <form
+          key={useExample ? "example" : "custom"}
           onSubmit={(e) => {
             e.preventDefault();
             const data = Object.fromEntries(new FormData(e.currentTarget));
@@ -133,12 +187,25 @@ export function AgentStudio() {
                   name={name}
                   type={type}
                   placeholder={placeholder}
+                  defaultValue={
+                    useExample
+                      ? name === "targetUrl"
+                        ? demoWebsiteUrl
+                        : name === "sellerEmail"
+                          ? "seller@example.com"
+                          : placeholder
+                      : undefined
+                  }
                   required
                   maxLength={name === "targetUrl" ? 1000 : 120}
                 />
               </div>
             ))}
           </div>
+          <p className="muted">
+            You confirm these requirements as the buyer. Seller email is contact
+            information; no invitation is sent.
+          </p>
           <div className="field">
             <label htmlFor="amount">Verification milestone · USD</label>
             <input
@@ -148,7 +215,7 @@ export function AgentStudio() {
               min="1"
               max="10000"
               step="0.01"
-              defaultValue="300"
+              defaultValue={useExample ? "5" : "300"}
               required
             />
           </div>

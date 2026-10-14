@@ -60,7 +60,7 @@ export function SellerPortal({
         url: approvedUrl || url,
       });
       setSuccess(
-        "Work submitted and review recorded. The buyer can now approve, request revisions, or open a dispute.",
+        "Work submitted. Return to buyer view to see the review, any revision request, and the payment status.",
       );
       setContent("");
       setUrl("");

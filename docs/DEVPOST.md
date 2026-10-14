@@ -22,6 +22,12 @@ For website-verification agreements, an AI tool loop chooses bounded browser too
 
 ## How we built it
 
+The hosted judge demo uses **Amazon Nova 2 Lite through Amazon Bedrock Converse**
+for milestone drafting, evidence review and sequential browser-tool decisions.
+Judges test buyer and seller roles within one isolated session. Seller email
+does not send an invitation. A public test storefront supports the actual
+PayPal sandbox verification path; the offline walkthrough stays practice-only.
+
 Next.js App Router, TypeScript, Tailwind CSS, Radix/shadcn-style UI primitives, Prisma, and SQLite. PayPal JS SDK and Orders v2 handle authorization; Payments v2 handles capture. OpenAI-compatible structured outputs and Zod enforce the agreement and review schemas. Submission content is untrusted data; the AI has no payment tools. Server checks validate checklist coverage and verify quoted evidence against submitted text. Playwright provides isolated read-only Chromium inspection; DNS validation and pinning block private-network targets. The model chooses tools through Bedrock Converse (or the optional Chat Completions adapter), with strict tool arguments and a five-step budget. node-html-parser evaluates explicit heading, purchase-link, and delivery-note source criteria without executing HTML.
 
 ## What makes it different

@@ -1,0 +1,11 @@
+# Add alongside the judge app's existing Caddy block. No new server is needed.
+YOUR_STORE_HOSTNAME {
+    header X-Robots-Tag "noindex, nofollow, noarchive"
+    header Cache-Control "no-store"
+    root * /var/www/paylock-store
+    file_server
+    handle_errors {
+        rewrite * /404.html
+        file_server
+    }
+}

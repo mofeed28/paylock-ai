@@ -49,7 +49,17 @@ npm start
 
 Without a configured model provider, this is a clearly labeled **deterministic browser rehearsal**. With a configured function-calling model, the planner selects browser tools, receives observations, and chooses its next tool or stops with findings. Amazon Nova 2 Lite on Bedrock has passed live structured planning, evidence review, and sequential tool-result checks. Mock-model tests separately cover validation and failure behavior.
 
-For a real deployed site, expand **Verify a deployed website** and define its exact HTTPS URL, product heading, delivery text, purchase link label, and destination heading. The seller must submit that exact URL. Submissions automatically trigger verification. Set `PAYMENT_MODE=sandbox` before creating the agreement for actual PayPal sandbox integration; authorize its payment using the PayPal button. The sample remains practice-only and cannot verify a sandbox capture.
+For a real deployed site, open **PayPal sandbox verification · deployed website** and define its exact HTTPS URL, product heading, delivery text, purchase link label, and destination heading. The seller must submit that exact URL. Submissions automatically trigger verification. Set `PAYMENT_MODE=sandbox` before creating the agreement for actual PayPal sandbox integration; authorize its payment using the PayPal button. The offline sample remains practice-only and cannot verify a sandbox capture.
+
+The hosted demo includes a public test storefront and a $5 verification preset.
+Use **Fill with test storefront requirements**, review the plan, then create it.
+Only authorize the $5 milestone; the $100 handoff remains separate. The buyer
+needs a Personal PayPal sandbox login. The storefront's purchase link is a
+preview; payment for the delivered work happens inside Paylock. Setup and
+revision instructions are in [Judge deployment](docs/JUDGE_DEPLOYMENT.md).
+
+For submission packaging and known remaining steps, see the
+[submission checklist](docs/SUBMISSION_CHECKLIST.md).
 
 Tools: `inspect_heading`, `inspect_delivery`, `test_purchase_link`, and `inspect_mobile`. The model has no payment tool. Server-side policy checks require all four passing observations, no blocked requests, an unchanged current submission, a fresh completed run, exact authorized amount, a valid PayPal authorization, an open milestone, and an unexpired buyer grant. Sandbox automatic capture additionally requires a successful live planner. A failed planner never silently gains payment authority.
 

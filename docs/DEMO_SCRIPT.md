@@ -8,7 +8,8 @@ The local sample is a rehearsal: real Chromium inspection, offline fixture pages
 
 “A freelancer says the product page is ready. It looks right, but does the work meet the requirements before we pay? Paylock connects browser evidence to a buyer-controlled PayPal payment.”
 
-Show the four criteria and $300 milestone.
+Show the four criteria and the $5 sandbox verification milestone. The separate
+$100 handoff is not part of this payment demonstration.
 
 ## 0:20–0:45 — Authorize the boundaries
 
@@ -33,3 +34,21 @@ Show all four passing checks, the saved permission, the PayPal sandbox capture r
 “Paylock verifies these agreed browser requirements and connects their evidence to payment. This is sandbox authorization and capture, not escrow or seller payouts. JavaScript is disabled; the destination check does not test an actual checkout transaction. Incomplete evidence stays with the buyer.”
 
 The public licensed repository and public YouTube URL still require the owner's direction. Submission accepts complete run instructions or a hosted working demo.
+
+## Hosted recording setup
+
+1. Open Browser walkthrough → PayPal sandbox verification and select
+   **Fill with test storefront requirements**. Review and create the agreement.
+2. Authorize only the $5 milestone using a Personal PayPal sandbox account.
+   Keep the login and access code out of the recording.
+3. Enable the one-capture permission only if demonstrating delegated capture.
+4. In seller view, submit the approved public storefront URL and a delivery note.
+5. If the store is deliberately missing its destination, show the failed check.
+   Publish the completed destination using the documented store generator, then
+   submit a revision. Do not reset another judge's work.
+6. Show the live planner label, browser observations, actual sandbox capture
+   reference, and ledger. If payment is pending or blocked, resolve it before
+   recording a successful result; do not splice in a simulated receipt.
+
+Use captions to disclose time cuts. Finish below 3:00, preferably 2:45.
+Use original screen footage and narration; no background music is needed.

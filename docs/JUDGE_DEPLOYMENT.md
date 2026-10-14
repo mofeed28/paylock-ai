@@ -52,7 +52,7 @@ Sources:
   play both sides without exposing their submissions to other judges.
 - Access code goes in the **private judging instructions**, never public source
   or the video. Code holders can enter; this is not identity verification.
-- Eight agreements per session. Model requests are limited to **60 globally per
+- Eight agreements per session. Model requests are limited to **150 globally per
   UTC calendar month and 20 per session per UTC day**, persisted in SQLite.
   Each agent step counts separately. Failed requests count too; no SDK retries.
   Requests above 40,000 UTF-8 bytes are rejected; output is capped at 4,096
@@ -70,6 +70,46 @@ Sources:
 - No-index metadata and headers discourage indexing; authentication controls access.
 
 ## Host preparation
+
+### Public test storefront
+
+The hosted instance also serves a public, read-only demo deliverable at
+https://northstar-demo.52.202.219.38.sslip.io/product/ . It contains no judge
+agreements or credentials. This is an ordinary HTTPS website fetched through
+the same DNS/TLS checks as any approved site; offline fixture interception
+is not enabled for its agreements.
+
+Set `DEMO_WEBSITE_URL` to that product URL and add its exact origin to
+`DEMO_ALLOWED_ORIGINS`. The browser walkthrough page offers a preset for
+a $5 sandbox verification milestone plus the existing $100 manual handoff.
+Only authorize the $5 milestone for the demo. The seller email is contact
+information; the configured sandbox merchant receives the capture.
+
+Generate the site with `npx tsx scripts/build-demo-store.ts /var/www/paylock-store`.
+Add `deploy/Caddyfile.store`, substituting the storefront hostname, to Caddy.
+The initial version deliberately has no checkout destination and returns 404.
+After observing a revision request, run the generator again with `--fixed` to
+publish the destination, then submit the same approved URL from seller view.
+This changes a real public page. Do not reset it while judges are using it.
+The completed storefront can remain available for judges to verify successfully.
+
+The buyer must approve checkout with a Personal PayPal sandbox account.
+The optional one-capture permission remains off until explicitly enabled.
+No capture success is claimed until the provider reports completion.
+
+### AI allowance rationale
+
+AWS's US East price list checked October 14 lists Nova 2 Lite standard text at
+$0.33 per million input tokens and $2.75 per million output tokens. Using a
+conservative planning estimate of 40,000 input tokens and the 4,096 output cap
+for every call, 150 calls are about $3.67. Browser steps are smaller and capped
+at 600 output tokens. This fits the planned $5 model allowance, but is not an
+AWS billing cap or a guarantee against price changes. The 20-call daily session
+limit remains; failed calls count.
+
+Price source: https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonBedrock/current/us-east-1/index.json
+
+### Server setup
 
 Create a dedicated Lightsail Linux instance in the chosen account only after
 confirming the profile and monthly cost. Prefer Ubuntu 22.04 for the currently
