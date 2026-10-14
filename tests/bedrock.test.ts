@@ -10,7 +10,7 @@ test("Bedrock structured tool output and tool-result loop use native Converse", 
   Object.assign(process.env, {
     AI_PROVIDER: "bedrock",
     AWS_REGION: "us-east-1",
-    BEDROCK_MODEL_ID: "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+    BEDROCK_MODEL_ID: "us.amazon.nova-2-lite-v1:0",
     AWS_BEARER_TOKEN_BEDROCK: "test-only",
   });
   delete process.env.DEMO_MODE;

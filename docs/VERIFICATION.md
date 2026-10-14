@@ -95,3 +95,18 @@ The screenshot in `dashboard.png` shows the working practice workspace following
 - Screenshot: [agent-verification.jpg](agent-verification.jpg).
 - Outstanding: live model/provider credentials and actual PayPal sandbox authorization/capture; deployed-site integration; multi-user/production hardening. Local sample results must not be presented as completed live integration.
 - Linux CI: [run 38215332691](https://github.com/mofeed28/paylock-ai/actions/runs/38215332691) passed all 21 tests, lint, typecheck, migration deploy, and production build on commit `8bf0b9a`, using Ubuntu 22.04 with Chromium sandboxing enabled.
+
+
+## Bedrock and hosting checkpoint — October 14, 2026
+
+This checkpoint supersedes the earlier no-credentials notes above. PayPal
+sandbox authorization and a manually approved USD 200 capture were verified
+on October 13, including an independent provider lookup.
+
+Amazon Nova 2 Lite (us.amazon.nova-2-lite-v1:0) passed live structured milestone
+generation and evidence review, plus a five-step tool loop with synthetic
+observations. The loop receives prior tool results and validates one tool at
+a time. All 23 automated tests, lint and typecheck passed after the model change.
+
+A dedicated Lightsail server has been provisioned, but hosted browser behavior,
+HTTPS and PayPal connectivity remain pending deployment completion.

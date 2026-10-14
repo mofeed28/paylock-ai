@@ -108,3 +108,26 @@ production HTTP check verified cross-session protections for buyer mutations,
 exports, screenshots, seller content, ledger and dashboard. Bedrock tests use
 HTTP doubles; real credentials/model access and a deployed Linux browser still
 need verification. The repository remains private.
+
+
+# October 14, 2026 — Amazon Nova and judge server provisioning
+
+The owner chose the existing AWS account with a separate paylock CLI profile
+and requested that Anthropic not be used. Switched the selected model to Amazon
+Nova 2 Lite through Bedrock Converse in us-east-1. Live requests generated a
+balanced milestone plan, reviewed both text acceptance criteria, and completed
+a five-step tool-result loop using synthetic observations. Nova initially
+requested parallel tools; an explicit single-tool-per-turn instruction fixed
+the observed behavior. Multiple or invalid tool calls still fail closed.
+
+Provisioned a dedicated $12/month Lightsail instance, static IP, restricted SSH
+firewall, and scoped Nova-only runtime IAM credential with a December 16 expiry.
+State Guard resources are unchanged. The host has Node 22, Caddy, Playwright
+and a fresh migrated SQLite database. The first deployment disconnected during
+build; the administrator IP changed and the AWS login expired before recovery.
+Hosted launch is not yet claimed. Deployment instructions now explicitly install
+build-time dependencies even when NODE_ENV is production.
+
+Validation before hosting: all 23 tests, lint and typecheck passed. Live Nova
+planning/review used real model calls; the tool loop test used synthetic tool
+observations, so it is not evidence of hosted browser success.

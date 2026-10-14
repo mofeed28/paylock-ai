@@ -1,4 +1,4 @@
-> Development status: private hackathon build. PayPal sandbox authorization and a $200 capture have been exercised; the capture was independently read back as COMPLETED. Native Bedrock support and judges-only hosting configuration are prepared, but live Bedrock and hosted deployment remain outstanding. See [the build journey](docs/BUILD_JOURNEY.md).
+> Development status: private hackathon build. PayPal sandbox authorization and a $200 capture have been exercised; the capture was independently read back as COMPLETED. Amazon Nova 2 Lite has passed live Bedrock planning, evidence-review and tool-result checks. A dedicated judge server is provisioned; hosted build and HTTPS verification are in progress. See [the build journey](docs/BUILD_JOURNEY.md).
 
 # Paylock AI
 
@@ -47,7 +47,7 @@ npm start
 4. Choose **Submit corrected page & recheck**. The corrected destination returns HTTP 200. All four requirements are inspected again.
 5. With valid buyer permission, Paylock records one simulated capture. With permission off or revoked, the passing result waits for manual approval. Inspect the tool activity, screenshots, original submission, and ledger.
 
-Without `OPENAI_API_KEY`, this is a clearly labeled **deterministic browser rehearsal**. With a configured function-calling model, the planner selects browser tools, receives observations, and chooses its next tool or stops with findings. The mock-model tests validate this protocol; they do not establish live-provider connectivity.
+Without a configured model provider, this is a clearly labeled **deterministic browser rehearsal**. With a configured function-calling model, the planner selects browser tools, receives observations, and chooses its next tool or stops with findings. Amazon Nova 2 Lite on Bedrock has passed live structured planning, evidence review, and sequential tool-result checks. Mock-model tests separately cover validation and failure behavior.
 
 For a real deployed site, expand **Verify a deployed website** and define its exact HTTPS URL, product heading, delivery text, purchase link label, and destination heading. The seller must submit that exact URL. Submissions automatically trigger verification. Set `PAYMENT_MODE=sandbox` before creating the agreement for actual PayPal sandbox integration; authorize its payment using the PayPal button. The sample remains practice-only and cannot verify a sandbox capture.
 

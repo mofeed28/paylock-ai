@@ -22,7 +22,7 @@ For website-verification agreements, an AI tool loop chooses bounded browser too
 
 ## How we built it
 
-Next.js App Router, TypeScript, Tailwind CSS, Radix/shadcn-style UI primitives, Prisma, and SQLite. PayPal JS SDK and Orders v2 handle authorization; Payments v2 handles capture. OpenAI-compatible structured outputs and Zod enforce the agreement and review schemas. Submission content is untrusted data; the AI has no payment tools. Server checks validate checklist coverage and verify quoted evidence against submitted text. Playwright provides isolated read-only Chromium inspection; DNS validation and pinning block private-network targets. The model chooses tools through Chat Completions function calling, with strict tool arguments and a five-step budget. node-html-parser evaluates explicit heading, purchase-link, and delivery-note source criteria without executing HTML.
+Next.js App Router, TypeScript, Tailwind CSS, Radix/shadcn-style UI primitives, Prisma, and SQLite. PayPal JS SDK and Orders v2 handle authorization; Payments v2 handles capture. OpenAI-compatible structured outputs and Zod enforce the agreement and review schemas. Submission content is untrusted data; the AI has no payment tools. Server checks validate checklist coverage and verify quoted evidence against submitted text. Playwright provides isolated read-only Chromium inspection; DNS validation and pinning block private-network targets. The model chooses tools through Bedrock Converse (or the optional Chat Completions adapter), with strict tool arguments and a five-step budget. node-html-parser evaluates explicit heading, purchase-link, and delivery-note source criteria without executing HTML.
 
 ## What makes it different
 
@@ -34,7 +34,7 @@ PayPal authorization is time-limited and is not regulated escrow. This MVP settl
 
 ## What we learned
 
-Early feedback identified a scattered interface and a table that clipped in a narrow browser panel. We replaced that dashboard with agreement cards and a clear next action. We also replaced the prewritten sample review with computed HTML checks: a missing delivery note now produces a concrete revision request. PayPal sandbox authorization and a manually approved $200 capture have now been exercised and the capture independently verified against PayPal. Live model and hosted deployment testing remain outstanding.
+Early feedback identified a scattered interface and a table that clipped in a narrow browser panel. We replaced that dashboard with agreement cards and a clear next action. We also replaced the prewritten sample review with computed HTML checks: a missing delivery note now produces a concrete revision request. PayPal sandbox authorization and a manually approved $200 capture have now been exercised and the capture independently verified against PayPal. Live Amazon Nova 2 Lite planning, evidence review and tool-result checks now pass; hosted deployment testing remains outstanding.
 
 ## What's next
 
@@ -42,7 +42,7 @@ Merchant onboarding, stronger deployment isolation and background execution, aut
 
 ## Built with
 
-Next.js, React, TypeScript, Tailwind CSS, Prisma, SQLite, PayPal JS SDK, PayPal Orders v2, PayPal Payments v2, OpenAI-compatible API (configured model must be named after live verification), Playwright, node-html-parser, Zod, Lucide.
+Next.js, React, TypeScript, Tailwind CSS, Prisma, SQLite, PayPal JS SDK, PayPal Orders v2, PayPal Payments v2, Amazon Bedrock Converse with Amazon Nova 2 Lite (us.amazon.nova-2-lite-v1:0); optional OpenAI-compatible adapter, Playwright, node-html-parser, Zod, Lucide.
 
 ## Evidence to attach before submission
 
@@ -58,6 +58,6 @@ Prioritize technical implementation, product completeness, and demo clarity. Tar
 
 Source: https://paypalaihackathon.devpost.com/ (reviewed October 11, 2026). Recheck official rules and eligibility before submitting.
 
-## Current verification status — 2026-10-13
+## Current verification status — 2026-10-14
 
-The real-browser practice loop and provider-contract tests pass locally. PayPal sandbox authorization, submission and manual capture were completed, with a direct provider lookup confirming the USD 200 capture. Native Bedrock Converse support and isolated judge sessions are implemented; Bedrock tests use HTTP doubles and live model access remains unverified. The protected Lightsail deployment is prepared but not provisioned. The source repository remains private at the owner's request; submission requires authorized publication and a public demo video.
+The real-browser practice loop and provider-contract tests pass locally. PayPal sandbox authorization, submission and manual capture were completed, with a direct provider lookup confirming the USD 200 capture. Native Bedrock Converse support and isolated judge sessions are implemented. Amazon Nova 2 Lite passed live planning, evidence review and sequential tool-result checks; HTTP doubles cover failure handling. A dedicated Lightsail server is provisioned; the hosted build and HTTPS checks are still in progress. The source repository remains private at the owner's request; submission requires authorized publication and a public demo video.

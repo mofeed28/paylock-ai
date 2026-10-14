@@ -1,7 +1,8 @@
 # Judges-only demo: Amazon Lightsail + Bedrock
 
-Prepared October 13, 2026. No AWS infrastructure has been created by this change.
-Live Bedrock access, Linux deployment, HTTPS and hosted checkout still require verification.
+Updated October 14, 2026. The dedicated Lightsail instance and static IP are provisioned.
+Amazon Nova 2 Lite passed live structured planning, evidence review and sequential tool-result checks.
+The hosted build, HTTPS and hosted checkout are still being verified.
 
 ## Budget and region
 
@@ -17,17 +18,19 @@ other AWS resources and model price changes can add costs. Use an existing
 domain/subdomain where possible. Configure AWS billing alerts before launch;
 alerts do not enforce a hard spending cap.
 
-Recommended initial model: `us.anthropic.claude-haiku-4-5-20251001-v1:0` through
+Selected model (Amazon Nova 2 Lite): `us.amazon.nova-2-lite-v1:0` through
 native Bedrock Converse. The US inference profile may route within the US;
 the application region is us-east-1. Verify model access in the target AWS account.
 Provider code supports a dedicated Bedrock API key or the AWS SDK credential
-chain. Lightsail deployment below uses a dedicated Bedrock key, never a root key.
+chain. This deployment uses a dedicated IAM user restricted to InvokeModel for
+Nova 2 Lite and its US inference profile, with access expiring December 16.
+Root/profile credentials stay on the administrator computer.
 Use credentials permitted only for the intended model/profile. A local AWS CLI
 profile for another project is not automatically authorized for this deployment.
 
 Sources:
 - https://docs.aws.amazon.com/lightsail/latest/userguide/amazon-lightsail-bundles.html
-- https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-anthropic-claude-haiku-4-5.html
+- https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-amazon-nova-2-lite.html
 - https://aws.amazon.com/bedrock/pricing/
 - https://docs.aws.amazon.com/bedrock/latest/userguide/api-keys-use.html
 
@@ -76,7 +79,9 @@ source, assets, migrations and the lockfile. **Never copy the local `.env`,
 The hosted demo starts with a fresh database.
 
 Copy `deploy/judges.env.example` to `/etc/paylock.env`. Fill in the hostname,
-random judge access code, PayPal sandbox credentials and dedicated Bedrock key.
+random judge access code, PayPal sandbox credentials and scoped Bedrock credentials.
+For IAM authentication, supply AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY instead
+of AWS_BEARER_TOKEN_BEDROCK.
 Owner should be root, group paylock, mode 0640. The app can read this file but
 cannot edit it. Do not pass secrets on command lines or print the file in logs.
 
@@ -84,7 +89,7 @@ With `/etc/paylock.env` configured, run as the paylock user from the release dir
 
 ```sh
 node --env-file=/etc/paylock.env scripts/check-demo-config.mjs
-node --env-file=/etc/paylock.env /usr/share/nodejs/npm/bin/npm-cli.js ci
+node --env-file=/etc/paylock.env /usr/share/nodejs/npm/bin/npm-cli.js ci --include=dev
 node --env-file=/etc/paylock.env node_modules/prisma/build/index.js migrate deploy
 node --env-file=/etc/paylock.env node_modules/playwright/cli.js install chromium
 node --env-file=/etc/paylock.env node_modules/next/dist/bin/next build
