@@ -156,3 +156,28 @@ production build and isolated HTTP checks. The test launcher now excludes real
 developer credentials: previously Prisma's .env loading could select Bedrock in
 tests intended for mocks. Quota persistence and rejection tests use the updated
 150-call monthly boundary; the 20-call session/day limit remains.
+
+## Hosted PayPal capture checkpoint — October 15, 2026
+
+The owner completed Personal sandbox checkout for a fresh agreement in the
+current judge session. The $5 verification milestone became AUTHORIZED.
+Submitting the public Northstar URL through the seller view triggered live
+Nova browser verification: heading, delivery text, HTTP 200 destination heading,
+and the 390px layout all passed. The buyer approval flow then captured $5.
+
+- Agreement: `cmv9ymzyw000qpdrdw9uxrh50`.
+- Live verification: `cmv9yqc3y0015pdrdwmrog8wd`, status VERIFIED.
+- PayPal capture: `5SF27921LV186002H`.
+- Independent read from PayPal Payments v2: COMPLETED, USD 5.00,
+  final_capture true, created `2026-10-15T20:00:50Z`.
+- App record: RELEASED / CAPTURED; separate $100 handoff remains unfunded.
+
+This verifies the hosted manual approval path with live evidence and actual
+sandbox funds. Automatic capture was off for this transaction. The earlier
+broken-site/revision run remains a separate agreement; do not describe this
+fresh agreement as having gone through that revision sequence.
+
+The previous test agreement was inaccessible after a new judge login, as
+expected with session isolation. A fresh agreement was created through the
+guided UI rather than recovering or bypassing another workspace's access.
+GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.

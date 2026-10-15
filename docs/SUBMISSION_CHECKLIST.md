@@ -1,6 +1,6 @@
 # Paylock AI submission checklist
 
-Updated October 14, 2026. Deadline: November 12, 2026, 12:00 PM PST.
+Updated October 15, 2026. Deadline: November 12, 2026, 12:00 PM PST.
 Requirements: https://paypalaihackathon.devpost.com/
 
 ## Ready
@@ -12,11 +12,12 @@ Requirements: https://paypalaihackathon.devpost.com/
 - Automated checks for payment permissions, duplicate capture, evidence handling,
   workspace isolation, model fallback and the browser revision loop.
 - Clear buyer requirements, seller submission view and payment decision flow.
+- Hosted $5 PayPal sandbox authorization, live Nova browser verification and
+  manual capture completed October 15. Independent PayPal lookup confirmed
+  COMPLETED, USD 5.00. See `VERIFICATION.md` for the evidence record.
 
 ## Finish before submitting
 
-- Complete and independently verify a hosted PayPal authorization and capture
-  linked to live browser evidence. Keep its provider reference and evidence packet.
 - Publish the repository only with the owner's approval. It is currently private.
   Before publication, scan tracked files and Git history for credentials and
   personal data. Do not publish `.env`, databases, private judge codes or SSH keys.

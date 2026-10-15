@@ -208,3 +208,17 @@ instructions. Scanned 330 historical Git objects against six known credential
 patterns and private-key markers; no matching paths were found. This limited
 scan does not substitute for final publication review. The repository remains
 private and the video is not yet recorded or published.
+
+### October 15 — Complete the hosted evidence-to-payment flow
+
+The owner authorized the $5 milestone using Personal PayPal sandbox checkout.
+In the same judge session, the seller submission triggered live Nova browser
+verification of the public storefront. All four checks passed; manual buyer
+approval captured USD 5.00. A separate PayPal Payments v2 lookup confirmed
+COMPLETED with capture reference 5SF27921LV186002H. The $100 handoff was untouched.
+
+The previous agreement belonged to another isolated session, which explained
+why the owner could not find it. Created a fresh agreement through the guided
+UI and brought its PayPal button into view. The public repo and public demo
+video remain submission tasks; this payment test does not claim delegated
+automatic capture or a revision cycle on the fresh agreement.
