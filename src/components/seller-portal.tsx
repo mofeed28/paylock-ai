@@ -26,15 +26,19 @@ type SellerAgreement = Pick<
 export function SellerPortal({
   agreement: a,
   judgeDemo = false,
+  initialMilestone,
 }: {
   agreement: SellerAgreement;
   judgeDemo?: boolean;
+  initialMilestone?: string;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState(
-    a.milestones.find((m) =>
-      ["PENDING", "REVISION_REQUESTED"].includes(m.status),
-    )?.id || a.milestones[0].id,
+    a.milestones.find((m) => m.id === initialMilestone)?.id ||
+      a.milestones.find((m) =>
+        ["PENDING", "REVISION_REQUESTED"].includes(m.status),
+      )?.id ||
+      a.milestones[0].id,
   );
   const [content, setContent] = useState("");
   const [url, setUrl] = useState("");
@@ -91,7 +95,9 @@ export function SellerPortal({
       {judgeDemo && (
         <div className="seller-return">
           <Button asChild variant="outline">
-            <Link href={`/agreements/${a.id}`}>Back to buyer view →</Link>
+            <Link href={`/agreements/${a.id}?milestone=${m.id}`}>
+              Back to buyer view →
+            </Link>
           </Button>
           <span>Same agreement · same private demo session</span>
         </div>

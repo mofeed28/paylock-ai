@@ -222,3 +222,32 @@ why the owner could not find it. Created a fresh agreement through the guided
 UI and brought its PayPal button into view. The public repo and public demo
 video remain submission tasks; this payment test does not claim delegated
 automatic capture or a revision cycle on the fresh agreement.
+
+### October 18 — Make the payment workflow understandable without coaching
+
+The owner could not find PayPal authorization and mistook automatic-payment
+permission for funding. Moved the actual PayPal button into a prominent next-step
+card, ahead of browser evidence. The card follows the selected milestone through
+authorization, seller submission, revision, buyer review, pending capture and
+receipt. Optional automation is collapsed and cannot be enabled in the UI until
+the milestone is authorized. Existing server payment checks are unchanged.
+
+Added an obvious buyer/seller switch that preserves the selected milestone in
+both directions. Completed captures now replace stale approval prompts, and
+browser findings are scoped to the current submission. Reworked login and the
+judge guide around a concrete broken-link example, while clearly separating
+simulated walkthrough payments from the $5 PayPal sandbox path. Login, the guide
+and unavailable-page recovery now explain the eight-hour session and new-workspace
+behavior; no claim of persistent user accounts was added.
+
+Validation: 24 isolated tests passed locally and on Linux, including payment
+permissions, idempotency and workspace isolation. Local browser checks covered
+desktop and 390px layouts, the visible funding control, unavailable-agreement
+recovery and milestone-preserving role switches. The initial restricted local
+Chromium launch failed; the same suite passed with normal process permissions.
+
+The staged Linux production build and isolated HTTP checks passed before the
+release switch. Live desktop/mobile inspection confirmed the new guide and
+visible PayPal funding card. No additional PayPal authorization, capture, or
+paid model call was needed for this UI release. The existing October 15 capture
+remains the verified payment checkpoint.

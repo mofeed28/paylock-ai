@@ -1,12 +1,20 @@
 import Link from "next/link";
 export default function NotFound() {
   return (
-    <div className="page">
-      <div className="card empty">
-        <h1>This page isn’t here.</h1>
-        <p>The agreement or seller link may be incorrect.</p>
-        <Link className="text-link" href="/">
-          Return to your workspace →
+    <div className="page narrow">
+      <div className="card empty recovery-card">
+        <span className="eyebrow">LET’S GET YOU BACK TO YOUR WORKSPACE</span>
+        <h1>This page isn’t available in this session.</h1>
+        <p>
+          The link may be incorrect, or it may belong to an earlier demo
+          session. Signing in again starts a new private workspace; it does not
+          restore previous agreements.
+        </p>
+        <Link className="button button-primary" href="/agreements">
+          Open your current agreements →
+        </Link>
+        <Link className="text-link" href="/judge">
+          Start a fresh guided demo →
         </Link>
       </div>
     </div>

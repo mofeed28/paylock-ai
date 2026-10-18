@@ -32,6 +32,7 @@ import { Button } from "./ui/button";
 import { api, CopyButton, Notice, Status } from "./common";
 import { AgentPanel } from "./agent-panel";
 import { PayPalButton } from "./paypal-button";
+import { nextMilestoneStep } from "@/lib/workflow";
 import { extractHtml, WEBSITE_DEMO_TITLE } from "@/lib/website-sample";
 export function AgreementDetail({
   agreement: a,
@@ -78,9 +79,17 @@ export function AgreementDetail({
     a.aiSource === "demo" &&
     a.title === WEBSITE_DEMO_TITLE &&
     m.position === 0;
+  const nextStep = nextMilestoneStep({ ...m, hasSubmission: !!sub });
+  const latestRun = m.agentRuns.find((r) => r.submissionId === sub?.id);
+  const browserFixture = m.browserPolicyJson
+    ? !!JSON.parse(m.browserPolicyJson).fixture
+    : false;
   const html = sub ? extractHtml(sub.content) : null;
   const passedCount = review?.checklist.filter((c) => c.passed).length || 0;
   const missingEvidence = !!review && passedCount < criteria.length;
+  const evidenceComplete = m.browserPolicyJson
+    ? !!latestRun && ["VERIFIED", "CAPTURED"].includes(latestRun.status)
+    : !!review && !missingEvidence;
   const receipt = a.payments.find(
     (p) =>
       p.milestoneId === m.id &&
@@ -144,39 +153,56 @@ export function AgreementDetail({
           <Status value={a.status} />
         </div>
       </div>
-      <section
-        className="agreement-context"
-        aria-label="Agreement roles and access"
-      >
-        <div>
-          <strong>Requirements</strong>
-          <span>
-            {a.aiSource === "demo"
-              ? "Prepared example for this walkthrough"
-              : "Set and confirmed by you, the buyer"}
-          </span>
-        </div>
-        <div>
-          <strong>Who can see this?</strong>
-          <span>
-            {judgeDemo
-              ? "Only this demo session. Other judges have separate workspaces."
-              : "Buyer access; the private seller link opens this agreement’s submission view."}
-          </span>
-        </div>
-        <div>
-          <strong>Seller view</strong>
-          <span>
-            {judgeDemo
-              ? "Play the seller in this same session. No invitation has been sent."
-              : "Share the submission link with the seller. No invitation is sent automatically."}
-          </span>
-          <Link className="text-link" href={`/seller/${a.sellerToken}`}>
-            {judgeDemo ? "Try seller view" : "Open seller view"}{" "}
-            <ArrowRight size={14} />
+      <div className="role-switch">
+        <span>
+          <strong>You’re the buyer</strong> · Set requirements and decide
+          payment
+        </span>
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/seller/${a.sellerToken}?milestone=${m.id}`}>
+            Switch to seller view <ArrowRight size={15} />
           </Link>
-        </div>
-      </section>
+        </Button>
+      </div>
+      <details className="agreement-access">
+        <summary>Requirements, access & demo roles</summary>
+        <section
+          className="agreement-context"
+          aria-label="Agreement roles and access"
+        >
+          <div>
+            <strong>Requirements</strong>
+            <span>
+              {a.aiSource === "demo"
+                ? "Prepared example for this walkthrough"
+                : "Set and confirmed by you, the buyer"}
+            </span>
+          </div>
+          <div>
+            <strong>Who can see this?</strong>
+            <span>
+              {judgeDemo
+                ? "Only this demo session. Other judges have separate workspaces."
+                : "Buyer access; the private seller link opens this agreement’s submission view."}
+            </span>
+          </div>
+          <div>
+            <strong>Seller view</strong>
+            <span>
+              {judgeDemo
+                ? "Play the seller in this same session. No invitation has been sent."
+                : "Share the submission link with the seller. No invitation is sent automatically."}
+            </span>
+            <Link
+              className="text-link"
+              href={`/seller/${a.sellerToken}?milestone=${m.id}`}
+            >
+              {judgeDemo ? "Try seller view" : "Open seller view"}{" "}
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+        </section>
+      </details>
       <div className="environment-note">
         <span className="green-dot" />
         {practice
@@ -197,8 +223,11 @@ export function AgreementDetail({
         ].map((label, i) => {
           const complete =
             i === 0 ||
-            (i === 1 && m.paymentStatus !== "UNFUNDED") ||
-            (i === 2 && !!review && !missingEvidence) ||
+            (i === 1 &&
+              ["AUTHORIZED", "CAPTURE_PENDING", "CAPTURED"].includes(
+                m.paymentStatus,
+              )) ||
+            (i === 2 && evidenceComplete) ||
             (i === 3 && m.status === "RELEASED");
           return (
             <li className={complete ? "complete" : ""} key={label}>
@@ -230,6 +259,131 @@ export function AgreementDetail({
       </div>
       {error && <Notice error>{error}</Notice>}
       {success && <Notice>{success}</Notice>}
+      {tab === "Milestones" && (
+        <section
+          className={`next-action next-action-${nextStep}`}
+          aria-label="Your next step"
+        >
+          <div className="next-action-copy">
+            <span className="eyebrow">
+              YOUR NEXT STEP · MILESTONE {m.position + 1}
+            </span>
+            <h2>
+              {nextStep === "authorize"
+                ? `Authorize ${money(m.amount)} with ${practice ? "practice funds" : "PayPal"}`
+                : nextStep === "submit"
+                  ? "Now try the seller’s side"
+                  : nextStep === "revise"
+                    ? "Send the revised delivery"
+                    : nextStep === "receipt"
+                      ? `${money(m.amount)} payment recorded`
+                      : nextStep === "pending"
+                        ? "PayPal is processing the capture"
+                        : nextStep === "dispute"
+                          ? "Resolve the open dispute"
+                          : "Review the evidence, then decide"}
+            </h2>
+            <p>
+              {nextStep === "authorize"
+                ? "Start here. Authorizing funds and allowing automatic payment are separate steps. You can keep manual approval."
+                : nextStep === "submit"
+                  ? "Your funds are authorized. Switch roles to submit the work against the requirements you set."
+                  : nextStep === "revise"
+                    ? "The previous evidence stays in the record. Submit a corrected version for another review."
+                    : nextStep === "receipt"
+                      ? `${practice ? "Simulated payment" : "PayPal sandbox capture"} complete. The receipt and supporting evidence are saved with this agreement.`
+                      : nextStep === "pending"
+                        ? "Check the existing payment status before taking another action."
+                        : nextStep === "dispute"
+                          ? "Payment release is blocked while this internal dispute is open."
+                          : "Inspect the findings and screenshots. You can approve payment or request a specific revision."}
+            </p>
+            <span className="next-milestone">
+              {m.title} · {money(m.amount)}
+            </span>
+          </div>
+          <div className="next-action-control">
+            {m.paymentStatus === "UNFUNDED" &&
+              m.status !== "DISPUTED" &&
+              (practice ? (
+                <Button
+                  variant="outline"
+                  disabled={!!busy}
+                  onClick={() =>
+                    run(
+                      `milestones/${m.id}/practice-authorize`,
+                      {},
+                      "Authorizing…",
+                    )
+                  }
+                >
+                  <LockKeyhole size={15} />
+                  {busy || `Simulate authorization · ${money(m.amount)}`}
+                </Button>
+              ) : paypalClientId ? (
+                <>
+                  <p className="muted">
+                    Use a Personal PayPal sandbox account. This reserves test
+                    funds; it does not capture payment.
+                  </p>
+                  <PayPalButton
+                    key={m.id}
+                    milestoneId={m.id}
+                    clientId={paypalClientId}
+                    onSuccess={() => router.refresh()}
+                  />
+                </>
+              ) : (
+                <Notice>
+                  PayPal sandbox credentials are missing. Configure the
+                  integration to authorize this milestone.
+                </Notice>
+              ))}
+            {nextStep === "revise" && browserFixture ? (
+              <Button asChild>
+                <a href="#browser-evidence">
+                  Recheck the corrected sample <ArrowRight size={16} />
+                </a>
+              </Button>
+            ) : (
+              ["submit", "revise"].includes(nextStep) && (
+                <Button asChild>
+                  <Link href={`/seller/${a.sellerToken}?milestone=${m.id}`}>
+                    Switch to seller · submit work <ArrowRight size={16} />
+                  </Link>
+                </Button>
+              )
+            )}
+            {nextStep === "receipt" && (
+              <Button asChild>
+                <Link href="/ledger">
+                  View payment receipt <ArrowRight size={16} />
+                </Link>
+              </Button>
+            )}
+            {["review", "pending", "dispute"].includes(nextStep) && (
+              <Button asChild>
+                <a
+                  href={
+                    nextStep === "review"
+                      ? m.browserPolicyJson
+                        ? "#browser-evidence"
+                        : "#payment-decision"
+                      : "#payment-decision"
+                  }
+                >
+                  {nextStep === "review"
+                    ? "Inspect evidence"
+                    : nextStep === "pending"
+                      ? "Check payment status"
+                      : "Review dispute"}{" "}
+                  <ArrowRight size={16} />
+                </a>
+              </Button>
+            )}
+          </div>
+        </section>
+      )}
       {tab === "Milestones" && m.browserPolicyJson && (
         <AgentPanel
           key={m.id}
@@ -326,42 +480,6 @@ export function AgreementDetail({
                 </div>
                 <Status value={m.paymentStatus} />
               </div>
-              {m.paymentStatus === "UNFUNDED" &&
-                m.status !== "DISPUTED" &&
-                (practice ? (
-                  <Button
-                    variant="outline"
-                    disabled={!!busy}
-                    onClick={() =>
-                      run(
-                        `milestones/${m.id}/practice-authorize`,
-                        {},
-                        "Authorizing…",
-                      )
-                    }
-                  >
-                    <LockKeyhole size={15} />
-                    {busy || `Simulate authorization · ${money(m.amount)}`}
-                  </Button>
-                ) : paypalClientId ? (
-                  <>
-                    <p className="muted">
-                      Fund with PayPal · authorize this milestone now; capture
-                      only after approval.
-                    </p>
-                    <PayPalButton
-                      key={m.id}
-                      milestoneId={m.id}
-                      clientId={paypalClientId}
-                      onSuccess={() => router.refresh()}
-                    />
-                  </>
-                ) : (
-                  <Notice>
-                    PayPal sandbox credentials are missing. Configure the
-                    integration to authorize this milestone.
-                  </Notice>
-                ))}
               {m.authorizedAt && m.paymentStatus === "AUTHORIZED" && (
                 <p className="fine-print">
                   PayPal authorizations last up to 29 days; capture success is
@@ -438,7 +556,7 @@ export function AgreementDetail({
                       : "Share the seller link to collect work and supporting evidence."}
                   </p>
                   <Button variant="outline" asChild>
-                    <Link href={`/seller/${a.sellerToken}`}>
+                    <Link href={`/seller/${a.sellerToken}?milestone=${m.id}`}>
                       Open seller view <ArrowUpRight size={15} />
                     </Link>
                   </Button>
@@ -447,7 +565,7 @@ export function AgreementDetail({
             </section>
           </div>
           <aside>
-            <section className="card ai-panel">
+            <section className="card ai-panel" id="payment-decision">
               <div className="ai-panel-header">
                 <span className="ai-mark">
                   <Sparkles size={20} />
@@ -628,7 +746,9 @@ export function AgreementDetail({
                           </Button>
                         ) : (
                           <Button asChild variant="outline">
-                            <Link href={`/seller/${a.sellerToken}`}>
+                            <Link
+                              href={`/seller/${a.sellerToken}?milestone=${m.id}`}
+                            >
                               Open seller view
                             </Link>
                           </Button>
@@ -759,7 +879,10 @@ export function AgreementDetail({
                 {!judgeDemo && (
                   <CopyButton value={`/seller/${a.sellerToken}`} />
                 )}
-                <Link className="text-link" href={`/seller/${a.sellerToken}`}>
+                <Link
+                  className="text-link"
+                  href={`/seller/${a.sellerToken}?milestone=${m.id}`}
+                >
                   Open seller view <ArrowUpRight size={14} />
                 </Link>
               </div>

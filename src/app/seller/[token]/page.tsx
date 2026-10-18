@@ -7,8 +7,10 @@ import { buyerPage } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>;
+  searchParams: Promise<{ milestone?: string }>;
 }) {
   const token = (await params).token;
   if (token.length !== 64) notFound();
@@ -32,5 +34,11 @@ export default async function Page({
       )
       .map((t) => ({ id: t.id, message: t.message, createdAt: t.createdAt })),
   };
-  return <SellerPortal agreement={jsonData(safe)} judgeDemo={judgeDemo()} />;
+  return (
+    <SellerPortal
+      agreement={jsonData(safe)}
+      judgeDemo={judgeDemo()}
+      initialMilestone={(await searchParams).milestone}
+    />
+  );
 }

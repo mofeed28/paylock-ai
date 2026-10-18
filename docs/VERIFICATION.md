@@ -181,3 +181,19 @@ The previous test agreement was inaccessible after a new judge login, as
 expected with session isolation. A fresh agreement was created through the
 guided UI rather than recovering or bypassing another workspace's access.
 GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
+
+## Judge usability release — October 18, 2026
+
+- 24 isolated regression tests pass on Windows and the Linux host.
+- ESLint and TypeScript pass; staged production build and judge HTTP checks pass.
+- At 1440px and 390px, inspected the guide, login and funding card. No horizontal
+  document overflow on the checked pages.
+- The PayPal SDK button appears inside the milestone's next-step card, before
+  optional automation. No payment was executed during this UI check.
+- Buyer → seller → buyer navigation preserves the chosen milestone; tested with
+  the second milestone rather than relying on the first-item default.
+- An unavailable agreement gives session-isolation guidance and recovery links.
+- Browser results use the current submission, and completed captures no longer
+  display the stale pending-approval summary.
+- Deployed to the existing Lightsail instance with the persistent database and
+  environment unchanged; previous release retained for rollback.

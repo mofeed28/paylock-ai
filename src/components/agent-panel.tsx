@@ -15,7 +15,6 @@ import type {
 } from "@/lib/agent-contract";
 import { money, timestamp } from "@/lib/utils";
 import { Button } from "./ui/button";
-
 export function AgentPanel({
   milestone: m,
   practice,
@@ -29,7 +28,10 @@ export function AgentPanel({
 }) {
   const [confirmed, setConfirmed] = useState(false);
   const policy: BrowserPolicy = JSON.parse(m.browserPolicyJson!);
-  const latest = m.agentRuns[0];
+  const latest = m.agentRuns.find(
+    (r) => r.submissionId === m.submissions[0]?.id,
+  );
+  const captured = m.paymentStatus === "CAPTURED";
   const trace: AgentTrace[] = latest ? JSON.parse(latest.traceJson) : [];
   const result: Partial<AgentResult> = latest
     ? JSON.parse(latest.resultJson)
@@ -49,13 +51,17 @@ export function AgentPanel({
     ),
   ];
   return (
-    <section className="card agent-panel">
+    <section className="card agent-panel" id="browser-evidence">
       <div className="card-heading">
         <h3>
           <ScanEye size={19} /> Browser verification
         </h3>
         <span className="subtle-pill">
-          {latest ? latest.status.replaceAll("_", " ") : "READY TO INSPECT"}
+          {captured
+            ? "PAYMENT RECORDED"
+            : latest
+              ? latest.status.replaceAll("_", " ")
+              : "AWAITING SELLER"}
         </span>
       </div>
       <p className="agent-target">
@@ -66,24 +72,40 @@ export function AgentPanel({
       <div className="agent-layout">
         <div>
           <h2>
-            {!latest
-              ? "Let the agent inspect the submitted work."
-              : latest.status === "REVISION_NEEDED"
-                ? "A fix is needed before payment."
-                : latest.status === "CAPTURED"
-                  ? "Work verified. Payment recorded."
-                  : latest.status === "VERIFIED"
-                    ? "Checks passed. Your approval is next."
-                    : "Human review is needed."}
+            {captured
+              ? latest && ["VERIFIED", "CAPTURED"].includes(latest.status)
+                ? "Work verified. Payment recorded."
+                : "Payment recorded after manual review."
+              : !latest
+                ? m.submissions.length
+                  ? "The delivery is ready to inspect."
+                  : "Waiting for the seller’s delivery."
+                : latest.status === "REVISION_NEEDED"
+                  ? "A fix is needed before payment."
+                  : latest.status === "CAPTURED"
+                    ? "Work verified. Payment recorded."
+                    : latest.status === "VERIFIED"
+                      ? "Checks passed. Your approval is next."
+                      : "Human review is needed."}
           </h2>
           <p className="muted">
             {!latest
-              ? "The run will show whether a live AI model or the deterministic rehearsal selected the browser checks."
+              ? m.submissions.length
+                ? "Run browser verification to check the submitted website against your agreed requirements."
+                : "Submit the website from seller view. The agent will inspect it against your agreed requirements."
               : latest.planner === "live"
                 ? "Live AI chooses browser tools and uses their results to decide what to inspect next."
                 : "Deterministic rehearsal: browser tools run without AI planning. Connect a model to enable the live tool loop."}
           </p>
-          {latest && <p className="muted">{latest.summary}</p>}
+          {latest && (
+            <p className="muted">
+              {captured
+                ? "The payment receipt is saved with this evidence."
+                : active && latest.status === "VERIFIED"
+                  ? "Automatic payment permission is enabled. The recorded run below reflects the policy at the time it ran."
+                  : latest.summary}
+            </p>
+          )}
           {result.observations && (
             <div className="agent-results">
               {result.observations.map((o) => (
@@ -174,8 +196,15 @@ export function AgentPanel({
             </details>
           )}
         </div>
-        <div className="agent-policy">
-          <span className="eyebrow">BUYER PAYMENT PERMISSION</span>
+        <details className="agent-policy" open={active || undefined}>
+          <summary>
+            {captured
+              ? "Payment completed"
+              : active
+                ? "Automatic payment · enabled"
+                : "Optional · automatic payment"}
+          </summary>
+          <span className="eyebrow">AFTER PAYPAL AUTHORIZATION</span>
           <h3>
             {m.paymentStatus === "CAPTURED"
               ? "Capture completed"
@@ -183,6 +212,12 @@ export function AgentPanel({
                 ? `Exactly ${money(m.autoCaptureLimit)} · enabled`
                 : "Manual approval"}
           </h3>
+          {m.paymentStatus === "UNFUNDED" && (
+            <p className="policy-prerequisite">
+              First authorize this milestone using the payment button above.
+              This permission does not fund the milestone.
+            </p>
+          )}
           <p>
             One {practice ? "simulated" : "PayPal sandbox"} capture for this
             milestone, only after all four browser checks pass with no blocked
@@ -214,6 +249,7 @@ export function AgentPanel({
                   <input
                     type="checkbox"
                     checked={confirmed}
+                    disabled={m.paymentStatus !== "AUTHORIZED"}
                     onChange={(e) => setConfirmed(e.target.checked)}
                   />
                   I authorize one {practice ? "simulated" : "sandbox"} capture
@@ -221,7 +257,9 @@ export function AgentPanel({
                 </label>
                 <Button
                   variant="outline"
-                  disabled={!!busy || !confirmed}
+                  disabled={
+                    !!busy || !confirmed || m.paymentStatus !== "AUTHORIZED"
+                  }
                   onClick={async () => {
                     await run(
                       `milestones/${m.id}/agent-policy`,
@@ -240,7 +278,7 @@ export function AgentPanel({
             not prove checkout functionality. Sandbox automation also requires a
             live AI planner.
           </small>
-        </div>
+        </details>
       </div>
     </section>
   );

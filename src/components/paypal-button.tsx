@@ -103,6 +103,11 @@ export function PayPalButton({
   return (
     <div className="paypal-widget">
       <div ref={ref} />
+      <p className="fine-print">
+        PayPal opens a secure checkout window. If it does not appear, allow
+        pop-ups for this demo or use your regular browser. Stay in the same
+        session to keep your agreement.
+      </p>
       {error && <Notice error>{error}</Notice>}
     </div>
   );
