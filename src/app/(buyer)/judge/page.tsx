@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, ScanEye, ShieldCheck, ReceiptText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { accountsEnabled } from "@/lib/workspace";
 export default function Page() {
   return (
     <div className="page judge-experience">
@@ -113,15 +114,26 @@ export default function Page() {
       <section className="session-guide">
         <ShieldCheck size={22} />
         <div>
-          <h3>One session. Two roles. Your private workspace.</h3>
+          <h3>
+            {accountsEnabled()
+              ? "Two people. One shared agreement."
+              : "One session. Two roles. Your private workspace."}
+          </h3>
           <p>
-            Use “Switch to seller view” to submit work, then return to the buyer
-            to review it. No invitation is sent. Other judges cannot see your
-            agreements.
+            {accountsEnabled() ? (
+              "Create the agreement as the buyer, share its seller invitation, then approve the seller’s account. The seller submits work; you review and decide payment. The prepared walkthrough remains available for a quick example."
+            ) : (
+              <>
+                Use “Switch to seller view” to submit work, then return to the
+                buyer to review it. No invitation is sent. Other judges cannot
+                see your agreements.
+              </>
+            )}
           </p>
           <p>
-            Sessions last 8 hours. Signing in again creates a new workspace.
-            Download the evidence packet to keep a copy of your work.
+            {accountsEnabled()
+              ? "Your workspace stays with your account when you sign out. Agreements are private to the buyer and their approved seller."
+              : "Sessions last 8 hours. Signing in again creates a new workspace. Download the evidence packet to keep a copy of your work."}
           </p>
           <Link className="text-link" href="/agreements">
             Open your agreements <ArrowRight size={14} />

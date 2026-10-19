@@ -197,3 +197,19 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   display the stale pending-approval summary.
 - Deployed to the existing Lightsail instance with the persistent database and
   environment unchanged; previous release retained for rollback.
+
+
+## Permanent accounts — October 19, 2026
+
+- 26 isolated regression tests pass, including additive migration preservation of
+  existing agreements, milestones and completed payment receipts.
+- ESLint, TypeScript and the production Next.js build pass.
+- Legacy judge HTTP checks and the new account HTTP checks pass against the final
+  production build with isolated databases and no live provider calls.
+- Account checks cover enrollment-code enforcement, cross-origin rejection,
+  logout/relogin restoring the same workspace, buyer/seller isolation, private
+  invitation requests, buyer approval, seller submission, revocation, old-link
+  invalidation, password changes and revocation of other device sessions.
+- Browser inspection confirms local account creation and read-only buyer preview
+  retaining the second selected milestone. Hosted rollout is pending AWS CLI
+  reauthentication; no production schema or login mode has been switched yet.

@@ -1,0 +1,32 @@
+import { currentAccount } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { AccountControls } from "@/components/account-controls";
+export default async function Page() {
+  const user = await currentAccount();
+  if (!user) redirect("/login");
+  return (
+    <div className="page narrow">
+      <div className="page-heading">
+        <div>
+          <h1>Your account</h1>
+          <p>
+            {user.name} · {user.email}
+          </p>
+        </div>
+      </div>
+      <section className="card form-card">
+        <p>Account ID: {user.id}</p>
+        <p>
+          Your agreements and receipts remain available when you sign back in.
+          Signing out does not delete work.
+        </p>
+        <AccountControls />
+        <p className="fine-print">
+          Email verification and password-reset emails are not configured. Keep
+          your password safe; an email address alone does not prove account
+          ownership.
+        </p>
+      </section>
+    </div>
+  );
+}

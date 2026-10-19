@@ -18,6 +18,8 @@ for (const name of [
   "DEMO_MODE",
   "DEMO_ALLOWED_ORIGINS",
   "DEMO_WEBSITE_URL",
+  "AUTH_MODE",
+  "BETTER_AUTH_SECRET",
 ])
   env[name] = "";
 Object.assign(env, {

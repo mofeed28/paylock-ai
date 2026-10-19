@@ -17,6 +17,7 @@ const env = {
   NODE_ENV: "production",
   DATABASE_URL: database,
   DEMO_MODE: "judges",
+  AUTH_MODE: "",
   DEMO_EXPIRES_AT: new Date(Date.now() + 3600000).toISOString(),
   BUYER_ACCESS_KEY: accessCode,
   AI_PROVIDER: "openai",

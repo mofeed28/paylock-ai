@@ -1,10 +1,10 @@
 import { db } from "./db";
-import { demoAvailable, judgeDemo, workspaceId } from "./workspace";
+import { demoAvailable, hostedLimits, workspaceId } from "./workspace";
 
 // Persisted counters survive restarts; failed requests also consume a slot.
 // These are application usage limits, not an AWS account spending cap.
 export async function reserveModelCall(payload: unknown) {
-  if (!judgeDemo()) return;
+  if (!hostedLimits()) return;
   if (!demoAvailable()) throw new Error("Judge demo closed");
   if (Buffer.byteLength(JSON.stringify(payload), "utf8") > 40000)
     throw new Error("Demo model input limit reached");

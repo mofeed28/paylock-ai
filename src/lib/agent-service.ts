@@ -1,4 +1,4 @@
-import { workspaceId, judgeDemo } from "./workspace";
+import { workspaceId, hostedLimits } from "./workspace";
 import { z } from "zod";
 import { db } from "./db";
 import { ApiError } from "./auth";
@@ -32,7 +32,7 @@ export async function createAgentJob(input: unknown, demo = false) {
   const v = agentJobSchema.parse(input);
   const policy = browserPolicySchema.parse({ ...v, fixture: demo });
   allowedTarget(policy.targetUrl);
-  if (judgeDemo() && !demo) {
+  if (hostedLimits() && !demo) {
     const allowed = (process.env.DEMO_ALLOWED_ORIGINS || "")
       .split(",")
       .filter(Boolean);

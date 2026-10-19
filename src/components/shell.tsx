@@ -16,9 +16,11 @@ import {
 export function Shell({
   children,
   judgeDemo = false,
+  accounts = false,
 }: {
   children: React.ReactNode;
   judgeDemo?: boolean;
+  accounts?: boolean;
 }) {
   const path = usePathname();
   const seller = path.startsWith("/seller");
@@ -28,7 +30,7 @@ export function Shell({
   ];
   if (path === "/login") return <>{children}</>;
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${accounts ? "account-shell" : ""}`}>
       <aside className="sidebar">
         <Link href="/" className="brand">
           <span className="brand-mark">
@@ -61,6 +63,15 @@ export function Shell({
           {seller ? "BUYER WORKSPACE" : "YOUR WORKSPACE"}
         </span>
         <nav>
+          {accounts && (
+            <Link
+              href="/seller"
+              className={`nav-link ${seller ? "active" : ""}`}
+            >
+              <FolderOpen size={18} />
+              Seller inbox
+            </Link>
+          )}
           {links.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
@@ -71,6 +82,12 @@ export function Shell({
               {label}
             </Link>
           ))}
+          {accounts && (
+            <Link className="nav-link" href="/account">
+              <Settings2 size={18} />
+              Account
+            </Link>
+          )}
         </nav>
         <span className="nav-caption">DEMO & TOOLS</span>
         <nav>
@@ -132,6 +149,11 @@ export function Shell({
               </small>
             </div>
           </div>
+          {accounts && (
+            <Link className="nav-link" href="/account">
+              Account & sign out
+            </Link>
+          )}
         </div>
       </aside>
       <div className="app-main">

@@ -10,6 +10,10 @@ model DemoUsage {
   count Int @default(0)
 }
 model Agreement {
+  sellerUserId String?
+  sellerInviteExpiresAt DateTime?
+  sellerUser User? @relation(fields: [sellerUserId], references: [id])
+  accessRequests SellerAccessRequest[]
   workspaceId String @default("local")
   id String @id @default(cuid())
   title String
@@ -27,9 +31,84 @@ model Agreement {
   deadline String?
   createdAt DateTime @default(now())
   @@index([workspaceId])
+  @@index([sellerUserId])
   milestones Milestone[]
   payments PaymentEvent[]
   timeline TimelineEvent[]
+}
+
+model User {
+  id String @id
+  name String
+  email String @unique
+  emailVerified Boolean @default(false)
+  image String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sessions Session[]
+  accounts Account[]
+  sellerAgreements Agreement[]
+  accessRequests SellerAccessRequest[]
+}
+
+model Session {
+  id String @id
+  expiresAt DateTime
+  token String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+
+model Account {
+  id String @id
+  accountId String
+  providerId String
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken String?
+  refreshToken String?
+  idToken String?
+  accessTokenExpiresAt DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope String?
+  password String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
+  @@unique([providerId, accountId])
+}
+
+model Verification {
+  id String @id
+  identifier String
+  value String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([identifier])
+}
+
+model RateLimit {
+  id String @id
+  key String @unique
+  count Int
+  lastRequest BigInt
+}
+
+model SellerAccessRequest {
+  id String @id @default(cuid())
+  agreementId String
+  agreement Agreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status String @default("PENDING")
+  createdAt DateTime @default(now())
+  @@unique([agreementId, userId])
 }
 model Milestone {
   id String @id @default(cuid())

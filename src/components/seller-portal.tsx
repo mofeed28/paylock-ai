@@ -27,10 +27,14 @@ export function SellerPortal({
   agreement: a,
   judgeDemo = false,
   initialMilestone,
+  ownerPreview = false,
+  accounts = false,
 }: {
   agreement: SellerAgreement;
   judgeDemo?: boolean;
   initialMilestone?: string;
+  ownerPreview?: boolean;
+  accounts?: boolean;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState(
@@ -50,6 +54,7 @@ export function SellerPortal({
     ? (JSON.parse(m.browserPolicyJson).targetUrl as string)
     : "";
   const blocked =
+    ownerPreview ||
     !["PENDING", "REVISION_REQUESTED"].includes(m.status) ||
     m.paymentStatus === "CAPTURE_PENDING";
   async function submit(e: React.FormEvent) {
@@ -64,7 +69,9 @@ export function SellerPortal({
         url: approvedUrl || url,
       });
       setSuccess(
-        "Work submitted. Return to buyer view to see the review, any revision request, and the payment status.",
+        accounts
+          ? "Work submitted. The buyer can now review it. Refresh this page to see their decision."
+          : "Work submitted. Return to buyer view to see the review, any revision request, and the payment status.",
       );
       setContent("");
       setUrl("");
@@ -88,18 +95,20 @@ export function SellerPortal({
         <Status value={a.paymentMode} />
       </div>
       <Notice>
-        {judgeDemo
-          ? "You are testing the seller’s side in your private demo session. The buyer set the requirements below. Submit evidence here, then switch back to review it."
-          : `Submit evidence for ${a.sellerEmail} against the buyer’s requirements. Payment approval remains with the buyer.`}
+        {ownerPreview
+          ? "You are previewing the seller’s view. Share the invitation and approve a separate seller account to receive submissions."
+          : judgeDemo
+            ? "You are testing the seller’s side in your private demo session. The buyer set the requirements below. Submit evidence here, then switch back to review it."
+            : `Submit evidence for ${a.sellerEmail} against the buyer’s requirements. Payment approval remains with the buyer.`}
       </Notice>
-      {judgeDemo && (
+      {(judgeDemo || ownerPreview) && (
         <div className="seller-return">
           <Button asChild variant="outline">
             <Link href={`/agreements/${a.id}?milestone=${m.id}`}>
               Back to buyer view →
             </Link>
           </Button>
-          <span>Same agreement · same private demo session</span>
+          <span>Same agreement · same selected milestone</span>
         </div>
       )}
       <div className="form-layout">
@@ -144,11 +153,13 @@ export function SellerPortal({
           </div>
           {blocked ? (
             <Notice>
-              {m.status === "IN_REVIEW"
-                ? "Your submission is awaiting buyer review. A new version can be submitted if the buyer requests a revision."
-                : m.status === "RELEASED"
-                  ? "This milestone is complete and its payment has been released."
-                  : "This milestone is in dispute. Wait for the buyer to resolve it."}
+              {ownerPreview
+                ? "Buyer preview is read-only. Only your approved seller can submit evidence."
+                : m.status === "IN_REVIEW"
+                  ? "Your submission is awaiting buyer review. A new version can be submitted if the buyer requests a revision."
+                  : m.status === "RELEASED"
+                    ? "This milestone is complete and its payment has been released."
+                    : "This milestone is in dispute. Wait for the buyer to resolve it."}
             </Notice>
           ) : (
             <>

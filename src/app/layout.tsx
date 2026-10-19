@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Shell } from "@/components/shell";
 import "./globals.css";
-import { judgeDemo } from "@/lib/workspace";
+import { accountsEnabled, judgeDemo } from "@/lib/workspace";
 export const metadata: Metadata = {
   title: "Paylock AI — Work agreed. Payment earned.",
   description:
@@ -16,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Shell judgeDemo={judgeDemo()}>{children}</Shell>
+        <Shell judgeDemo={judgeDemo()} accounts={accountsEnabled()}>
+          {children}
+        </Shell>
       </body>
     </html>
   );

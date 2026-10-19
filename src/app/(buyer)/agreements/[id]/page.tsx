@@ -1,4 +1,4 @@
-import { judgeDemo } from "@/lib/workspace";
+import { accountsEnabled, judgeDemo } from "@/lib/workspace";
 import { notFound } from "next/navigation";
 import { getAgreement, jsonData } from "@/lib/data";
 import { AgreementDetail } from "@/components/agreement-detail";
@@ -16,6 +16,7 @@ export default async function Page({
     <AgreementDetail
       agreement={jsonData(a)}
       judgeDemo={judgeDemo()}
+      accounts={accountsEnabled()}
       initialMilestone={(await searchParams).milestone}
       paypalClientId={
         paypalConfigured() ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "" : ""

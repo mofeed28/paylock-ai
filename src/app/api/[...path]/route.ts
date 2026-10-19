@@ -10,8 +10,15 @@ import {
   serialized,
   session,
   buyerWorkspace,
+  currentAccount,
 } from "@/lib/auth";
-import { demoAvailable, judgeDemo, inWorkspace } from "@/lib/workspace";
+import {
+  accountsEnabled,
+  demoAvailable,
+  judgeDemo,
+  inWorkspace,
+} from "@/lib/workspace";
+import { requestSellerAccess, manageSellerAccess } from "@/lib/seller-access";
 import { generateAgreementMilestones } from "@/lib/ai";
 import { briefSchema, submissionSchema } from "@/lib/schema";
 import {
@@ -107,6 +114,7 @@ async function handle(
     if (text.length > 50000) throw new ApiError(413, "Request too large.");
     const body = text ? JSON.parse(text) : {};
     if (route === "login") {
+      if (accountsEnabled()) throw new ApiError(404, "Use account sign-in.");
       const key = z.object({ key: z.string().max(512) }).parse(body).key;
       if (
         !process.env.BUYER_ACCESS_KEY ||
@@ -122,19 +130,39 @@ async function handle(
       });
       return NextResponse.json({ ok: true });
     }
+    if (
+      accountsEnabled() &&
+      path[0] === "seller" &&
+      path[2] === "request-access"
+    ) {
+      const user = await currentAccount();
+      if (!user) throw new ApiError(401, "Sign in to request seller access.");
+      return NextResponse.json(
+        await serialized(() => requestSellerAccess(path[1], user.id)),
+      );
+    }
     if (path[0] === "seller" && path[2] === "submit") {
       const input = submissionSchema
         .extend({ milestoneId: idSchema })
         .parse(body);
       const agreement = await db.agreement.findUnique({
         where: { sellerToken: path[1] },
-        select: { workspaceId: true },
+        select: { workspaceId: true, sellerUserId: true },
       });
       if (
         !agreement ||
         (judgeDemo() && agreement.workspaceId !== (await buyerWorkspace()))
       )
         throw new ApiError(404, "Seller link not found in this session.");
+      if (
+        accountsEnabled() &&
+        (!agreement.sellerUserId ||
+          agreement.sellerUserId !== (await currentAccount())?.id)
+      )
+        throw new ApiError(
+          403,
+          "Only the buyer-approved seller account can submit work.",
+        );
       const result = await inWorkspace(agreement.workspaceId, () =>
         serialized(() =>
           submitWork(input.milestoneId, path[1], input.content, input.url),
@@ -145,6 +173,24 @@ async function handle(
     await requireBuyer();
     const result = await inWorkspace((await buyerWorkspace())!, () =>
       serialized(async () => {
+        if (
+          accountsEnabled() &&
+          path[0] === "agreements" &&
+          path[2] === "seller-access"
+        ) {
+          const input = z
+            .object({
+              action: z.enum(["approve", "renew"]),
+              requestId: z.string().optional(),
+            })
+            .parse(body);
+          return manageSellerAccess(
+            idSchema.parse(path[1]),
+            (await buyerWorkspace())!,
+            input.action,
+            input.requestId,
+          );
+        }
         if (route === "ai/generate")
           return generateAgreementMilestones(briefSchema.parse(body));
         if (route === "agreements") return createAgreement(body);

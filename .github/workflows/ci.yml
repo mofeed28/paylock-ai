@@ -23,3 +23,4 @@ jobs:
       # Exercise the same env-loading launcher used by the hosted build.
       - run: node scripts/with-env.mjs .env node_modules/next/dist/bin/next build
       - run: npm run test:judge
+      - run: npm run test:accounts

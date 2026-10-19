@@ -1,4 +1,4 @@
-import { workspaceId, judgeDemo } from "./workspace";
+import { workspaceId, hostedLimits, accountsEnabled } from "./workspace";
 import { randomBytes } from "node:crypto";
 import { db } from "./db";
 import { ApiError } from "./auth";
@@ -19,16 +19,22 @@ import {
 export async function createAgreement(input: unknown, mode = paymentMode()) {
   const v = agreementSchema.parse(input);
   if (
-    judgeDemo() &&
+    hostedLimits() &&
     (await db.agreement.count({ where: { workspaceId: workspaceId() } })) >= 8
   )
     throw new ApiError(
       429,
       "This judge session has reached its eight-agreement limit.",
     );
+  const owner = accountsEnabled()
+    ? await db.user.findUniqueOrThrow({
+        where: { id: workspaceId().replace(/^account:/, "") },
+      })
+    : null;
   return db.agreement.create({
     data: {
       workspaceId: workspaceId(),
+      ...(owner ? { buyerName: owner.name, buyerEmail: owner.email } : {}),
       title: v.title,
       sellerEmail: v.sellerEmail,
       description: v.description,
@@ -38,6 +44,9 @@ export async function createAgreement(input: unknown, mode = paymentMode()) {
       aiSource: v.aiSource,
       riskFlags: JSON.stringify(v.plan.riskFlags),
       sellerToken: randomBytes(32).toString("hex"),
+      sellerInviteExpiresAt: accountsEnabled()
+        ? new Date(Date.now() + 7 * 86400000)
+        : null,
       milestones: {
         create: v.plan.milestones.map((m, position) => ({
           ...m,

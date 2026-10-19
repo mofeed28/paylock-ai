@@ -1,9 +1,10 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { agreementInclude, jsonData } from "@/lib/data";
 import { SellerPortal } from "@/components/seller-portal";
-import { judgeDemo } from "@/lib/workspace";
-import { buyerPage } from "@/lib/auth";
+import { accountsEnabled, judgeDemo } from "@/lib/workspace";
+import { buyerPage, currentAccount } from "@/lib/auth";
+import { SellerInvitation } from "@/components/seller-access";
 export const dynamic = "force-dynamic";
 export default async function Page({
   params,
@@ -13,6 +14,12 @@ export default async function Page({
   searchParams: Promise<{ milestone?: string }>;
 }) {
   const token = (await params).token;
+  const milestone = (await searchParams).milestone;
+  const account = await currentAccount();
+  if (accountsEnabled() && !account)
+    redirect(
+      `/login?next=${encodeURIComponent(`/seller/${token}${milestone && /^[a-zA-Z0-9_-]+$/.test(milestone) ? `?milestone=${milestone}` : ""}`)}`,
+    );
   if (token.length !== 64) notFound();
   const a = await db.agreement.findUnique({
     where: { sellerToken: token },
@@ -20,6 +27,22 @@ export default async function Page({
   });
   if (!a) notFound();
   if (judgeDemo() && a.workspaceId !== (await buyerPage())) notFound();
+  const ownerPreview = !!account && a.workspaceId === `account:${account.id}`;
+  if (accountsEnabled() && !ownerPreview && a.sellerUserId !== account?.id) {
+    if (
+      !a.workspaceId.startsWith("account:") ||
+      !a.sellerInviteExpiresAt ||
+      a.sellerInviteExpiresAt <= new Date()
+    )
+      notFound();
+    return (
+      <SellerInvitation
+        token={token}
+        userId={account!.id}
+        status={a.accessRequests.find((r) => r.userId === account!.id)?.status}
+      />
+    );
+  }
   const safe = {
     id: a.id,
     title: a.title,
@@ -38,6 +61,8 @@ export default async function Page({
     <SellerPortal
       agreement={jsonData(safe)}
       judgeDemo={judgeDemo()}
+      ownerPreview={ownerPreview}
+      accounts={accountsEnabled()}
       initialMilestone={(await searchParams).milestone}
     />
   );

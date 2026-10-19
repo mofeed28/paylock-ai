@@ -33,17 +33,20 @@ import { api, CopyButton, Notice, Status } from "./common";
 import { AgentPanel } from "./agent-panel";
 import { PayPalButton } from "./paypal-button";
 import { nextMilestoneStep } from "@/lib/workflow";
+import { SellerAccess } from "./seller-access";
 import { extractHtml, WEBSITE_DEMO_TITLE } from "@/lib/website-sample";
 export function AgreementDetail({
   agreement: a,
   initialMilestone,
   paypalClientId,
   judgeDemo = false,
+  accounts = false,
 }: {
   agreement: AgreementView;
   initialMilestone?: string;
   paypalClientId: string;
   judgeDemo?: boolean;
+  accounts?: boolean;
 }) {
   const router = useRouter();
   const [selected, setSelected] = useState(
@@ -160,10 +163,12 @@ export function AgreementDetail({
         </span>
         <Button asChild variant="outline" size="sm">
           <Link href={`/seller/${a.sellerToken}?milestone=${m.id}`}>
-            Switch to seller view <ArrowRight size={15} />
+            {accounts ? "Preview seller view" : "Switch to seller view"}{" "}
+            <ArrowRight size={15} />
           </Link>
         </Button>
       </div>
+      {accounts && <SellerAccess agreement={a} milestone={m.id} />}
       <details className="agreement-access">
         <summary>Requirements, access & demo roles</summary>
         <section
@@ -183,7 +188,9 @@ export function AgreementDetail({
             <span>
               {judgeDemo
                 ? "Only this demo session. Other judges have separate workspaces."
-                : "Buyer access; the private seller link opens this agreement’s submission view."}
+                : accounts
+                  ? "Your buyer account and the seller account you approve. Agreements are not publicly listed."
+                  : "Buyer access; the private seller link opens this agreement’s submission view."}
             </span>
           </div>
           <div>
@@ -272,9 +279,13 @@ export function AgreementDetail({
               {nextStep === "authorize"
                 ? `Authorize ${money(m.amount)} with ${practice ? "practice funds" : "PayPal"}`
                 : nextStep === "submit"
-                  ? "Now try the seller’s side"
+                  ? accounts
+                    ? "Ready for your seller’s delivery"
+                    : "Now try the seller’s side"
                   : nextStep === "revise"
-                    ? "Send the revised delivery"
+                    ? accounts
+                      ? "Waiting for the seller’s revision"
+                      : "Send the revised delivery"
                     : nextStep === "receipt"
                       ? `${money(m.amount)} payment recorded`
                       : nextStep === "pending"
@@ -287,9 +298,13 @@ export function AgreementDetail({
               {nextStep === "authorize"
                 ? "Start here. Authorizing funds and allowing automatic payment are separate steps. You can keep manual approval."
                 : nextStep === "submit"
-                  ? "Your funds are authorized. Switch roles to submit the work against the requirements you set."
+                  ? accounts
+                    ? "Your funds are authorized. Your approved seller can now submit evidence against your requirements."
+                    : "Your funds are authorized. Switch roles to submit the work against the requirements you set."
                   : nextStep === "revise"
-                    ? "The previous evidence stays in the record. Submit a corrected version for another review."
+                    ? accounts
+                      ? "The previous evidence stays in the record. Your seller can submit a corrected version from their inbox."
+                      : "The previous evidence stays in the record. Submit a corrected version for another review."
                     : nextStep === "receipt"
                       ? `${practice ? "Simulated payment" : "PayPal sandbox capture"} complete. The receipt and supporting evidence are saved with this agreement.`
                       : nextStep === "pending"
@@ -348,8 +363,17 @@ export function AgreementDetail({
             ) : (
               ["submit", "revise"].includes(nextStep) && (
                 <Button asChild>
-                  <Link href={`/seller/${a.sellerToken}?milestone=${m.id}`}>
-                    Switch to seller · submit work <ArrowRight size={16} />
+                  <Link
+                    href={
+                      accounts
+                        ? "#seller-access"
+                        : `/seller/${a.sellerToken}?milestone=${m.id}`
+                    }
+                  >
+                    {accounts
+                      ? "Manage seller invitation"
+                      : "Switch to seller · submit work"}{" "}
+                    <ArrowRight size={16} />
                   </Link>
                 </Button>
               )
@@ -863,30 +887,34 @@ export function AgreementDetail({
                 </div>
               )}
             </section>
-            <section className="card share-card">
-              <MessageSquare size={20} />
-              <h3>
-                {judgeDemo
-                  ? "Next: try the seller’s side"
-                  : "Seller submission link"}
-              </h3>
-              <p>
-                {judgeDemo
-                  ? "Open the seller view to submit work, then return here to review it. This link works only in your current demo session."
-                  : "Anyone with this private link can see the submission view and submit work. Share it directly with your seller."}
-              </p>
-              <div className="button-row">
-                {!judgeDemo && (
-                  <CopyButton value={`/seller/${a.sellerToken}`} />
-                )}
-                <Link
-                  className="text-link"
-                  href={`/seller/${a.sellerToken}?milestone=${m.id}`}
-                >
-                  Open seller view <ArrowUpRight size={14} />
-                </Link>
-              </div>
-            </section>
+            {!accounts && (
+              <section className="card share-card">
+                <MessageSquare size={20} />
+                <h3>
+                  {judgeDemo
+                    ? "Next: try the seller’s side"
+                    : "Seller submission link"}
+                </h3>
+                <p>
+                  {judgeDemo
+                    ? "Open the seller view to submit work, then return here to review it. This link works only in your current demo session."
+                    : accounts
+                      ? "Share the invitation with your seller, then approve their account above. Only that account can submit work."
+                      : "Anyone with this private link can see the submission view and submit work. Share it directly with your seller."}
+                </p>
+                <div className="button-row">
+                  {!judgeDemo && (
+                    <CopyButton value={`/seller/${a.sellerToken}`} />
+                  )}
+                  <Link
+                    className="text-link"
+                    href={`/seller/${a.sellerToken}?milestone=${m.id}`}
+                  >
+                    Open seller view <ArrowUpRight size={14} />
+                  </Link>
+                </div>
+              </section>
+            )}
           </aside>
         </div>
       ) : tab === "Activity" ? (

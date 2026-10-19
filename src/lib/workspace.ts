@@ -1,10 +1,14 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
 const context = new AsyncLocalStorage<string>();
-export const judgeDemo = () => process.env.DEMO_MODE === "judges";
+export const accountsEnabled = () => process.env.AUTH_MODE === "accounts";
+export const hostedLimits = () =>
+  process.env.DEMO_MODE === "judges" || accountsEnabled();
+export const judgeDemo = () =>
+  process.env.DEMO_MODE === "judges" && !accountsEnabled();
 export function workspaceId() {
   const id = context.getStore();
-  if (judgeDemo() && !id) throw new Error("Judge workspace context required");
+  if (hostedLimits() && !id) throw new Error("Workspace context required");
   return id || "local";
 }
 export function inWorkspace<T>(id: string, action: () => T): T {

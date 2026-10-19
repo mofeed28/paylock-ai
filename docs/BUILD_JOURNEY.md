@@ -251,3 +251,28 @@ release switch. Live desktop/mobile inspection confirmed the new guide and
 visible PayPal funding card. No additional PayPal authorization, capture, or
 paid model call was needed for this UI release. The existing October 15 capture
 remains the verified payment checkpoint.
+
+
+### October 18 — Replace disposable access with permanent accounts
+
+The owner asked for a usable product beyond eight-hour judge sessions. Added an
+optional permanent private-beta account mode with Better Auth, durable account
+workspace IDs, password changes and revocable database sessions. Existing judge
+agreements and payment receipts remain untouched; unverified emails cannot claim
+them. No domain or email sender exists yet, so the UI is explicit that email
+verification and password-reset mail are unavailable.
+
+Seller participation now uses an expiring invitation, a signed-in access request,
+and explicit buyer approval of that account ID. Invitation holders cannot read
+the agreement before approval. The approved seller has a persistent inbox and
+submission permissions; buyer preview is read-only and retains the milestone.
+Revocation invalidates the invitation without removing delivered work. Existing
+PayPal sandbox and AI budget safeguards remain in force. See ACCOUNTS.md for the
+rollout and remaining commercial-production requirements.
+
+
+October 19 validation: all 26 tests, lint, typecheck, production build and both
+account/judge HTTP suites pass locally. Deployment preparation includes an online
+SQLite backup and a hash comparison of every pre-existing column in all seven
+business-data tables. The first upload could not connect to SSH; AWS CLI login had expired. Hosted activation awaits renewed AWS
+access. No old account, agreement or receipt has been silently reassigned.

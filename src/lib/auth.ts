@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual, randomBytes } from "node:crypto";
-import { demoAvailable, judgeDemo } from "./workspace";
+import { accountsEnabled, demoAvailable, judgeDemo } from "./workspace";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 export class ApiError extends Error {
@@ -41,6 +41,10 @@ export function sessionWorkspace(value: string): string | null {
   return equal(sig, sign(`${expiry}.${workspace}`)) ? workspace : null;
 }
 export async function buyerWorkspace(): Promise<string | null> {
+  if (accountsEnabled()) {
+    const user = await currentAccount();
+    return user ? `account:${user.id}` : null;
+  }
   if (!demoAvailable()) return null;
   if (!process.env.BUYER_ACCESS_KEY) {
     const h = await headers();
@@ -53,6 +57,14 @@ export async function buyerWorkspace(): Promise<string | null> {
   }
   const value = (await cookies()).get("paylock-buyer")?.value || "";
   return sessionWorkspace(value);
+}
+export async function currentAccount() {
+  if (!accountsEnabled()) return null;
+  const { accountAuth } = await import("./account-auth");
+  return (
+    (await accountAuth().api.getSession({ headers: await headers() }))?.user ??
+    null
+  );
 }
 export async function isBuyer() {
   return !!(await buyerWorkspace());
