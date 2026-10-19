@@ -272,7 +272,18 @@ rollout and remaining commercial-production requirements.
 
 
 October 19 validation: all 26 tests, lint, typecheck, production build and both
-account/judge HTTP suites pass locally. Deployment preparation includes an online
-SQLite backup and a hash comparison of every pre-existing column in all seven
-business-data tables. The first upload could not connect to SSH; AWS CLI login had expired. Hosted activation awaits renewed AWS
-access. No old account, agreement or receipt has been silently reassigned.
+account/judge HTTP suites pass locally and in the staged Linux release. Deployed
+implementation commit 3c111dd to the existing Lightsail instance on October 19.
+An online SQLite backup and hash comparison of every pre-existing column in all
+seven business-data tables verified preservation of 8 agreements, 20 milestones,
+8 submissions, 10 payment events, 33 timeline events, 7 agent runs and 5 usage rows.
+The existing USD 5 captured milestone remains intact. No old account, agreement
+or receipt has been silently reassigned.
+
+Hosted account creation and sign-in are visible over HTTPS. Anonymous access to
+private pages redirects to login, protected exports return 401, enrollment without
+the beta code returns 403, and the legacy shared-code login returns 404. The
+existing Bedrock and PayPal sandbox configuration is preserved. Restored the
+original SSH firewall allowlist after deployment; the previous release and a
+restricted database/environment backup remain on the host for rollback. No new
+cloud resources, paid model calls or payment captures were needed for this release.

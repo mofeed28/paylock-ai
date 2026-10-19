@@ -211,5 +211,19 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   invitation requests, buyer approval, seller submission, revocation, old-link
   invalidation, password changes and revocation of other device sessions.
 - Browser inspection confirms local account creation and read-only buyer preview
-  retaining the second selected milestone. Hosted rollout is pending AWS CLI
-  reauthentication; no production schema or login mode has been switched yet.
+  retaining the second selected milestone.
+- Deployed implementation commit 3c111dd to the existing Lightsail instance as
+  `accounts-20261019`. All 26 tests, lint, production build, and both isolated HTTP
+  suites passed on Linux before the release switch. GitHub CI run 39233322758 passed.
+- Backed up SQLite and the environment before applying the additive migration.
+  Compared hashes of all pre-existing columns in seven business-data tables:
+  all records preserved. Integrity and foreign-key checks pass; the existing
+  USD 5 milestone remains RELEASED / CAPTURED with its original capture reference.
+- Public HTTPS checks pass: login 200, anonymous account session null, export 401,
+  enrollment without a beta code 403, and legacy shared-code login 404. Next.js
+  streams the anonymous page redirect in a 200 response; browser inspection
+  confirms the final destination is `/login`.
+- Inspected hosted sign-in and account-creation screens. Bedrock remains selected,
+  PayPal remains sandbox, and the temporary deployment SSH allowance was removed.
+  No hosted user account was created during the deployment verification; the
+  complete account workflow was exercised against isolated server databases.
