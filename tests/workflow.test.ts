@@ -18,6 +18,7 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
     submitWork,
     authorize,
     createOrder,
+    recoverAuthorization,
     createAgreement,
   } = await import("../src/lib/service");
   const { fallbackPlan } = await import("../src/lib/ai");
@@ -192,6 +193,9 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
     process.env.PAYPAL_CLIENT_SECRET = "test-secret";
     process.env.PAYPAL_ENV = "sandbox";
     const realFetch = globalThis.fetch;
+    let orderStatus = "PAYER_ACTION_REQUIRED";
+    let orderAmount = "200.00";
+    let orderReference = sm.id;
     const requests: {
       url: string;
       body: Record<string, unknown>;
@@ -210,6 +214,20 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
       if (url.endsWith("/checkout/orders")) {
         assert.equal(body.intent, "AUTHORIZE");
         return Response.json({ id: "ORDER_TEST", status: "CREATED" });
+      }
+      if (url.endsWith("/checkout/orders/ORDER_TEST")) {
+        assert.equal(init?.method, "GET");
+        return Response.json({
+          id: "ORDER_TEST",
+          intent: "AUTHORIZE",
+          status: orderStatus,
+          purchase_units: [
+            {
+              reference_id: orderReference,
+              amount: { currency_code: "USD", value: orderAmount },
+            },
+          ],
+        });
       }
       if (url.endsWith("/ORDER_TEST/authorize"))
         return Response.json({
@@ -248,6 +266,8 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
       throw new Error(`Unexpected provider call: ${url}`);
     };
     try {
+      assert.equal((await recoverAuthorization(sm.id)).status, "NOT_STARTED");
+      assert.equal(requests.length, 0, "recovery never creates an order");
       await createOrder(sm.id);
       await createOrder(sm.id);
       assert.equal(
@@ -255,7 +275,46 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
         1,
       );
       await assert.rejects(authorize(sm.id, "ORDER_OTHER"), /does not belong/);
-      await authorize(sm.id, "ORDER_TEST");
+      assert.equal(
+        (await recoverAuthorization(sm.id)).status,
+        "AWAITING_APPROVAL",
+      );
+      assert.equal((await milestone(sm.id)).paymentStatus, "UNFUNDED");
+      orderStatus = "APPROVED";
+      orderAmount = "999.00";
+      await assert.rejects(recoverAuthorization(sm.id), /did not match/);
+      orderAmount = "200.00";
+      orderReference = "another-milestone";
+      await assert.rejects(recoverAuthorization(sm.id), /did not match/);
+      orderReference = sm.id;
+      const { inWorkspace } = await import("../src/lib/workspace");
+      await assert.rejects(
+        inWorkspace("unrelated-buyer", () => recoverAuthorization(sm.id)),
+        /not found/,
+      );
+      orderStatus = "VOIDED";
+      await assert.rejects(recoverAuthorization(sm.id), /can be authorized/);
+      assert.equal(
+        requests.filter((r) => r.url.endsWith("/authorize")).length,
+        0,
+      );
+      orderStatus = "APPROVED";
+      assert.equal((await recoverAuthorization(sm.id)).status, "AUTHORIZED");
+      assert.equal((await recoverAuthorization(sm.id)).status, "AUTHORIZED");
+      assert.equal(
+        requests.filter((r) => r.url.endsWith("/authorize")).length,
+        1,
+      );
+      assert.equal(
+        requests.filter((r) => r.url.endsWith("/capture")).length,
+        0,
+      );
+      assert.equal(
+        await db.paymentEvent.count({
+          where: { milestoneId: sm.id, type: "AUTHORIZE" },
+        }),
+        1,
+      );
       await submitWork(
         sm.id,
         sandbox.sellerToken,

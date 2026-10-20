@@ -253,3 +253,23 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   order, authorization, and completed capture; the USD 100 handoff stays UNFUNDED.
   Evidence packet and sanitized receipt are saved locally under the ignored
   `work/paypal-sandbox/` directory. No real money moved.
+
+
+## Checkout recovery — October 20, 2026
+
+- Added buyer-only `POST /api/paypal/recover-authorization` and an explicit UI
+  recovery control for an already-approved order whose SDK callback was lost.
+- Server reads the saved order and verifies ID, intent, single purchase unit,
+  milestone reference, currency and amount before authorizing. No capture or
+  replacement order is performed. Existing AUTHORIZED/CAPTURED states return
+  without another provider mutation.
+- All 26 tests, lint, typecheck, production build and both HTTP suites pass.
+  Mock-provider regression covers no-order, pending, mismatched amount/reference,
+  unrelated buyer, voided order, successful recovery and repeated recovery.
+  HTTP checks reject seller, stranger and anonymous callers and practice mode.
+- Local UI: recovery renders and reports no checkout without changing the
+  unfunded milestone. No additional PayPal transaction or model call was made.
+- Hosted activation is pending AWS CLI sign-in. The normal SDK popup/callback
+  path still needs a regular-browser check; this is a recovery path, not evidence
+  that the in-app browser supports checkout popups.
+- Provider contract reference: [PayPal Orders v2](https://developer.paypal.com/api/orders/v2).

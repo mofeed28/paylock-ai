@@ -271,6 +271,45 @@ export async function createOrder(id: string) {
   ]);
   return { id: raw.id };
 }
+// Recover a lost SDK callback using only this buyer's saved order. Never capture.
+export async function recoverAuthorization(id: string) {
+  const m = await milestone(id);
+  if (m.agreement.paymentMode !== "sandbox")
+    throw new ApiError(
+      409,
+      "Authorization recovery is only for PayPal sandbox agreements.",
+    );
+  if (m.paymentStatus === "AUTHORIZED" || m.paymentStatus === "CAPTURED")
+    return { status: m.paymentStatus };
+  assertOpen(m);
+  if (!m.orderId) return { status: "NOT_STARTED" };
+  const order = await paypal(
+    `/v2/checkout/orders/${encodeURIComponent(m.orderId)}`,
+    "GET",
+  );
+  const unit = order.purchase_units?.[0];
+  if (
+    order.id !== m.orderId ||
+    order.intent !== "AUTHORIZE" ||
+    order.purchase_units?.length !== 1 ||
+    unit?.reference_id !== m.id ||
+    unit.amount?.currency_code !== "USD" ||
+    Math.round(Number(unit.amount?.value) * 100) !== m.amount
+  )
+    throw new ApiError(
+      502,
+      "PayPal order details did not match this milestone. No authorization was recorded.",
+    );
+  if (["CREATED", "SAVED", "PAYER_ACTION_REQUIRED"].includes(order.status))
+    return { status: "AWAITING_APPROVAL" };
+  if (order.status !== "APPROVED")
+    throw new ApiError(
+      409,
+      "PayPal has not returned an order that can be authorized. Check the sandbox transaction before retrying.",
+    );
+  await authorize(m.id, m.orderId);
+  return { status: "AUTHORIZED" };
+}
 export async function authorize(id: string, orderId?: string) {
   const m = await milestone(id);
   assertOpen(m);

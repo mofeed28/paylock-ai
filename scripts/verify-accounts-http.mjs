@@ -179,6 +179,31 @@ try {
     (await post(`milestones/${m.id}/practice-authorize`, seller.cookie)).status,
     404,
   );
+  for (const cookie of [seller.cookie, stranger.cookie]) {
+    assert.equal(
+      (
+        await post("paypal/recover-authorization", cookie, {
+          milestoneId: m.id,
+        })
+      ).status,
+      404,
+      "another account cannot recover the buyer's PayPal authorization",
+    );
+  }
+  assert.equal(
+    (await post("paypal/recover-authorization", null, { milestoneId: m.id }))
+      .status,
+    401,
+  );
+  assert.equal(
+    (
+      await post("paypal/recover-authorization", buyer.cookie, {
+        milestoneId: m.id,
+      })
+    ).status,
+    409,
+    "practice agreements cannot enter PayPal recovery",
+  );
   const evidence = {
     milestoneId: m.id,
     content:

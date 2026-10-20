@@ -303,3 +303,23 @@ already-approved order's payer, merchant and amount, the normal authenticated
 Paylock API recorded authorization. The later capture completed through the UI.
 This is a verified account/evidence/payment integration test; the popup/callback
 experience still needs a separate regular-browser regression check.
+
+
+### October 20 — Recover an approved checkout inside Paylock
+
+Added an explicit recovery action beneath the PayPal button for a lost SDK
+callback. It reads only the current buyer's saved order, verifies its ID,
+AUTHORIZE intent, single purchase unit, milestone reference, USD amount and
+approval status, then uses the existing idempotent authorization path. It never
+creates another order or captures payment. No-order and pending-approval states
+have clear messages; mismatches and unsupported states leave balances unchanged.
+
+All 26 regression tests, lint, typecheck, production build and both HTTP suites
+pass. Additional assertions exercise mismatched amount/reference, foreign
+workspace access, unapproved/voided orders, duplicate recovery, and seller/
+anonymous route rejection. Local UI inspection verifies the recovery control
+and no-order message. The initial build's Prisma regeneration hit a Windows DLL
+lock from the existing preview; building with the unchanged generated client
+succeeded. Hosted deployment is pending AWS CLI reauthentication. This change
+recovers completed PayPal approvals; it does not claim to fix popup support in
+the in-app browser or complete the regular-browser SDK regression check.

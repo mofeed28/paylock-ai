@@ -23,6 +23,7 @@ import { generateAgreementMilestones } from "@/lib/ai";
 import { briefSchema, submissionSchema } from "@/lib/schema";
 import {
   authorize,
+  recoverAuthorization,
   capture,
   createAgreement,
   createOrder,
@@ -205,6 +206,8 @@ async function handle(
           );
         if (route === "paypal/create-order")
           return createOrder(idSchema.parse(body.milestoneId));
+        if (route === "paypal/recover-authorization")
+          return recoverAuthorization(idSchema.parse(body.milestoneId));
         if (route === "paypal/authorize-order")
           return authorize(
             idSchema.parse(body.milestoneId),
