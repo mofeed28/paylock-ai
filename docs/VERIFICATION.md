@@ -227,3 +227,29 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   PayPal remains sandbox, and the temporary deployment SSH allowance was removed.
   No hosted user account was created during the deployment verification; the
   complete account workflow was exercised against isolated server databases.
+
+## Hosted permanent-account transaction — October 20, 2026
+
+- Created separate buyer and seller test accounts through the hosted registration
+  UI. Credentials are local, Git-ignored test artifacts; no PayPal password was
+  reused as a Paylock password.
+- Buyer created agreement `cmvfoxeq80000pdhhvdvenuy8`, with a USD 5 website
+  verification milestone and a separate USD 100 unfunded handoff.
+- Seller could not view scope before requesting access. Buyer approved the
+  matching test account ID; seller then submitted the buyer-approved website.
+- Live planner run `cmvfp2bls000jpdhh6x05ltka` is VERIFIED, with all four browser
+  criteria passing and 11 recorded tool steps. Automatic capture was off.
+- The in-app PayPal popup did not expose a usable checkout window. An independent
+  Orders API lookup found the order already APPROVED and verified that payer and
+  payee matched the supplied sandbox accounts. Called Paylock's authenticated
+  authorization endpoint to record it. This checkpoint therefore does not claim
+  an uninterrupted SDK popup/callback flow in the in-app browser.
+- Buyer approved capture through the hosted decision dialog. PayPal Payments v2
+  independently confirms receipt `7GP376298T3177443`: COMPLETED, USD 5.00,
+  final_capture true, created `2026-10-20T15:48:55Z`. The earlier capture attempt
+  was blocked before execution by an approval-review usage limit; retrying after
+  the limit cleared produced one completed capture.
+- A fresh buyer sign-in restored the same agreement and receipt. Ledger shows
+  order, authorization, and completed capture; the USD 100 handoff stays UNFUNDED.
+  Evidence packet and sanitized receipt are saved locally under the ignored
+  `work/paypal-sandbox/` directory. No real money moved.

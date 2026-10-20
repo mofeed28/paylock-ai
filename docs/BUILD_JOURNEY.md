@@ -287,3 +287,19 @@ existing Bedrock and PayPal sandbox configuration is preserved. Restored the
 original SSH firewall allowlist after deployment; the previous release and a
 restricted database/environment backup remain on the host for rollback. No new
 cloud resources, paid model calls or payment captures were needed for this release.
+
+### October 20 — Verify a payment across permanent buyer and seller accounts
+
+Created dedicated hosted test accounts and exercised the private invitation flow:
+seller requests access, buyer approves the exact account, seller submits evidence,
+live AI checks all four website requirements, and the buyer approves a USD 5
+PayPal sandbox capture. Fresh sign-in preserved the workspace and receipt.
+Independent PayPal verification confirms capture `7GP376298T3177443` is COMPLETED.
+The USD 100 second milestone remains unfunded. Test credentials and evidence
+exports are kept outside Git in the ignored local test folder.
+
+The in-app checkout popup was not usable, so after independently verifying the
+already-approved order's payer, merchant and amount, the normal authenticated
+Paylock API recorded authorization. The later capture completed through the UI.
+This is a verified account/evidence/payment integration test; the popup/callback
+experience still needs a separate regular-browser regression check.
