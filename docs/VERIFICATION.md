@@ -299,3 +299,12 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   transaction still require the separate Platform app and external verification.
   UI status refresh is manual; payment operations recheck PayPal eligibility and
   permission. Onboarding webhooks and production activation are not claimed.
+- Deployed implementation `0efb85e` to `/opt/paylock/releases/sellers-20261021`.
+  All 27 tests, lint, production build and both HTTP suites passed on Linux.
+  The additive migration preserved hashes of all existing rows in eleven tables,
+  including accounts, sessions, seller access and payment records. Database and
+  environment backups and the previous release are retained for rollback.
+- Hosted Account page visibly shows Your PayPal connection / Not connected /
+  awaiting platform setup. Existing sign-in survived deployment. Public HTTPS,
+  anonymous access boundaries and the original USD 5 receipt checks pass.
+  Temporary SSH deployment access was removed and the original allowlist restored.

@@ -355,3 +355,10 @@ ignored local credential template and documented setup in PAYPAL_SELLERS.md.
 External seller onboarding and a seller-routed sandbox capture remain pending
 those credentials. All 27 tests, lint, typecheck, production build and both HTTP
 suites pass locally. A Windows build-cache reset resolved a cached compiler error.
+
+Deployed `0efb85e` as `sellers-20261021`; the same checks passed on Linux before
+switching. Backups and hash comparisons preserved eleven existing tables,
+including permanent accounts, active sessions and receipts. Hosted Account now
+shows the PayPal connection panel and its truthful awaiting-platform-setup state.
+Restored the original SSH allowlist after deployment. No new payment or model
+call was made; real seller onboarding is still awaiting Platform credentials.
