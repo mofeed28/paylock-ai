@@ -340,3 +340,17 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   identifies the platform as "Test Store" and lists payment, refund, transaction
   data and deduction permissions. The final Allow action awaits specific user
   confirmation; merchant readiness and a seller-routed capture remain unverified.
+
+### Seller permission and readiness — October 21, 2026
+
+- User explicitly approved the displayed permission scope; PayPal's Allow action
+  was submitted for the saved sandbox seller.
+- Hosted Check connection returned Connected for sandbox payments and PayPal
+  confirmed your account can receive sandbox payments. Real provider payloads
+  passed the tracking/merchant ownership checks, confirmed email, payment
+  eligibility and platform authorization/capture permission checks.
+- PayPal also offered profile completion after the grant. No additional identity
+  data was entered. Readiness here is the sandbox API result, not a claim that
+  live onboarding or all profile requirements are complete.
+- No new order, authorization or capture was created. Seller-routed transaction
+  testing and regular-browser Checkout callbacks remain outstanding.

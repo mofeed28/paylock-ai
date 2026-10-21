@@ -68,8 +68,12 @@ OAuth and partner onboarding scopes were verified; a nonexistent tracking lookup
 returned the expected 404 instead of the original merchant app's 403. The hosted
 seller Account page now offers Connect PayPal. The real onboarding redirect and
 saved seller sign-in were verified after correcting Base64 referral ID handling.
-Final PayPal permission authorization, verified merchant readiness and a
-seller-routed sandbox transaction remain pending. Complete these with distinct
+The user confirmed PayPal's final permission grant, and the hosted status check
+verified merchant identity, confirmed email, payment eligibility and the platform's
+authorization/capture permission. The saved seller now shows Connected for sandbox
+payments. PayPal also displayed a further profile-completion flow; no additional
+identity information was submitted. A seller-routed sandbox transaction remains
+pending. Complete transaction testing with distinct
 platform, seller and buyer sandbox accounts before presenting the feature as
 end-to-end verified. Also test normal Checkout SDK callbacks in a regular browser.
 

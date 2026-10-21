@@ -395,3 +395,14 @@ receipt remain intact; the temporary SSH rule was removed. Real onboarding now
 redirects to PayPal, and the saved test seller successfully signs in. Paused at
 the final permission grant because PayPal lists broader payment/refund/data
 permissions than the connection-reference consent. No new payment was made.
+
+### October 21 — Verify the connected sandbox seller
+
+With the user's explicit approval, submitted PayPal's Allow action for the saved
+sandbox seller. PayPal then offered additional profile completion. Without
+submitting any new identity information, ran Paylock's Check connection: both
+server-side merchant lookups passed ownership and permission checks, and the
+hosted account now shows Connected for sandbox payments. This verifies the actual
+merchant-status payload, confirmed email, payment eligibility and platform
+authorization/capture scope. No transaction was initiated; a new seller-routed
+authorization and capture remain the next end-to-end check.
