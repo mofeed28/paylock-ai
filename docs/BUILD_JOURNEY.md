@@ -320,6 +320,22 @@ workspace access, unapproved/voided orders, duplicate recovery, and seller/
 anonymous route rejection. Local UI inspection verifies the recovery control
 and no-order message. The initial build's Prisma regeneration hit a Windows DLL
 lock from the existing preview; building with the unchanged generated client
-succeeded. Hosted deployment is pending AWS CLI reauthentication. This change
+succeeded. This change
 recovers completed PayPal approvals; it does not claim to fix popup support in
 the in-app browser or complete the regular-browser SDK regression check.
+
+### October 21 — Deploy and verify checkout recovery
+
+Deployed implementation commit `d5178ea` to the existing Lightsail host after
+AWS sign-in was refreshed. All 26 tests, lint, production build and both HTTP
+suites passed on Linux. Backed up the database and environment before switching
+releases; hashes across seven business tables confirm existing records survived.
+The previous release remains available for rollback. No firewall changes or new
+cloud resources were needed.
+
+Verified the hosted buyer session and original USD 5 receipt survived the update.
+On the unfunded USD 100 milestone, the new recovery button correctly reports
+that no checkout exists and leaves funds unchanged. Public HTTPS and anonymous
+access checks pass; Bedrock and PayPal sandbox remain configured. No extra
+payment or model call was needed. Regular-browser SDK popup/callback verification
+remains outstanding.

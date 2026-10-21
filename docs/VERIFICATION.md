@@ -269,7 +269,16 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   HTTP checks reject seller, stranger and anonymous callers and practice mode.
 - Local UI: recovery renders and reports no checkout without changing the
   unfunded milestone. No additional PayPal transaction or model call was made.
-- Hosted activation is pending AWS CLI sign-in. The normal SDK popup/callback
-  path still needs a regular-browser check; this is a recovery path, not evidence
-  that the in-app browser supports checkout popups.
+- Deployed October 21 to `/opt/paylock/releases/recovery-20261021`. All 26 tests,
+  lint, production build and both HTTP suites passed on the host. Database backup,
+  integrity, foreign keys and hashes across seven business tables were checked;
+  existing agreements, evidence and payment records were preserved.
+- Hosted browser verification retained the signed-in buyer and original USD 5
+  receipt `7GP376298T3177443`. The recovery control on the unfunded USD 100
+  milestone reports "There is no checkout to recover yet" and leaves it
+  unauthorized. No additional transaction or model call was made.
+- Public HTTPS and anonymous access checks pass. Bedrock and sandbox configuration
+  remain intact. No firewall change was needed for this deployment.
+- The normal SDK popup/callback path still needs a regular-browser check; this
+  is a recovery path, not evidence that the in-app browser supports checkout popups.
 - Provider contract reference: [PayPal Orders v2](https://developer.paypal.com/api/orders/v2).
