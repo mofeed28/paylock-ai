@@ -362,3 +362,18 @@ including permanent accounts, active sessions and receipts. Hosted Account now
 shows the PayPal connection panel and its truthful awaiting-platform-setup state.
 Restored the original SSH allowlist after deployment. No new payment or model
 call was made; real seller onboarding is still awaiting Platform credentials.
+
+### October 21 — Activate the sandbox Platform app
+
+Validated the newly supplied credentials without logging their values. OAuth
+includes Partner Referrals and merchant-integration permissions; a nonexistent
+tracking lookup returns 404 instead of the original app's authorization failure.
+Activated the four Platform settings in the hosted environment and ignored local
+configuration, preserving the original merchant credentials and legacy receipts.
+Restarted the app and verified HTTPS, database integrity, access boundaries and
+the existing USD 5 capture. Restored and verified the original SSH allowlist.
+
+Signed in as the saved test seller and verified Account now offers Connect PayPal.
+Browser approval review requires action-time confirmation before starting the
+permission flow, so no referral, seller grant or additional payment was created.
+Real onboarding and seller-routed capture remain pending. Secrets stay ignored.

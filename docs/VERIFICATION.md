@@ -308,3 +308,17 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   awaiting platform setup. Existing sign-in survived deployment. Public HTTPS,
   anonymous access boundaries and the original USD 5 receipt checks pass.
   Temporary SSH deployment access was removed and the original allowlist restored.
+
+### Platform activation follow-up — October 21, 2026
+
+- New sandbox Platform OAuth succeeds and exposes partner-referral and merchant
+  integration scopes. Lookup of a nonexistent tracking ID returns 404; no referral
+  or payment was created by this read-only probe. This does not independently
+  establish that PayPal accepted the BN code for attribution.
+- Four Platform environment settings are active on the hosted demo; the original
+  merchant settings remain intact. Restart and HTTPS health checks passed, along
+  with database integrity, existing USD 5 capture and anonymous-access checks.
+- Signed in as the saved test seller and visibly verified Connect PayPal appears
+  on Account. Starting onboarding awaits action-time permission confirmation.
+  Actual referral redirect, merchant-status payload and seller capture are still
+  unverified. Temporary SSH access was removed and the original allowlist checked.
