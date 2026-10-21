@@ -28,6 +28,10 @@ const env = {
   PAYPAL_CLIENT_ID: "",
   PAYPAL_CLIENT_SECRET: "",
   NEXT_PUBLIC_PAYPAL_CLIENT_ID: "",
+  PAYPAL_PLATFORM_CLIENT_ID: "",
+  PAYPAL_PLATFORM_CLIENT_SECRET: "",
+  PAYPAL_PARTNER_MERCHANT_ID: "",
+  PAYPAL_PARTNER_BN_CODE: "",
   AWS_BEARER_TOKEN_BEDROCK: "",
   AWS_ACCESS_KEY_ID: "",
   AWS_SECRET_ACCESS_KEY: "",
@@ -129,6 +133,59 @@ try {
   const buyer = await signup("owner@example.com");
   const seller = await signup("worker@example.com");
   const stranger = await signup("other@example.com");
+  assert.equal(
+    (await post("paypal/seller/connect", null, { consent: true })).status,
+    401,
+  );
+  assert.equal((await post("paypal/seller/refresh", null)).status, 401);
+  assert.equal(
+    (
+      await post(
+        "paypal/seller/connect",
+        seller.cookie,
+        { consent: true },
+        { Origin: "https://other.example" },
+      )
+    ).status,
+    403,
+  );
+  assert.equal(
+    (await post("paypal/seller/connect", seller.cookie, { consent: false }))
+      .status,
+    400,
+  );
+  assert.equal(
+    (
+      await post("paypal/seller/connect", seller.cookie, {
+        consent: true,
+        userId: buyer.user.id,
+      })
+    ).status,
+    503,
+  );
+  assert.equal(
+    (
+      await post("paypal/seller/refresh", stranger.cookie, {
+        userId: seller.user.id,
+      })
+    ).status,
+    409,
+  );
+  assert.equal(
+    await db.payPalConnection.count(),
+    0,
+    "disabled platform never creates connections, even with forged account IDs",
+  );
+  assert.ok(
+    (
+      await (
+        await get(
+          "/account?merchantIdInPayPal=FAKE&permissionsGranted=true",
+          seller.cookie,
+        )
+      ).text()
+    ).includes("Your PayPal connection"),
+  );
   const created = await post("agreements", buyer.cookie, {
     title: "Private persistent agreement",
     sellerEmail: "worker@example.com",

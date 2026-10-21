@@ -19,7 +19,12 @@ test("account migration preserves pre-existing agreements, milestones and paymen
   const migrations = join(dir, "migrations");
   mkdirSync(migrations);
   for (const entry of readdirSync("prisma/migrations")) {
-    if (entry !== "20261018000000_persistent_accounts")
+    if (
+      ![
+        "20261018000000_persistent_accounts",
+        "20261021100000_seller_paypal",
+      ].includes(entry)
+    )
       cpSync(join("prisma/migrations", entry), join(migrations, entry), {
         recursive: true,
       });
@@ -55,12 +60,19 @@ test("account migration preserves pre-existing agreements, milestones and paymen
       join(migrations, "20261018000000_persistent_accounts"),
       { recursive: true },
     );
+    cpSync(
+      "prisma/migrations/20261021100000_seller_paypal",
+      join(migrations, "20261021100000_seller_paypal"),
+      { recursive: true },
+    );
     migrate();
     const saved = await db.agreement.findUniqueOrThrow({
       where: { id: "legacy" },
       include: { milestones: true, payments: true },
     });
     assert.equal(saved.workspaceId, "old-workspace");
+    assert.equal(saved.paymentRouting, "legacy");
+    assert.equal(saved.milestones[0].payeeMerchantId, null);
     assert.equal(
       saved.sellerUserId,
       null,

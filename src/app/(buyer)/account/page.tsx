@@ -1,6 +1,8 @@
 import { currentAccount } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AccountControls } from "@/components/account-controls";
+import { SellerPayPal } from "@/components/seller-paypal";
+import { sellerPayPalStatus } from "@/lib/seller-paypal";
 export default async function Page() {
   const user = await currentAccount();
   if (!user) redirect("/login");
@@ -27,6 +29,7 @@ export default async function Page() {
           ownership.
         </p>
       </section>
+      <SellerPayPal connection={await sellerPayPalStatus(user.id)} />
     </div>
   );
 }

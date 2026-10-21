@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getAgreement, jsonData } from "@/lib/data";
 import { AgreementDetail } from "@/components/agreement-detail";
 import { paypalConfigured } from "@/lib/paypal";
+import { platformConfigured } from "@/lib/paypal-platform";
 export default async function Page({
   params,
   searchParams,
@@ -19,7 +20,18 @@ export default async function Page({
       accounts={accountsEnabled()}
       initialMilestone={(await searchParams).milestone}
       paypalClientId={
-        paypalConfigured() ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "" : ""
+        a.paymentRouting === "seller"
+          ? platformConfigured()
+            ? process.env.PAYPAL_PLATFORM_CLIENT_ID || ""
+            : ""
+          : paypalConfigured()
+            ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || ""
+            : ""
+      }
+      paypalPartnerCode={
+        a.paymentRouting === "seller"
+          ? process.env.PAYPAL_PARTNER_BN_CODE
+          : undefined
       }
     />
   );

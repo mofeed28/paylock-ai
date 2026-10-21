@@ -19,6 +19,7 @@ import {
   inWorkspace,
 } from "@/lib/workspace";
 import { requestSellerAccess, manageSellerAccess } from "@/lib/seller-access";
+import { startSellerPayPal, refreshSellerPayPal } from "@/lib/seller-paypal";
 import { generateAgreementMilestones } from "@/lib/ai";
 import { briefSchema, submissionSchema } from "@/lib/schema";
 import {
@@ -114,6 +115,25 @@ async function handle(
     const text = await request.text();
     if (text.length > 50000) throw new ApiError(413, "Request too large.");
     const body = text ? JSON.parse(text) : {};
+    if (
+      route === "paypal/seller/connect" ||
+      route === "paypal/seller/refresh"
+    ) {
+      const user = await currentAccount();
+      if (!user)
+        throw new ApiError(401, "Sign in to connect your PayPal account.");
+      const result = await serialized(async () =>
+        route.endsWith("/connect")
+          ? startSellerPayPal(
+              user.id,
+              z.object({ consent: z.literal(true) }).parse(body).consent,
+            )
+          : refreshSellerPayPal(user.id),
+      );
+      return NextResponse.json(result, {
+        headers: { "Cache-Control": "no-store" },
+      });
+    }
     if (route === "login") {
       if (accountsEnabled()) throw new ApiError(404, "Use account sign-in.");
       const key = z.object({ key: z.string().max(512) }).parse(body).key;

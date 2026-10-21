@@ -35,6 +35,16 @@ export default async function Page() {
           Your buyer agreements →
         </Link>
       </div>
+      <div className="card form-card">
+        <h2>Where your payments go</h2>
+        <p>
+          Connect PayPal in your account before a buyer authorizes payment for a
+          new agreement.
+        </p>
+        <Link className="text-link" href="/account#paypal-connection">
+          Manage PayPal connection →
+        </Link>
+      </div>
       {!agreements.length && (
         <div className="card form-card">
           <h2>No seller agreements yet.</h2>

@@ -1,7 +1,14 @@
 import { db } from "./db";
 import { buyerPage } from "./auth";
 export const agreementInclude = {
-  sellerUser: { select: { id: true, name: true, email: true } },
+  sellerUser: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      paypalConnection: { select: { merchantId: true, status: true } },
+    },
+  },
   accessRequests: {
     include: { user: { select: { id: true, name: true, email: true } } },
     orderBy: { createdAt: "desc" as const },

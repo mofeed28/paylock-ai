@@ -20,16 +20,22 @@ declare global {
     paypal?: PayPalSDK;
   }
 }
-let sdkPromise: Promise<void> | undefined;
-function loadSDK(clientId: string) {
-  if (window.paypal) return Promise.resolve();
-  if (sdkPromise) return sdkPromise;
-  sdkPromise = new Promise<void>((resolve, reject) => {
+const sdkPromises = new Map<string, Promise<PayPalSDK>>();
+let sdkSequence = 0;
+function loadSDK(clientId: string, merchantId?: string, partnerCode?: string) {
+  const key = `${clientId}:${merchantId || ""}:${partnerCode || ""}`;
+  const existing = sdkPromises.get(key);
+  if (existing) return existing;
+  const namespace = `paylockPayPal${sdkSequence++}`;
+  const promise = new Promise<PayPalSDK>((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=authorize&components=buttons&disable-funding=credit,card`;
-    script.onload = () => resolve();
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(clientId)}&currency=USD&intent=authorize&components=buttons&disable-funding=credit,card${merchantId ? `&merchant-id=${encodeURIComponent(merchantId)}` : ""}`;
+    script.dataset.namespace = namespace;
+    if (partnerCode) script.dataset.partnerAttributionId = partnerCode;
+    script.onload = () =>
+      resolve((window as unknown as Record<string, PayPalSDK>)[namespace]);
     script.onerror = () => {
-      sdkPromise = undefined;
+      sdkPromises.delete(key);
       script.remove();
       reject(
         new Error(
@@ -39,15 +45,20 @@ function loadSDK(clientId: string) {
     };
     document.head.appendChild(script);
   });
-  return sdkPromise;
+  sdkPromises.set(key, promise);
+  return promise;
 }
 export function PayPalButton({
   milestoneId,
   clientId,
+  merchantId,
+  partnerCode,
   onSuccess,
 }: {
   milestoneId: string;
   clientId: string;
+  merchantId?: string;
+  partnerCode?: string;
   onSuccess: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -87,10 +98,10 @@ export function PayPalButton({
   useEffect(() => {
     let cancelled = false;
     let buttons: PayPalButtons | undefined;
-    loadSDK(clientId)
-      .then(async () => {
+    loadSDK(clientId, merchantId, partnerCode)
+      .then(async (sdk) => {
         if (cancelled || !ref.current) return;
-        buttons = window.paypal!.Buttons({
+        buttons = sdk.Buttons({
           style: {
             layout: "vertical",
             label: "paypal",
@@ -128,7 +139,7 @@ export function PayPalButton({
       cancelled = true;
       void buttons?.close().catch(() => {});
     };
-  }, [clientId, milestoneId]);
+  }, [clientId, milestoneId, merchantId, partnerCode]);
   return (
     <div className="paypal-widget">
       <div ref={ref} />

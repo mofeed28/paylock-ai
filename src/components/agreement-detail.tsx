@@ -39,12 +39,14 @@ export function AgreementDetail({
   agreement: a,
   initialMilestone,
   paypalClientId,
+  paypalPartnerCode,
   judgeDemo = false,
   accounts = false,
 }: {
   agreement: AgreementView;
   initialMilestone?: string;
   paypalClientId: string;
+  paypalPartnerCode?: string;
   judgeDemo?: boolean;
   accounts?: boolean;
 }) {
@@ -335,16 +337,41 @@ export function AgreementDetail({
                   <LockKeyhole size={15} />
                   {busy || `Simulate authorization · ${money(m.amount)}`}
                 </Button>
+              ) : a.paymentRouting === "seller" &&
+                (!a.sellerUser?.paypalConnection?.merchantId ||
+                  a.sellerUser.paypalConnection.status !== "READY" ||
+                  !paypalClientId) ? (
+                <Notice>
+                  {!a.sellerUserId
+                    ? "First approve the seller account using Seller access above."
+                    : !paypalClientId
+                      ? "Seller payments are awaiting PayPal platform setup by the demo operator."
+                      : "Ask your seller to open Account → PayPal connection and finish connecting. Then refresh this page."}{" "}
+                  Payment stays blocked until PayPal verifies the recipient.
+                </Notice>
               ) : paypalClientId ? (
                 <>
                   <p className="muted">
                     Use a Personal PayPal sandbox account. This reserves test
                     funds; it does not capture payment.
                   </p>
+                  <p className="fine-print">
+                    {a.paymentRouting === "seller"
+                      ? `Recipient: ${a.sellerUser?.name} · PayPal ${m.payeeMerchantId || a.sellerUser?.paypalConnection?.merchantId}`
+                      : "Legacy demo agreement: payments go to the configured test merchant, not the invited seller’s account."}
+                  </p>
                   <PayPalButton
                     key={m.id}
                     milestoneId={m.id}
                     clientId={paypalClientId}
+                    merchantId={
+                      a.paymentRouting === "seller"
+                        ? m.payeeMerchantId ||
+                          a.sellerUser?.paypalConnection?.merchantId ||
+                          undefined
+                        : undefined
+                    }
+                    partnerCode={paypalPartnerCode}
                     onSuccess={() => router.refresh()}
                   />
                 </>

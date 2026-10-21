@@ -26,6 +26,7 @@ model Agreement {
   currency String @default("USD")
   status String @default("ACTIVE")
   paymentMode String
+  paymentRouting String @default("legacy")
   aiSource String
   riskFlags String
   deadline String?
@@ -49,6 +50,21 @@ model User {
   accounts Account[]
   sellerAgreements Agreement[]
   accessRequests SellerAccessRequest[]
+  paypalConnection PayPalConnection?
+}
+
+model PayPalConnection {
+  userId String @id
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackingId String @unique
+  referralId String?
+  merchantId String? @unique
+  partnerClientId String
+  status String @default("PENDING")
+  checkedAt DateTime?
+  consentedAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Session {
@@ -124,6 +140,8 @@ model Milestone {
   dueDate String?
   aiRiskNotes String
   orderId String? @unique
+  payeeMerchantId String?
+  payeeUserId String?
   authorizationId String? @unique
   captureId String? @unique
   authorizedAt DateTime?

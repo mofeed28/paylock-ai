@@ -10,6 +10,8 @@ import {
   type AgentResult,
 } from "./agent-contract";
 import { paymentMode, paypal } from "./paypal";
+import { platformPayPal } from "./paypal-platform";
+import { verifiedSeller } from "./seller-paypal";
 import { money } from "./utils";
 import {
   WEBSITE_CRITERIA,
@@ -41,6 +43,7 @@ export async function createAgreement(input: unknown, mode = paymentMode()) {
       totalAmount: v.totalAmount,
       deadline: v.deadline,
       paymentMode: mode,
+      paymentRouting: owner && mode === "sandbox" ? "seller" : "legacy",
       aiSource: v.aiSource,
       riskFlags: JSON.stringify(v.plan.riskFlags),
       sellerToken: randomBytes(32).toString("hex"),
@@ -75,6 +78,36 @@ export async function milestone(id: string) {
   if (!m || m.agreement.workspaceId !== workspaceId())
     throw new ApiError(404, "Milestone not found.");
   return m;
+}
+async function paymentRecipient(m: Awaited<ReturnType<typeof milestone>>) {
+  if (m.agreement.paymentRouting !== "seller") return undefined;
+  const userId = m.agreement.sellerUserId;
+  if (!userId)
+    throw new ApiError(
+      409,
+      "Approve the seller account and ask them to connect PayPal before authorizing payment.",
+    );
+  if (
+    (m.orderId && !m.payeeMerchantId) ||
+    (m.payeeUserId && m.payeeUserId !== userId)
+  )
+    throw new ApiError(
+      409,
+      "The seller changed after checkout started. Existing payment recipients cannot be replaced.",
+    );
+  const merchantId = await verifiedSeller(userId);
+  if (m.payeeMerchantId && m.payeeMerchantId !== merchantId)
+    throw new ApiError(
+      409,
+      "The connected PayPal merchant does not match this payment’s saved recipient.",
+    );
+  return merchantId;
+}
+function paymentApi(merchantId: string | undefined) {
+  return merchantId
+    ? (path: string, method = "POST", body?: unknown, key?: string) =>
+        platformPayPal(path, method, body, key, merchantId)
+    : paypal;
 }
 function assertOpen(m: { status: string; paymentStatus: string }) {
   if (
@@ -224,9 +257,20 @@ export async function createOrder(id: string) {
       409,
       "Use the practice authorization action for this agreement.",
     );
+  const merchantId = await paymentRecipient(m);
   if (m.orderId) return { id: m.orderId };
+  // Pin before the provider call: a response loss must never retry this order
+  // against another seller, even if agreement access changes afterwards.
+  if (merchantId && !m.payeeMerchantId)
+    await db.milestone.update({
+      where: { id },
+      data: {
+        payeeMerchantId: merchantId,
+        payeeUserId: m.agreement.sellerUserId,
+      },
+    });
   const key = `order:${id}`;
-  const raw = await paypal(
+  const raw = await paymentApi(merchantId)(
     "/v2/checkout/orders",
     "POST",
     {
@@ -236,6 +280,7 @@ export async function createOrder(id: string) {
           reference_id: id,
           custom_id: id,
           description: m.title.slice(0, 127),
+          ...(merchantId ? { payee: { merchant_id: merchantId } } : {}),
           amount: { currency_code: "USD", value: (m.amount / 100).toFixed(2) },
         },
       ],
@@ -251,6 +296,11 @@ export async function createOrder(id: string) {
     key,
   );
   if (!raw.id) throw new ApiError(502, "PayPal did not return an order ID.");
+  if (merchantId && raw.purchase_units?.[0]?.payee?.merchant_id !== merchantId)
+    throw new ApiError(
+      502,
+      "PayPal did not confirm the intended seller. Checkout was not recorded; retry with the same seller.",
+    );
   await db.$transaction([
     db.paymentEvent.upsert({
       where: { operationKey: key },
@@ -283,7 +333,8 @@ export async function recoverAuthorization(id: string) {
     return { status: m.paymentStatus };
   assertOpen(m);
   if (!m.orderId) return { status: "NOT_STARTED" };
-  const order = await paypal(
+  const merchantId = await paymentRecipient(m);
+  const order = await paymentApi(merchantId)(
     `/v2/checkout/orders/${encodeURIComponent(m.orderId)}`,
     "GET",
   );
@@ -291,6 +342,7 @@ export async function recoverAuthorization(id: string) {
   if (
     order.id !== m.orderId ||
     order.intent !== "AUTHORIZE" ||
+    (merchantId && unit?.payee?.merchant_id !== merchantId) ||
     order.purchase_units?.length !== 1 ||
     unit?.reference_id !== m.id ||
     unit.amount?.currency_code !== "USD" ||
@@ -323,7 +375,28 @@ export async function authorize(id: string, orderId?: string) {
   if (!practice) {
     if (!orderId || orderId !== m.orderId)
       throw new ApiError(400, "Order does not belong to this milestone.");
-    const result = await paypal(
+    const merchantId = await paymentRecipient(m);
+    if (merchantId) {
+      const order = await paymentApi(merchantId)(
+        `/v2/checkout/orders/${encodeURIComponent(orderId)}`,
+        "GET",
+      );
+      const unit = order.purchase_units?.[0];
+      if (
+        order.id !== orderId ||
+        order.intent !== "AUTHORIZE" ||
+        order.purchase_units?.length !== 1 ||
+        unit?.payee?.merchant_id !== merchantId ||
+        unit.reference_id !== id ||
+        unit.amount?.currency_code !== "USD" ||
+        Math.round(Number(unit.amount?.value) * 100) !== m.amount
+      )
+        throw new ApiError(
+          502,
+          "The saved order does not match the seller and milestone. Authorization blocked.",
+        );
+    }
+    const result = await paymentApi(merchantId)(
       `/v2/checkout/orders/${encodeURIComponent(orderId)}/authorize`,
       "POST",
       {},
@@ -335,6 +408,7 @@ export async function authorize(id: string, orderId?: string) {
     if (
       !auth?.id ||
       auth.status !== "CREATED" ||
+      (merchantId && unit?.payee?.merchant_id !== merchantId) ||
       unit.reference_id !== id ||
       auth.amount?.currency_code !== "USD" ||
       Math.round(Number(auth.amount?.value) * 100) !== m.amount
@@ -442,12 +516,13 @@ export async function capture(id: string, reason: string, agentRunId?: string) {
   let captureId = `practice-cap-${id}`;
   let status = "COMPLETED";
   if (!practice) {
+    const merchantId = await paymentRecipient(m);
     const result = previous?.providerCaptureId
-      ? await paypal(
+      ? await paymentApi(merchantId)(
           `/v2/payments/captures/${encodeURIComponent(previous.providerCaptureId)}`,
           "GET",
         )
-      : await paypal(
+      : await paymentApi(merchantId)(
           `/v2/payments/authorizations/${encodeURIComponent(m.authorizationId!)}/capture`,
           "POST",
           {

@@ -339,3 +339,19 @@ that no checkout exists and leaves funds unchanged. Public HTTPS and anonymous
 access checks pass; Bedrock and PayPal sandbox remain configured. No extra
 payment or model call was needed. Regular-browser SDK popup/callback verification
 remains outstanding.
+
+### October 21 — Connect independent sellers to PayPal
+
+Added a permanent-account PayPal connection panel, consent-based Partner Referrals
+v2 onboarding, server-verified connection status, and seller-routed sandbox orders.
+Recipients are pinned before order creation and checked before authorization and
+capture. Old agreements preserve their original merchant integration and receipts.
+New agreements block payments until the approved seller is ready; they cannot
+silently fall back to the platform merchant.
+
+The current merchant app's read-only capability check returned 403 NOT_AUTHORIZED
+with no partner scopes. A separate Sandbox Platform app is required. Prepared an
+ignored local credential template and documented setup in PAYPAL_SELLERS.md.
+External seller onboarding and a seller-routed sandbox capture remain pending
+those credentials. All 27 tests, lint, typecheck, production build and both HTTP
+suites pass locally. A Windows build-cache reset resolved a cached compiler error.

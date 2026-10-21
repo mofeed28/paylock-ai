@@ -282,3 +282,20 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
 - The normal SDK popup/callback path still needs a regular-browser check; this
   is a recovery path, not evidence that the in-app browser supports checkout popups.
 - Provider contract reference: [PayPal Orders v2](https://developer.paypal.com/api/orders/v2).
+
+## Seller PayPal connection — October 21, 2026
+
+- All 27 tests, lint, typecheck, production build and both HTTP suites pass locally.
+- New mock-provider regression exercises consent, interrupted referral reuse,
+  unexpected redirect hosts, wrong tracking ID, duplicate merchant ownership,
+  unconfirmed email, missing/revoked permissions, provider outage, wrong payee,
+  seller changes after checkout, platform auth assertions and idempotent capture.
+- HTTP checks enforce authenticated account ownership, origin checks, explicit
+  consent and no forged user-ID override. Untrusted callback query parameters do
+  not connect an account. Migration checks preserve legacy receipts and routing.
+- Existing sandbox merchant credentials have no partner scopes; a read-only
+  tracking lookup returned 403 NOT_AUTHORIZED. No referral or payment was created.
+- Actual Platform onboarding, merchant-status payloads and a seller-routed sandbox
+  transaction still require the separate Platform app and external verification.
+  UI status refresh is manual; payment operations recheck PayPal eligibility and
+  permission. Onboarding webhooks and production activation are not claimed.
