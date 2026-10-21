@@ -377,3 +377,14 @@ Signed in as the saved test seller and verified Account now offers Connect PayPa
 Browser approval review requires action-time confirmation before starting the
 permission flow, so no referral, seller grant or additional payment was created.
 Real onboarding and seller-routed capture remain pending. Secrets stay ignored.
+
+### October 21 — Correct real PayPal referral ID handling
+
+After the user confirmed starting seller onboarding, PayPal returned a referral
+that exposed an overly restrictive ID validator. Its documented Base64 IDs can
+contain plus, slash and padding characters. Updated parsing to validate the
+sandbox API origin, decode once, accept the bounded ID character set, and encode
+the entire ID as one path parameter when reusing it. Regression coverage now
+includes raw and encoded IDs, foreign origins, query strings and double encoding.
+All 27 local tests and lint pass; the first restricted test run could not launch
+Chromium, and its permitted rerun passed. No credentials are included in Git.

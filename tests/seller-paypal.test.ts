@@ -51,6 +51,8 @@ test("seller onboarding verifies ownership and permissions, pins recipient and b
     "https://www.sandbox.paypal.com/bizsignup/partner/entry?token=test";
   let savedUnit: Record<string, unknown> = {};
   let wrongPayee = false;
+  const referralId = "UmVmZXJyYWw+Lw/==";
+  let referralUrl = `https://api-m.sandbox.paypal.com/v2/customer/partner-referrals/${referralId}`;
   global.fetch = async (url, init) => {
     const u = new URL(String(url));
     assert.equal(
@@ -71,6 +73,11 @@ test("seller onboarding verifies ownership and permissions, pins recipient and b
       return response({ access_token: "mock-token", expires_in: 3600 });
     assert.equal(headers.get("PayPal-Partner-Attribution-Id"), "test_BN");
     if (u.pathname.startsWith("/v2/customer/partner-referrals")) {
+      if (method === "GET")
+        assert.equal(
+          u.pathname,
+          `/v2/customer/partner-referrals/${encodeURIComponent(referralId)}`,
+        );
       if (method === "POST") {
         tracking = body.tracking_id;
         assert.equal(body.legal_consents[0].granted, true);
@@ -85,7 +92,7 @@ test("seller onboarding verifies ownership and permissions, pins recipient and b
           { rel: "action_url", href: callbackUrl },
           {
             rel: "self",
-            href: "https://api-m.sandbox.paypal.com/v2/customer/partner-referrals/ref-test",
+            href: referralUrl,
           },
         ],
       });
@@ -189,7 +196,29 @@ test("seller onboarding verifies ownership and permissions, pins recipient and b
     );
     callbackUrl =
       "https://www.sandbox.paypal.com/bizsignup/partner/entry?token=test";
+    const validReferralUrl = referralUrl;
+    for (const bad of [
+      "https://evil.example/v2/customer/partner-referrals/abc=",
+      "https://api-m.sandbox.paypal.com/v2/customer/partner-referrals/%252F",
+      "https://api-m.sandbox.paypal.com/v2/customer/partner-referrals/abc?unexpected=true",
+    ]) {
+      referralUrl = bad;
+      await assert.rejects(
+        startSellerPayPal("seller", true),
+        /valid referral reference/,
+      );
+    }
+    referralUrl = validReferralUrl;
     assert.equal((await startSellerPayPal("seller", true)).url, callbackUrl);
+    assert.equal(
+      (
+        await db.payPalConnection.findUniqueOrThrow({
+          where: { userId: "seller" },
+        })
+      ).referralId,
+      referralId,
+    );
+    referralUrl = `https://api-m.sandbox.paypal.com/v2/customer/partner-referrals/${encodeURIComponent(referralId)}`;
     const referralPosts = calls.filter(
       (c) => c.path.endsWith("partner-referrals") && c.method === "POST",
     ).length;

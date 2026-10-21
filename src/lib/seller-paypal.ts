@@ -89,11 +89,32 @@ export async function startSellerPayPal(userId: string, consent: boolean) {
       502,
       "PayPal returned an unexpected onboarding destination.",
     );
-  const referralId =
-    self &&
-    new URL(self).pathname.match(
-      /^\/v2\/customer\/partner-referrals\/([A-Za-z0-9_-]+)$/,
-    )?.[1];
+  // PayPal referral IDs use Base64, including +, / and =. Decode the
+  // suffix once, validate it, and encode it as one path parameter on reuse.
+  let referralId: string | undefined;
+  try {
+    const reference = self ? new URL(self) : undefined;
+    const prefix = "/v2/customer/partner-referrals/";
+    if (
+      reference?.protocol === "https:" &&
+      ["api-m.sandbox.paypal.com", "api.sandbox.paypal.com"].includes(
+        reference.hostname,
+      ) &&
+      !reference.username &&
+      !reference.password &&
+      !reference.port &&
+      !reference.search &&
+      !reference.hash &&
+      reference.pathname.startsWith(prefix)
+    ) {
+      const candidate = decodeURIComponent(
+        reference.pathname.slice(prefix.length),
+      );
+      if (/^[A-Za-z0-9+/_=-]{1,255}$/.test(candidate)) referralId = candidate;
+    }
+  } catch {
+    // A malformed provider link must never be persisted or followed.
+  }
   if (!referralId)
     throw new ApiError(
       502,
