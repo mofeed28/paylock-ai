@@ -66,8 +66,10 @@ legacy receipts and mark their routing as legacy.
 Sandbox Platform credentials were activated on the hosted demo on October 21.
 OAuth and partner onboarding scopes were verified; a nonexistent tracking lookup
 returned the expected 404 instead of the original merchant app's 403. The hosted
-seller Account page now offers Connect PayPal. The real onboarding redirect and a
-seller-routed sandbox transaction remain unverified pending seller consent. Complete these with distinct
+seller Account page now offers Connect PayPal. The real onboarding redirect and
+saved seller sign-in were verified after correcting Base64 referral ID handling.
+Final PayPal permission authorization, verified merchant readiness and a
+seller-routed sandbox transaction remain pending. Complete these with distinct
 platform, seller and buyer sandbox accounts before presenting the feature as
 end-to-end verified. Also test normal Checkout SDK callbacks in a regular browser.
 

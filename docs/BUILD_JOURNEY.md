@@ -388,3 +388,10 @@ the entire ID as one path parameter when reusing it. Regression coverage now
 includes raw and encoded IDs, foreign origins, query strings and double encoding.
 All 27 local tests and lint pass; the first restricted test run could not launch
 Chromium, and its permitted rerun passed. No credentials are included in Git.
+
+Deployed the fix as `referral-20261021` after all server tests, lint, production
+build and both HTTP suites passed. Existing record hashes and the legacy USD 5
+receipt remain intact; the temporary SSH rule was removed. Real onboarding now
+redirects to PayPal, and the saved test seller successfully signs in. Paused at
+the final permission grant because PayPal lists broader payment/refund/data
+permissions than the connection-reference consent. No new payment was made.

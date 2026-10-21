@@ -322,3 +322,21 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   on Account. Starting onboarding awaits action-time permission confirmation.
   Actual referral redirect, merchant-status payload and seller capture are still
   unverified. Temporary SSH access was removed and the original allowlist checked.
+
+### Real referral redirect — October 21, 2026
+
+- Confirmed onboarding exposed a real-provider mismatch: referral IDs include
+  Base64 characters rejected by the original validator. Fix `5c172e4` accepts
+  bounded, decoded IDs from sandbox API self links and encodes them on reuse.
+  Regression tests cover raw/encoded IDs, unsafe origins and double encoding.
+- Deployed the fix as `referral-20261021` after all 27 tests, lint, production
+  build with TypeScript and both HTTP suites passed on Linux. Local tests and
+  lint pass too; a restricted Chromium launch required a permitted test rerun.
+  Eleven existing tables passed row-hash preservation checks. Post-release
+  HTTPS, access boundaries, database integrity and the old USD 5 receipt pass.
+  Temporary deployment SSH access was removed.
+- Hosted Continue PayPal setup now redirects to real PayPal sandbox onboarding.
+  The saved seller sandbox login succeeds and reaches partnerPermission. PayPal
+  identifies the platform as "Test Store" and lists payment, refund, transaction
+  data and deduction permissions. The final Allow action awaits specific user
+  confirmation; merchant readiness and a seller-routed capture remain unverified.
