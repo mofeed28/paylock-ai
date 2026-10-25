@@ -147,7 +147,7 @@ export function AgreementForm({
             </div>
             <div className="field-grid">
               <div className="field">
-                <label htmlFor="email">Seller contact email</label>
+                <label htmlFor="email">Seller’s Paylock email</label>
                 <input
                   id="email"
                   type="email"
@@ -158,7 +158,11 @@ export function AgreementForm({
                   placeholder="seller@studio.com"
                   required
                 />
-                <small>Contact information only. No invitation is sent.</small>
+                <small>
+                  Use the email they sign in to Paylock with. In account mode,
+                  an invitation appears in their seller inbox. They request
+                  access; you approve it. No email is sent.
+                </small>
               </div>
               <div className="field">
                 <label htmlFor="budget">Total budget · USD</label>

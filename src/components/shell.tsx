@@ -60,7 +60,7 @@ export function Shell({
           </Link>
         )}
         <span className="nav-caption">
-          {seller ? "BUYER WORKSPACE" : "YOUR WORKSPACE"}
+          {seller ? "SELLER WORKSPACE" : "YOUR WORKSPACE"}
         </span>
         <nav>
           {accounts && (

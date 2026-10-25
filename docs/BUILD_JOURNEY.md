@@ -406,3 +406,29 @@ hosted account now shows Connected for sandbox payments. This verifies the actua
 merchant-status payload, confirmed email, payment eligibility and platform
 authorization/capture scope. No transaction was initiated; a new seller-routed
 authorization and capture remain the next end-to-end check.
+
+### October 25 — Make seller invitations discoverable and repair the inbox
+
+The user reported that a newly addressed agreement never appeared in the seller
+inbox, alongside broken card rendering. The old inbox selected only already
+approved sellers; the email field was contact-only. Links styled as cards also
+remained inline elements around block content, producing fragmented backgrounds.
+
+Added separate Invitations and Your work sections, block card containers with
+explicit action links, pending-approval states, a compact PayPal status summary,
+the signed-in email and a correct Seller workspace navigation label. The agreement
+form now explains which email to use and that buyer approval is required.
+
+Matching a seller email (case-insensitive, trimmed) discovers only an opaque
+invitation. Because emails are not yet verified, no title, buyer identity, scope,
+budget or evidence is exposed before buyer approval. Existing invitation-link
+requests stay visible too. Expired, self-owned and differently assigned
+invitations are excluded. This also makes existing eligible agreements visible
+without recreating or changing them. No email delivery is claimed.
+
+All 28 tests, lint and the production build pass. Desktop and 390px mobile
+previews with synthetic new, pending and approved work show intact cards and no
+horizontal overflow. During validation, npm reported critical Next.js advisories;
+updated Next.js from 16.4.0 to 16.4.3. A separate high-severity Zod advisory remains
+and requires a reviewed major-version migration. AWS deployment authentication
+expired; the hosted rollout is pending the user's refreshed sign-in.

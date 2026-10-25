@@ -215,6 +215,23 @@ try {
     include: { milestones: true },
   });
   const m = a.milestones[0];
+  const inboxBeforeApproval = await (
+    await get("/seller", seller.cookie)
+  ).text();
+  assert.ok(
+    inboxBeforeApproval.includes("Review invitation"),
+    "email-matched invitation appears before approval",
+  );
+  assert.ok(
+    !inboxBeforeApproval.includes(a.title),
+    "invitation inbox does not expose private scope",
+  );
+  assert.ok(
+    !(await (await get("/seller", stranger.cookie)).text()).includes(
+      a.sellerToken,
+    ),
+    "unrelated account cannot discover invitation token",
+  );
   const sellerPath = `/seller/${a.sellerToken}?milestone=${a.milestones[1].id}`;
   const anonymous = await get(sellerPath);
   const anonymousBody = await anonymous.text();
@@ -279,6 +296,11 @@ try {
   const access = await db.sellerAccessRequest.findFirstOrThrow({
     where: { agreementId: a.id },
   });
+  assert.ok(
+    (await (await get("/seller", seller.cookie)).text()).includes(
+      "Waiting for buyer approval",
+    ),
+  );
   assert.equal(
     (
       await post(`agreements/${a.id}/seller-access`, stranger.cookie, {

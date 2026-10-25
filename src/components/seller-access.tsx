@@ -41,7 +41,7 @@ export function SellerAccess({
       <p>
         {a.sellerUser
           ? "This account can view the scope and submit evidence. Only you can approve payment."
-          : "Copy this invitation and send it to your seller. They sign in and request access; you confirm their account here."}
+          : `An invitation appears in the seller inbox for ${a.sellerEmail}. You can also copy and share the link. They request access; approve their account here to let them see the work.`}
       </p>
       <CopyButton value={`/seller/${a.sellerToken}?milestone=${milestone}`} />
       <small>

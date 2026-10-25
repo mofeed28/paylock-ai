@@ -354,3 +354,19 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   live onboarding or all profile requirements are complete.
 - No new order, authorization or capture was created. Seller-routed transaction
   testing and regular-browser Checkout callbacks remain outstanding.
+
+## Seller inbox repair — October 25, 2026
+
+- 28 unit/workflow tests pass, including invitation discovery by normalized email,
+  exclusion of expired/self-owned/other-seller agreements, private invitation
+  payloads, retained link-based requests, approval and renewed invitation tokens.
+- Production HTTP coverage now checks pre-approval invitation discovery, no
+  agreement title exposure, no invitation token discovery by unrelated users,
+  pending-approval status and the existing approved delivery workflow.
+- Lint and production build with TypeScript pass on Next.js 16.4.3. The initial
+  build flagged a Next.js security advisory; the patch removes that critical npm
+  audit finding. The separate Zod high-severity advisory remains unresolved.
+- Desktop and 390px mobile visual checks use isolated synthetic data. Card bounds
+  stay within the viewport and the approved-work card is no longer an inline link.
+- Hosted deployment is pending refreshed AWS authentication. No hosted data,
+  payment, access grants or firewall configuration changed during this repair.
