@@ -432,3 +432,16 @@ horizontal overflow. During validation, npm reported critical Next.js advisories
 updated Next.js from 16.4.0 to 16.4.3. A separate high-severity Zod advisory remains
 and requires a reviewed major-version migration. AWS deployment authentication
 expired; the hosted rollout is pending the user's refreshed sign-in.
+
+After the user refreshed AWS sign-in, deployed `0af6661` as `inbox-20261025`.
+All 28 tests, lint, production build and both HTTP suites passed on Linux before
+switching. Backups and row hashes preserved twelve tables, including all eleven
+agreements and both PayPal connections. No firewall change was needed.
+
+Signed in as the saved seller on the hosted site and verified one new October 25
+invitation appears beside the previously approved Northstar agreement. The
+connected-PayPal banner remains correct. No access request, buyer approval or
+payment was submitted. Public HTTPS, database integrity, anonymous boundaries
+and the existing USD 5 receipt pass. Hosted screenshot capture was unavailable;
+the rendered accessibility tree verified the live content, with desktop/mobile
+layout screenshots retained from the isolated preview.

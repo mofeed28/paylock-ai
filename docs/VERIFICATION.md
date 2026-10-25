@@ -368,5 +368,14 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
   audit finding. The separate Zod high-severity advisory remains unresolved.
 - Desktop and 390px mobile visual checks use isolated synthetic data. Card bounds
   stay within the viewport and the approved-work card is no longer an inline link.
-- Hosted deployment is pending refreshed AWS authentication. No hosted data,
-  payment, access grants or firewall configuration changed during this repair.
+- Deployed `0af6661` as `inbox-20261025` after all 28 tests, lint, production build
+  and both HTTP suites passed on Linux. Twelve tables passed row-hash preservation
+  checks, including 11 agreements and 2 PayPal connections. Backups and the prior
+  release are retained. No firewall change was needed.
+- Hosted seller sign-in verified one new October 25 invitation and the existing
+  approved Northstar agreement, plus the connected-PayPal banner. No access
+  request, buyer approval or payment was submitted. Public HTTPS, anonymous
+  boundaries, database integrity and the existing USD 5 receipt checks pass.
+- Hosted screenshot capture was unavailable. Live content was verified in the
+  rendered accessibility tree; layout evidence comes from the isolated desktop
+  and mobile preview screenshots.
