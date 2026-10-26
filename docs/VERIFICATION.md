@@ -379,3 +379,23 @@ GitHub CI run 38602792656 passed all checks on implementation commit 46aaa5d.
 - Hosted screenshot capture was unavailable. Live content was verified in the
   rendered accessibility tree; layout evidence comes from the isolated desktop
   and mobile preview screenshots.
+
+
+## 2026-10-26 — Seller acceptance deployed
+
+Commit `deb63e1` deployed to `/opt/paylock/releases/invite-20261026` after all
+28 Linux tests, lint, normal Turbopack production build/TypeScript, and both HTTP
+suites passed. Backup: `/var/backups/paylock/invite-20261026`.
+Hashes/counts of all 12 existing data tables were unchanged across the switch:
+11 agreements, 29 milestones, 10 submissions, 13 payment events, 42 timeline
+events, 8 agent runs, 8 quota rows, 5 users, 8 sessions, 5 auth accounts,
+2 seller access rows and 2 PayPal connections.
+
+Read-only post-deployment checks passed for HTTPS, account boundaries, database
+integrity, Bedrock/PayPal sandbox configuration and a preserved USD 5 receipt.
+The signed-in hosted seller inbox shows the new acceptance wording, retains
+existing work and the connected PayPal state, and labels the existing email-only
+invitation as needing an account ID. No actual invitation was accepted or
+payment submitted during this deployment. The local synthetic preview showed
+Accept invitation / Decline controls; duplicate acceptance was tested through
+isolated HTTP fixtures.
