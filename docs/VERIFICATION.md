@@ -399,3 +399,13 @@ invitation as needing an account ID. No actual invitation was accepted or
 payment submitted during this deployment. The local synthetic preview showed
 Accept invitation / Decline controls; duplicate acceptance was tested through
 isolated HTTP fixtures.
+
+
+## 2026-10-26 — Simplified UI deployed
+
+UI commit `b9f5949` is live at `/opt/paylock/releases/ui-20261026`. Linux passed
+all 28 tests, lint, the normal production build/TypeScript and both HTTP suites.
+The deployment backed up the database and environment under
+`/var/backups/paylock/ui-20261026`; all 12 existing table hashes were preserved.
+Read-only HTTPS/authentication checks and the saved USD 5 receipt passed after
+the switch. No payments, invitations or access grants were changed by UI testing.

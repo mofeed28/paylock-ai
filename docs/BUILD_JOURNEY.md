@@ -504,3 +504,13 @@ Validation: production webpack build/TypeScript and both existing HTTP suites
 passed. Desktop (1280px) and phone (390px) were inspected in the browser. Phone
 content fits without horizontal overflow; navigation, work actions and expandable
 invitation details remain usable. No authorization or payment logic changed.
+
+
+## 2026-10-26 — Simplified UI deployed
+
+UI commit `b9f5949` is live at `/opt/paylock/releases/ui-20261026`. Linux passed
+all 28 tests, lint, the normal production build/TypeScript and both HTTP suites.
+The deployment backed up the database and environment under
+`/var/backups/paylock/ui-20261026`; all 12 existing table hashes were preserved.
+Read-only HTTPS/authentication checks and the saved USD 5 receipt passed after
+the switch. No payments, invitations or access grants were changed by UI testing.
