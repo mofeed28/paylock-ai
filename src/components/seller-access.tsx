@@ -70,8 +70,7 @@ export function SellerAccess({
         </p>
       ) : declined ? (
         <p>
-          This invitation is closed. Renew it below before inviting the seller
-          again.
+          Invitation closed Renew it below before inviting the seller again.
         </p>
       ) : (
         <>
@@ -176,23 +175,22 @@ export function SellerInvitation({
     }
   }
   return (
-    <div className="page narrow">
+    <div className="page narrow seller-response-page">
       <section className="card form-card seller-invitation-panel">
         <span className="eyebrow">SELLER INVITATION</span>
         <h1>
           {status === "INVITED"
-            ? "You’re invited to deliver this work."
+            ? "Join this project"
             : status === "DECLINED"
-              ? "This invitation is closed."
-              : "The buyer needs your account ID."}
+              ? "Invitation closed"
+              : "Share your account ID"}
         </h1>
         {status === "INVITED" ? (
           <>
             <h2>{title}</h2>
             <p>
-              The buyer chose your account. Accept to open the scope and
-              milestones, or decline. The buyer does not need to approve you
-              again. Accepting does not authorize a payment or connect PayPal.
+              Accept to view the requirements and start submitting work. Payment
+              approval stays with the buyer.
             </p>
             <div className="button-row">
               <Button disabled={busy} onClick={() => respond("accept")}>
@@ -212,12 +210,12 @@ export function SellerInvitation({
         ) : (
           <>
             <p>
-              This older invitation used an email address only. Send your
-              account ID to the buyer through your usual conversation. They
-              choose your account once, then you can accept here.
+              Send this ID to your buyer. Once they add it to the invitation,
+              you can accept here.
             </p>
             <p>
-              <strong>Your account ID:</strong> {userId}
+              <strong>Your account ID</strong>
+              <code className="seller-account-code">{userId}</code>
             </p>
             <CopyButton value={userId} label="Copy account ID" />
             <Button variant="outline" onClick={() => router.refresh()}>

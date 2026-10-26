@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Inbox, ShieldCheck } from "lucide-react";
+import { ArrowRight, Inbox, CheckCircle2, FolderOpen } from "lucide-react";
 import { currentAccount } from "@/lib/auth";
 import { sellerInbox } from "@/lib/seller-inbox";
 import { sellerPayPalStatus } from "@/lib/seller-paypal";
+import { CopyButton } from "@/components/common";
 import { money } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 export default async function Page() {
@@ -15,154 +16,156 @@ export default async function Page() {
   ]);
   const connected = paypal.status === "READY";
   return (
-    <div className="page seller-inbox-page">
-      <div className="page-heading">
+    <div className="page seller-hub">
+      <header className="seller-hub-heading">
         <div>
-          <span className="eyebrow">SELLER WORKSPACE</span>
-          <h1>Your seller inbox</h1>
-          <p>Accept invitations and deliver your work.</p>
-          <p className="fine-print">Signed in as {user.email}</p>
+          <h1>Your seller workspace</h1>
+          <p>Accept work. Submit delivery. Track progress.</p>
         </div>
-        <Link className="text-link" href="/agreements">
-          Switch to buyer view →
+        <Link
+          className={`seller-connection ${connected ? "is-connected" : ""}`}
+          href="/account#paypal-connection"
+        >
+          {connected && <CheckCircle2 size={16} />}
+          {connected ? "PayPal connected" : "Connect PayPal"}
+          <ArrowRight size={14} />
         </Link>
-      </div>
-      <aside className="card seller-payment-summary">
-        <ShieldCheck size={22} aria-hidden="true" />
-        <div>
-          <strong>
-            {connected
-              ? "PayPal connected for sandbox payments"
-              : "Set up where you receive payment"}
-          </strong>
-          <p>
-            {connected
-              ? "Your connection was verified. PayPal checks it again before each payment."
-              : "Connect your PayPal account before a buyer authorizes payment."}
-          </p>
-        </div>
-        <Link className="text-link" href="/account#paypal-connection">
-          {connected ? "Manage connection" : "Connect PayPal"} →
-        </Link>
-      </aside>
+      </header>
       <section
-        className="seller-inbox-section"
+        className="seller-hub-section"
         aria-labelledby="seller-invitations"
       >
-        <div className="seller-section-heading">
+        <div className="seller-hub-section-title">
           <h2 id="seller-invitations">
-            Invitations{" "}
-            <span className="seller-count">{invitations.length}</span>
+            Invitations <span>{invitations.length}</span>
           </h2>
-          <p>The buyer chooses your account. You accept once to join.</p>
         </div>
-        {invitations.length ? (
-          <div className="seller-inbox-grid">
-            {invitations.map((invitation, index) => {
+        <div className="seller-row-list">
+          {invitations.length ? (
+            invitations.map((invitation) => {
               const status = invitation.accessRequests[0]?.status;
               return (
-                <article className="card seller-work-card" key={invitation.id}>
-                  <span className="eyebrow">
-                    INVITATION {index + 1} ·{" "}
-                    {invitation.createdAt.toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      timeZone: "UTC",
-                    })}
-                  </span>
-                  <h3>
-                    {status === "INVITED"
-                      ? "Ready for your acceptance"
-                      : status === "DECLINED"
-                        ? "Invitation closed"
-                        : "Share your account ID"}
-                  </h3>
-                  <p>
-                    {status === "INVITED"
-                      ? "Accept or decline. No second buyer approval is needed."
-                      : status === "DECLINED"
-                        ? "The buyer must renew this invitation before you can join."
-                        : "This invitation uses your email only. Share your account ID so the buyer can choose your account."}
-                  </p>
+                <article className="seller-invite-row" key={invitation.id}>
+                  <div className="seller-row-icon">
+                    <Inbox size={20} />
+                  </div>
+                  <div className="seller-row-copy">
+                    <h3>
+                      {status === "INVITED"
+                        ? "Ready for your acceptance"
+                        : status === "DECLINED"
+                          ? "Invitation closed"
+                          : "One detail needed to join"}
+                    </h3>
+                    <p>
+                      {status === "INVITED"
+                        ? "Review and accept to start work."
+                        : status === "DECLINED"
+                          ? "Ask the buyer for a new invitation."
+                          : "Share your account ID with the buyer to receive this work."}
+                    </p>
+                    <time dateTime={invitation.createdAt.toISOString()}>
+                      {invitation.createdAt.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        timeZone: "UTC",
+                      })}
+                    </time>
+                  </div>
                   <Link
-                    className="button outline"
+                    className="button button-outline"
                     href={`/seller/${invitation.sellerToken}`}
                   >
                     Review invitation
-                    <ArrowRight size={16} aria-hidden="true" />
+                    <ArrowRight size={15} />
                   </Link>
                 </article>
               );
-            })}
-          </div>
-        ) : (
-          <div className="card seller-inbox-empty">
-            <Inbox size={22} aria-hidden="true" />
-            <div>
-              <strong>No pending invitations</strong>
-              <p>
-                Share your Paylock email and account ID from your Account page
-                with the buyer. Invitations expire after seven days.
-              </p>
+            })
+          ) : (
+            <div className="seller-quiet-empty">
+              <Inbox size={20} />
+              <p>You’re all caught up. New invitations will appear here.</p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </section>
       <section
-        className="seller-inbox-section"
+        className="seller-hub-section"
         aria-labelledby="seller-deliveries"
       >
-        <div className="seller-section-heading">
+        <div className="seller-hub-section-title">
           <h2 id="seller-deliveries">
-            Your work <span className="seller-count">{agreements.length}</span>
+            Your work <span>{agreements.length}</span>
           </h2>
-          <p>Agreements you have joined as the seller.</p>
         </div>
-        {agreements.length ? (
-          <div className="seller-inbox-grid">
-            {agreements.map((a) => {
+        <div className="seller-row-list">
+          {agreements.length ? (
+            agreements.map((a) => {
               const paid = a.milestones.filter(
                 (m) => m.status === "RELEASED",
               ).length;
+              const complete =
+                a.milestones.length > 0 && paid === a.milestones.length;
               return (
-                <article className="card seller-work-card" key={a.id}>
-                  <span className="eyebrow">
-                    {paid === a.milestones.length
-                      ? "COMPLETED"
-                      : "SELLER ACCESS"}
-                  </span>
-                  <h3>{a.title}</h3>
-                  <p>Buyer: {a.buyerName}</p>
-                  <div className="seller-work-meta">
-                    <span>
-                      {paid}/{a.milestones.length} milestones paid
+                <article className="seller-delivery-row" key={a.id}>
+                  <div className="seller-row-copy">
+                    <span
+                      className={`seller-work-state ${complete ? "is-complete" : ""}`}
+                    >
+                      {complete ? "Completed" : "In progress"}
                     </span>
+                    <h3>{a.title}</h3>
+                    <p>
+                      {a.buyerName} <span aria-hidden="true">·</span> {paid}/
+                      {a.milestones.length} milestones paid
+                    </p>
+                  </div>
+                  <div className="seller-work-value">
                     <strong>{money(a.totalAmount)}</strong>
+                    <small>Agreement total</small>
                   </div>
                   <Link
-                    className="button outline"
+                    className="button button-primary"
                     href={`/seller/${a.sellerToken}?milestone=${a.milestones.find((m) => m.status !== "RELEASED")?.id || a.milestones[0]?.id || ""}`}
                   >
-                    Open delivery workspace
-                    <ArrowRight size={16} aria-hidden="true" />
+                    {complete ? "View work" : "Open workspace"}
+                    <ArrowRight size={15} />
                   </Link>
                 </article>
               );
-            })}
-          </div>
-        ) : (
-          <div className="card seller-inbox-empty">
-            <Inbox size={22} aria-hidden="true" />
-            <div>
-              <strong>No work joined yet</strong>
-              <p>
-                Once you accept an invitation, the agreement and its milestones
-                appear here.
-              </p>
+            })
+          ) : (
+            <div className="seller-quiet-empty">
+              <FolderOpen size={20} />
+              <p>Accept an invitation to see your work here.</p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </section>
+      <details className="seller-invite-help">
+        <summary>How does a buyer invite me?</summary>
+        <div>
+          <p>
+            Send these details to your buyer. They invite your account, then you
+            accept here.
+          </p>
+          <dl>
+            <div>
+              <dt>Paylock email</dt>
+              <dd>{user.email}</dd>
+            </div>
+            <div>
+              <dt>Account ID</dt>
+              <dd>{user.id}</dd>
+            </div>
+          </dl>
+          <CopyButton
+            value={`Paylock email: ${user.email}\nAccount ID: ${user.id}`}
+            label="Copy invitation details"
+          />
+        </div>
+      </details>
     </div>
   );
 }

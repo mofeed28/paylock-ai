@@ -488,3 +488,19 @@ invitation as needing an account ID. No actual invitation was accepted or
 payment submitted during this deployment. The local synthetic preview showed
 Accept invitation / Decline controls; duplicate acceptance was tested through
 isolated HTTP fixtures.
+
+
+## 2026-10-26 — Reduce workspace clutter
+
+Replaced the crowded shell with Buying, Selling and Payments navigation, one
+account entry and collapsed demo tools. Removed repeated role descriptions,
+fictitious profile initials and promotional sidebar content. Rebuilt the seller
+home as compact invitation rows followed by a work list with progress, amount
+and one primary action. Connected PayPal is a small status link; invitation
+identity instructions live in an expandable help section. Shortened the seller
+acceptance page and made the account ID easier to copy and read.
+
+Validation: production webpack build/TypeScript and both existing HTTP suites
+passed. Desktop (1280px) and phone (390px) were inspected in the browser. Phone
+content fits without horizontal overflow; navigation, work actions and expandable
+invitation details remain usable. No authorization or payment logic changed.
