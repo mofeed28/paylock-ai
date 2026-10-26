@@ -93,7 +93,13 @@ export function DemoButton({
     </>
   );
 }
-export function CopyButton({ value }: { value: string }) {
+export function CopyButton({
+  value,
+  label = "Copy seller link",
+}: {
+  value: string;
+  label?: string;
+}) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
   return (
@@ -114,9 +120,11 @@ export function CopyButton({ value }: { value: string }) {
         }}
       >
         {copied ? <Check size={14} /> : null}
-        {copied ? "Copied" : "Copy seller link"}
+        {copied ? "Copied" : label}
       </Button>
-      {error && <small>Copy the seller portal URL from your browser.</small>}
+      {error && (
+        <small>Could not copy. Select and copy the value manually.</small>
+      )}
     </>
   );
 }

@@ -114,8 +114,8 @@ export function AccountLogin({ next }: { next: string }) {
       </Button>
       <p className="fine-print">
         Email verification and password-reset emails are not available yet. Save
-        your password in a password manager. Seller access requires the buyer’s
-        approval.
+        your password in a password manager. Buyers invite a specific seller
+        account; the seller accepts once to join.
       </p>
       <p className="fine-print">PayPal sandbox only. No real-money escrow.</p>
     </form>

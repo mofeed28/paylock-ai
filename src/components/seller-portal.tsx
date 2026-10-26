@@ -96,7 +96,7 @@ export function SellerPortal({
       </div>
       <Notice>
         {ownerPreview
-          ? "You are previewing the seller’s view. Share the invitation and approve a separate seller account to receive submissions."
+          ? "You are previewing the seller’s view. Invite a separate seller account. They accept once to start submitting work."
           : judgeDemo
             ? "You are testing the seller’s side in your private demo session. The buyer set the requirements below. Submit evidence here, then switch back to review it."
             : `Submit evidence for ${a.sellerEmail} against the buyer’s requirements. Payment approval remains with the buyer.`}
@@ -154,7 +154,7 @@ export function SellerPortal({
           {blocked ? (
             <Notice>
               {ownerPreview
-                ? "Buyer preview is read-only. Only your approved seller can submit evidence."
+                ? "Buyer preview is read-only. Only your assigned seller can submit evidence."
                 : m.status === "IN_REVIEW"
                   ? "Your submission is awaiting buyer review. A new version can be submitted if the buyer requests a revision."
                   : m.status === "RELEASED"

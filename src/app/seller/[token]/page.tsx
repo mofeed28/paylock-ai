@@ -40,6 +40,13 @@ export default async function Page({
         token={token}
         userId={account!.id}
         status={a.accessRequests.find((r) => r.userId === account!.id)?.status}
+        title={
+          a.accessRequests.some(
+            (r) => r.userId === account!.id && r.status === "INVITED",
+          )
+            ? a.title
+            : undefined
+        }
       />
     );
   }

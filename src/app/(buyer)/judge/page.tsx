@@ -121,7 +121,7 @@ export default function Page() {
           </h3>
           <p>
             {accountsEnabled() ? (
-              "Create the agreement as the buyer, share its seller invitation, then approve the seller’s account. The seller submits work; you review and decide payment. The prepared walkthrough remains available for a quick example."
+              "Create the agreement as the buyer, invite the seller’s account, then wait for them to accept. The seller submits work; you review and decide payment. The prepared walkthrough remains available for a quick example."
             ) : (
               <>
                 Use “Switch to seller view” to submit work, then return to the
@@ -132,7 +132,7 @@ export default function Page() {
           </p>
           <p>
             {accountsEnabled()
-              ? "Your workspace stays with your account when you sign out. Agreements are private to the buyer and their approved seller."
+              ? "Your workspace stays with your account when you sign out. Agreements are private to the buyer and their assigned seller."
               : "Sessions last 8 hours. Signing in again creates a new workspace. Download the evidence packet to keep a copy of your work."}
           </p>
           <Link className="text-link" href="/agreements">

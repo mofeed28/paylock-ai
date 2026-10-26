@@ -301,7 +301,7 @@ export function AgreementDetail({
                 ? "Start here. Authorizing funds and allowing automatic payment are separate steps. You can keep manual approval."
                 : nextStep === "submit"
                   ? accounts
-                    ? "Your funds are authorized. Your approved seller can now submit evidence against your requirements."
+                    ? "Your funds are authorized. Your assigned seller can now submit evidence against your requirements."
                     : "Your funds are authorized. Switch roles to submit the work against the requirements you set."
                   : nextStep === "revise"
                     ? accounts
@@ -343,7 +343,7 @@ export function AgreementDetail({
                   !paypalClientId) ? (
                 <Notice>
                   {!a.sellerUserId
-                    ? "First approve the seller account using Seller access above."
+                    ? "Invite your seller above and wait for them to accept."
                     : !paypalClientId
                       ? "Seller payments are awaiting PayPal platform setup by the demo operator."
                       : "Ask your seller to open Account → PayPal connection and finish connecting. Then refresh this page."}{" "}
@@ -926,7 +926,7 @@ export function AgreementDetail({
                   {judgeDemo
                     ? "Open the seller view to submit work, then return here to review it. This link works only in your current demo session."
                     : accounts
-                      ? "Share the invitation with your seller, then approve their account above. Only that account can submit work."
+                      ? "Choose your seller's account above. They accept the invitation once, then can submit work."
                       : "Anyone with this private link can see the submission view and submit work. Share it directly with your seller."}
                 </p>
                 <div className="button-row">

@@ -33,6 +33,20 @@ export async function createAgreement(input: unknown, mode = paymentMode()) {
         where: { id: workspaceId().replace(/^account:/, "") },
       })
     : null;
+  if (owner && v.sellerAccountId) {
+    const seller = await db.user.findUnique({
+      where: { id: v.sellerAccountId },
+    });
+    if (
+      !seller ||
+      seller.id === owner.id ||
+      seller.email.trim().toLowerCase() !== v.sellerEmail.trim().toLowerCase()
+    )
+      throw new ApiError(
+        400,
+        "Use the account ID your seller shared, with their matching Paylock email.",
+      );
+  }
   return db.agreement.create({
     data: {
       workspaceId: workspaceId(),
@@ -50,6 +64,13 @@ export async function createAgreement(input: unknown, mode = paymentMode()) {
       sellerInviteExpiresAt: accountsEnabled()
         ? new Date(Date.now() + 7 * 86400000)
         : null,
+      ...(owner && v.sellerAccountId
+        ? {
+            accessRequests: {
+              create: { userId: v.sellerAccountId, status: "INVITED" },
+            },
+          }
+        : {}),
       milestones: {
         create: v.plan.milestones.map((m, position) => ({
           ...m,

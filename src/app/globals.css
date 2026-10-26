@@ -3198,3 +3198,11 @@ summary {
   .next-action h2 { font-size: 23px; }
   .recovery-card { padding: 24px; }
 }
+
+/* Explicit recipient selection and one-step seller acceptance. */
+.seller-invitation-panel { display: grid; gap: 16px; overflow-wrap: anywhere; }
+.seller-invitation-panel h3, .seller-invitation-panel p { margin: 0; }
+.seller-invitation-panel > .button { justify-self: start; }
+.seller-invitation-panel details > * + * { margin-top: 12px; }
+.invitation-confirmation, .field > .invitation-confirmation { display: flex; align-items: flex-start; gap: 10px; margin: 12px 0; }
+.invitation-confirmation input[type="checkbox"] { width: 16px; height: 16px; padding: 0; flex: 0 0 16px; margin-top: 3px; }

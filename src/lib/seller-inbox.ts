@@ -31,7 +31,14 @@ export async function sellerInbox(userId: string) {
         sellerInviteExpiresAt: { gt: new Date() },
         OR: [
           { id: { in: matches.map((m) => m.id) } },
-          { accessRequests: { some: { userId, status: "PENDING" } } },
+          {
+            accessRequests: {
+              some: {
+                userId,
+                status: { in: ["PENDING", "INVITED", "DECLINED"] },
+              },
+            },
+          },
         ],
       },
       orderBy: { createdAt: "desc" },

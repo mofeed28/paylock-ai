@@ -291,21 +291,21 @@ try {
   assert.equal(
     (await post(`seller/${a.sellerToken}/request-access`, seller.cookie))
       .status,
-    200,
+    409,
   );
-  const access = await db.sellerAccessRequest.findFirstOrThrow({
-    where: { agreementId: a.id },
-  });
-  assert.ok(
-    (await (await get("/seller", seller.cookie)).text()).includes(
-      "Waiting for buyer approval",
-    ),
+  assert.equal(
+    (
+      await post(`seller/${a.sellerToken}/respond-invitation`, seller.cookie, {
+        action: "accept",
+      })
+    ).status,
+    403,
   );
   assert.equal(
     (
       await post(`agreements/${a.id}/seller-access`, stranger.cookie, {
-        action: "approve",
-        requestId: access.id,
+        action: "invite",
+        accountId: seller.user.id,
       })
     ).status,
     404,
@@ -313,11 +313,56 @@ try {
   assert.equal(
     (
       await post(`agreements/${a.id}/seller-access`, buyer.cookie, {
-        action: "approve",
-        requestId: access.id,
+        action: "invite",
+        accountId: seller.user.id,
       })
     ).status,
     200,
+  );
+  assert.ok(
+    (await (await get("/seller", seller.cookie)).text()).includes(
+      "Ready for your acceptance",
+    ),
+  );
+  assert.ok(
+    (await (await get(sellerPath, seller.cookie)).text()).includes(
+      "Accept invitation",
+    ),
+  );
+  assert.ok(
+    !(await (await get(sellerPath, stranger.cookie)).text()).includes(a.title),
+  );
+  assert.equal(
+    (
+      await post(
+        `seller/${a.sellerToken}/respond-invitation`,
+        stranger.cookie,
+        { action: "accept" },
+      )
+    ).status,
+    403,
+  );
+  assert.equal(
+    (await post(`seller/${a.sellerToken}/submit`, seller.cookie, evidence))
+      .status,
+    403,
+  );
+  const accepts = await Promise.all(
+    [1, 2].map(() =>
+      post(`seller/${a.sellerToken}/respond-invitation`, seller.cookie, {
+        action: "accept",
+      }),
+    ),
+  );
+  assert.deepEqual(
+    accepts.map((r) => r.status),
+    [200, 200],
+  );
+  assert.equal(
+    await db.timelineEvent.count({
+      where: { agreementId: a.id, type: "SELLER_ACCEPTED" },
+    }),
+    1,
   );
   assert.ok(
     (await (await get("/seller", seller.cookie)).text()).includes(a.title),
@@ -407,7 +452,7 @@ try {
     "previous password no longer works",
   );
   console.log(
-    "Account HTTP checks passed: enrollment, CSRF, persistent login, buyer/seller isolation, private invitations, approval, submission and revocation.",
+    "Account HTTP checks passed: enrollment, CSRF, persistent login, buyer/seller isolation, targeted invitations, seller acceptance, submission and revocation.",
   );
 } finally {
   if (child && child.exitCode === null) {

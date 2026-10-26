@@ -28,15 +28,11 @@ flows for isolated tests and compatibility.
 
 - Buyer creates and owns an agreement, defines requirements, authorizes sandbox
   funds, reviews evidence and controls payment. Nothing is publicly listed.
-- Buyer copies the invitation from the agreement and shares it directly. Invitations
-  expire after seven days; no email is sent automatically.
-- Seller signs in with a separate account, opens the invitation and requests access.
-  The invitation does not expose the scope or evidence before approval.
-- Buyer confirms the request's account ID with the intended seller through their
-  existing conversation, then approves that specific account. An email address is
-  an unverified contact label, not an authorization claim.
-- Approved seller sees the agreement in `/seller` and can submit evidence, but
-  cannot access the buyer's ledger, exports, payment actions or other agreements.
+- Seller shares their Paylock email and account ID (copy from `/account`) with the buyer through their existing conversation.
+- Buyer enters the matching email and ID while creating the agreement, or chooses the recipient in Seller access afterward. This creates an `INVITED` row pinned to that exact account; it does not grant submission access yet.
+- Seller sees the invitation in `/seller` and accepts or declines. Acceptance assigns the seller immediately, with no second buyer approval. Only that account can respond, even if someone else has the link. Pending invitations expire after seven days; accepted access continues until revoked.
+- Email addresses are not verified, so email-only legacy invitations expose no scope. The buyer must choose the intended account before acceptance is available. Existing assigned sellers retain access.
+- Accepted sellers can see scope and submit evidence, but cannot access the buyer's ledger, exports, payment actions or other agreements. No invitation email is sent automatically.
 - Buyer can revoke access and renew the invitation. Prior links and requests stop
   working; submissions, agreements and receipts are retained.
 - Buyer's seller preview is read-only. Switching into and back out of that preview
@@ -68,7 +64,7 @@ SQLite and the process-local payment queue currently require a single app proces
 
 ## Validation
 
-`npm test` includes session/ownership, invite approval/revocation and migration
+`npm test` includes session/ownership, invitation targeting, acceptance, decline and revocation and migration
 preservation checks. After `npm run build`, run `npm run test:accounts` for actual
 HTTP isolation, enrollment, CSRF, buyer/seller permissions, logout/relogin and
 password-change revocation. `npm run test:judge` verifies legacy judge isolation.

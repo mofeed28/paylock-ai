@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { randomBytes } from "node:crypto";
 
-test("permanent account sessions and buyer-approved seller access remain isolated and revocable", async () => {
+test("permanent account sessions and direct seller invitations remain isolated and revocable", async () => {
   const dir = mkdtempSync(join(tmpdir(), "paylock-accounts-"));
   process.env.DATABASE_URL = `file:${join(dir, "test.db").replaceAll("\\", "/")}`;
   process.env.AUTH_MODE = "accounts";
@@ -20,7 +20,7 @@ test("permanent account sessions and buyer-approved seller access remain isolate
   );
   const { db } = await import("../src/lib/db");
   const { accountAuth } = await import("../src/lib/account-auth");
-  const { requestSellerAccess, manageSellerAccess } =
+  const { inviteSellerAccount, respondSellerInvitation, manageSellerAccess } =
     await import("../src/lib/seller-access");
   const { inWorkspace } = await import("../src/lib/workspace");
   const { createAgreement, milestone } = await import("../src/lib/service");
@@ -104,44 +104,67 @@ test("permanent account sessions and buyer-approved seller access remain isolate
       1,
     );
     await assert.rejects(
-      requestSellerAccess(agreement.sellerToken, buyer.user.id),
-      /own this agreement/,
+      respondSellerInvitation(agreement.sellerToken, buyer.user.id, "accept"),
+      /own invitation/,
     );
-    await requestSellerAccess(agreement.sellerToken, seller.user.id);
-    await requestSellerAccess(agreement.sellerToken, stranger.user.id);
-    const pending = await db.sellerAccessRequest.findFirstOrThrow({
-      where: { agreementId: agreement.id, userId: seller.user.id },
-    });
     await assert.rejects(
-      manageSellerAccess(
+      respondSellerInvitation(agreement.sellerToken, seller.user.id, "accept"),
+      /chosen by the buyer/,
+    );
+    await assert.rejects(
+      inviteSellerAccount(
         agreement.id,
         `account:${stranger.user.id}`,
-        "approve",
-        pending.id,
+        seller.user.id,
       ),
       /not found/,
     );
-    await manageSellerAccess(agreement.id, workspace, "approve", pending.id);
+    await assert.rejects(
+      inviteSellerAccount(agreement.id, workspace, stranger.user.id),
+      /matching Paylock email/,
+    );
+    await inviteSellerAccount(agreement.id, workspace, seller.user.id);
+    assert.equal(
+      (await db.agreement.findUniqueOrThrow({ where: { id: agreement.id } }))
+        .sellerUserId,
+      null,
+    );
+    await assert.rejects(
+      respondSellerInvitation(
+        agreement.sellerToken,
+        stranger.user.id,
+        "accept",
+      ),
+      /chosen by the buyer/,
+    );
+    await respondSellerInvitation(
+      agreement.sellerToken,
+      seller.user.id,
+      "accept",
+    );
+    await respondSellerInvitation(
+      agreement.sellerToken,
+      seller.user.id,
+      "accept",
+    );
     assert.equal(
       (await db.agreement.findUniqueOrThrow({ where: { id: agreement.id } }))
         .sellerUserId,
       seller.user.id,
     );
     assert.equal(
-      (
-        await db.sellerAccessRequest.findFirstOrThrow({
-          where: { userId: stranger.user.id },
-        })
-      ).status,
-      "DECLINED",
+      await db.timelineEvent.count({
+        where: { agreementId: agreement.id, type: "SELLER_ACCEPTED" },
+      }),
+      1,
     );
     await assert.rejects(
-      manageSellerAccess(agreement.id, workspace, "approve", pending.id),
-      /no longer available/,
+      inviteSellerAccount(agreement.id, workspace, seller.user.id),
+      /Renew the invitation/,
     );
     await manageSellerAccess(agreement.id, workspace, "renew");
     await assert.rejects(
-      requestSellerAccess(agreement.sellerToken, seller.user.id),
+      respondSellerInvitation(agreement.sellerToken, seller.user.id, "accept"),
       /unavailable/,
     );
     const renewed = await db.agreement.findUniqueOrThrow({
@@ -158,9 +181,49 @@ test("permanent account sessions and buyer-approved seller access remain isolate
       data: { sellerInviteExpiresAt: new Date(0) },
     });
     await assert.rejects(
-      requestSellerAccess(renewed.sellerToken, seller.user.id),
+      respondSellerInvitation(renewed.sellerToken, seller.user.id, "accept"),
       /expired/,
     );
+    const direct = await inWorkspace(workspace, () =>
+      createAgreement({
+        ...brief,
+        sellerAccountId: seller.user.id,
+        plan: fallbackPlan(brief),
+        aiSource: "fallback",
+      }),
+    );
+    assert.equal(direct.sellerUserId, null);
+    assert.equal(
+      (
+        await db.sellerAccessRequest.findFirstOrThrow({
+          where: { agreementId: direct.id },
+        })
+      ).status,
+      "INVITED",
+    );
+    await respondSellerInvitation(
+      direct.sellerToken,
+      seller.user.id,
+      "decline",
+    );
+    await assert.rejects(
+      respondSellerInvitation(direct.sellerToken, seller.user.id, "accept"),
+      /chosen by the buyer/,
+    );
+    await assert.rejects(
+      inviteSellerAccount(direct.id, workspace, seller.user.id),
+      /Renew the invitation/,
+    );
+    await manageSellerAccess(direct.id, workspace, "renew");
+    await inviteSellerAccount(direct.id, workspace, seller.user.id);
+    const fresh = await db.agreement.findUniqueOrThrow({
+      where: { id: direct.id },
+    });
+    await assert.rejects(
+      respondSellerInvitation(direct.sellerToken, seller.user.id, "accept"),
+      /unavailable/,
+    );
+    await respondSellerInvitation(fresh.sellerToken, seller.user.id, "accept");
     assert.equal(
       (await db.user.findUniqueOrThrow({ where: { id: seller.user.id } }))
         .emailVerified,

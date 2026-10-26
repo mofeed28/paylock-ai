@@ -6,7 +6,7 @@
 
 A working PayPal AI Hackathon MVP for small freelance projects: turn a brief into measurable milestones, collect evidence, inspect an AI review, and capture a PayPal sandbox authorization after manual approval or an explicit, time-limited buyer policy.
 
-This repository is a **private sandbox beta with optional permanent accounts**, not a regulated escrow service or a production marketplace. Buyers own persistent workspaces and explicitly approve seller access. New account-based sandbox agreements require a connected seller; legacy agreements keep their original test merchant. Seller onboarding is implemented but awaits Platform sandbox credentials and external end-to-end verification. Practice mode is usable without external credentials.
+This repository is a **private sandbox beta with optional permanent accounts**, not a regulated escrow service or a production marketplace. Buyers own persistent workspaces and invite specific seller accounts, which accept once to join. New account-based sandbox agreements require a connected seller; legacy agreements keep their original test merchant. Seller onboarding is implemented but awaits Platform sandbox credentials and external end-to-end verification. Practice mode is usable without external credentials.
 
 See [permanent accounts and seller invitations](docs/ACCOUNTS.md) for setup, access rules and remaining production-launch requirements. Email verification and password-reset mail need a sender before open enrollment.
 

@@ -16,7 +16,7 @@ test("seller inbox discovers private invitations without granting agreement acce
   );
   const { db } = await import("../src/lib/db");
   const { sellerInbox } = await import("../src/lib/seller-inbox");
-  const { requestSellerAccess, manageSellerAccess } =
+  const { inviteSellerAccount, respondSellerInvitation, manageSellerAccess } =
     await import("../src/lib/seller-access");
   try {
     for (const id of ["buyer", "seller", "stranger"])
@@ -61,7 +61,9 @@ test("seller inbox discovers private invitations without granting agreement acce
     ]);
     assert.equal(JSON.stringify(inbox).includes("Private"), false);
     assert.equal((await sellerInbox("stranger")).invitations.length, 0);
-    await requestSellerAccess(link.sellerToken, "seller");
+    await db.sellerAccessRequest.create({
+      data: { agreementId: link.id, userId: "seller", status: "PENDING" },
+    });
     inbox = await sellerInbox("seller");
     assert.equal(
       inbox.invitations.length,
@@ -72,16 +74,13 @@ test("seller inbox discovers private invitations without granting agreement acce
       inbox.invitations.find((i) => i.id === link.id)?.accessRequests[0].status,
       "PENDING",
     );
-    await requestSellerAccess(invited.sellerToken, "seller");
-    const request = await db.sellerAccessRequest.findFirstOrThrow({
-      where: { agreementId: invited.id, userId: "seller" },
-    });
-    await manageSellerAccess(
-      invited.id,
-      "account:buyer",
-      "approve",
-      request.id,
+    await inviteSellerAccount(invited.id, "account:buyer", "seller");
+    assert.equal(
+      (await sellerInbox("seller")).invitations.find((i) => i.id === invited.id)
+        ?.accessRequests[0].status,
+      "INVITED",
     );
+    await respondSellerInvitation(invited.sellerToken, "seller", "accept");
     inbox = await sellerInbox("seller");
     assert.equal(inbox.agreements[0].title, "Private title");
     assert.equal(

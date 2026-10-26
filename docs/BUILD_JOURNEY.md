@@ -445,3 +445,26 @@ payment was submitted. Public HTTPS, database integrity, anonymous boundaries
 and the existing USD 5 receipt pass. Hosted screenshot capture was unavailable;
 the rendered accessibility tree verified the live content, with desktop/mobile
 layout screenshots retained from the isolated preview.
+
+
+## 2026-10-26 — Invite once, seller accepts
+
+Removed the seller-request / buyer-reapproval cycle. A buyer now selects the
+seller's permanent account ID, obtained directly from the seller and matched to
+the agreement's Paylock email. The seller accepts or declines in their inbox;
+acceptance immediately grants seller access. The old approval endpoint no longer
+grants access. Account pages include a copy-ID control, and the agreement form
+can target the seller at creation or leave recipient selection until afterward.
+
+No email-verification provider exists, so unverified email and invitation links
+alone still cannot grant access. Legacy email-only invitations ask for account
+identification; existing assigned sellers retain access. Revocation rotates the
+link and preserves work/payment records. Accepting is separate from PayPal
+connection, funding and payment approval.
+
+Validation: all 28 isolated tests passed, including the browser-agent flow.
+Account HTTP checks passed with wrong-account rejection, concurrent acceptance
+idempotency, submission gating and revocation; judge HTTP isolation also passed.
+Local Turbopack's CSS worker failed to start, so the local production build used
+Next's webpack builder and passed TypeScript. The deployment gate will also run
+the normal Turbopack build and both HTTP suites on Linux before switching.

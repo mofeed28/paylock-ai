@@ -20,7 +20,7 @@ export default async function Page() {
         <div>
           <span className="eyebrow">SELLER WORKSPACE</span>
           <h1>Your seller inbox</h1>
-          <p>Review invitations, get buyer approval, and deliver your work.</p>
+          <p>Accept invitations and deliver your work.</p>
           <p className="fine-print">Signed in as {user.email}</p>
         </div>
         <Link className="text-link" href="/agreements">
@@ -54,14 +54,12 @@ export default async function Page() {
             Invitations{" "}
             <span className="seller-count">{invitations.length}</span>
           </h2>
-          <p>Request access here. The buyer then approves your account.</p>
+          <p>The buyer chooses your account. You accept once to join.</p>
         </div>
         {invitations.length ? (
           <div className="seller-inbox-grid">
             {invitations.map((invitation, index) => {
-              const pending = invitation.accessRequests.some(
-                (r) => r.status === "PENDING",
-              );
+              const status = invitation.accessRequests[0]?.status;
               return (
                 <article className="card seller-work-card" key={invitation.id}>
                   <span className="eyebrow">
@@ -73,20 +71,24 @@ export default async function Page() {
                     })}
                   </span>
                   <h3>
-                    {pending
-                      ? "Waiting for buyer approval"
-                      : "You have a new invitation"}
+                    {status === "INVITED"
+                      ? "Ready for your acceptance"
+                      : status === "DECLINED"
+                        ? "Invitation closed"
+                        : "Share your account ID"}
                   </h3>
                   <p>
-                    {pending
-                      ? "Your request is saved. The buyer must approve your account before you can see the agreement."
-                      : "A buyer invited your Paylock email. Request access to join; agreement details stay private until approval."}
+                    {status === "INVITED"
+                      ? "Accept or decline. No second buyer approval is needed."
+                      : status === "DECLINED"
+                        ? "The buyer must renew this invitation before you can join."
+                        : "This invitation uses your email only. Share your account ID so the buyer can choose your account."}
                   </p>
                   <Link
                     className="button outline"
                     href={`/seller/${invitation.sellerToken}`}
                   >
-                    {pending ? "Check approval status" : "Review invitation"}
+                    Review invitation
                     <ArrowRight size={16} aria-hidden="true" />
                   </Link>
                 </article>
@@ -99,9 +101,8 @@ export default async function Page() {
             <div>
               <strong>No pending invitations</strong>
               <p>
-                Ask the buyer to use your Paylock email above, or open the
-                invitation link they shared. Invitations expire after seven
-                days.
+                Share your Paylock email and account ID from your Account page
+                with the buyer. Invitations expire after seven days.
               </p>
             </div>
           </div>
@@ -115,7 +116,7 @@ export default async function Page() {
           <h2 id="seller-deliveries">
             Your work <span className="seller-count">{agreements.length}</span>
           </h2>
-          <p>Agreements the buyer has approved you to access.</p>
+          <p>Agreements you have joined as the seller.</p>
         </div>
         {agreements.length ? (
           <div className="seller-inbox-grid">
@@ -128,7 +129,7 @@ export default async function Page() {
                   <span className="eyebrow">
                     {paid === a.milestones.length
                       ? "COMPLETED"
-                      : "APPROVED ACCESS"}
+                      : "SELLER ACCESS"}
                   </span>
                   <h3>{a.title}</h3>
                   <p>Buyer: {a.buyerName}</p>
@@ -153,10 +154,10 @@ export default async function Page() {
           <div className="card seller-inbox-empty">
             <Inbox size={22} aria-hidden="true" />
             <div>
-              <strong>No approved work yet</strong>
+              <strong>No work joined yet</strong>
               <p>
-                Once a buyer approves your request, the agreement and its
-                milestones appear here.
+                Once you accept an invitation, the agreement and its milestones
+                appear here.
               </p>
             </div>
           </div>

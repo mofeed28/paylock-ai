@@ -34,7 +34,7 @@ Never commit populated credentials.
 ## Payment behavior
 
 - New sandbox agreements created by permanent accounts use seller routing. Buyer
-  must approve the seller's Paylock account and that seller must connect PayPal.
+  must invite the seller's Paylock account; that seller must accept and connect PayPal.
   Missing setup blocks checkout; there is no fallback to the platform merchant.
 - Existing agreements retain `legacy` routing and their original credential set.
   Their checkout explicitly identifies them as using the configured test merchant.

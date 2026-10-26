@@ -1,6 +1,12 @@
-import { judgeDemo } from "@/lib/workspace";
+import { accountsEnabled, judgeDemo } from "@/lib/workspace";
 import { AgreementForm } from "@/components/agreement-form";
 import { paymentMode } from "@/lib/paypal";
 export default function Page() {
-  return <AgreementForm mode={paymentMode()} judgeDemo={judgeDemo()} />;
+  return (
+    <AgreementForm
+      mode={paymentMode()}
+      judgeDemo={judgeDemo()}
+      accounts={accountsEnabled()}
+    />
+  );
 }

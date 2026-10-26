@@ -18,7 +18,11 @@ import {
   judgeDemo,
   inWorkspace,
 } from "@/lib/workspace";
-import { requestSellerAccess, manageSellerAccess } from "@/lib/seller-access";
+import {
+  inviteSellerAccount,
+  respondSellerInvitation,
+  manageSellerAccess,
+} from "@/lib/seller-access";
 import { startSellerPayPal, refreshSellerPayPal } from "@/lib/seller-paypal";
 import { generateAgreementMilestones } from "@/lib/ai";
 import { briefSchema, submissionSchema } from "@/lib/schema";
@@ -154,12 +158,23 @@ async function handle(
     if (
       accountsEnabled() &&
       path[0] === "seller" &&
-      path[2] === "request-access"
+      ["request-access", "respond-invitation"].includes(path[2])
     ) {
       const user = await currentAccount();
-      if (!user) throw new ApiError(401, "Sign in to request seller access.");
+      if (!user)
+        throw new ApiError(401, "Sign in to respond to the invitation.");
+      if (path[2] === "request-access")
+        throw new ApiError(
+          409,
+          "Refresh this page. The buyer invites your account, then you accept directly.",
+        );
+      const input = z
+        .object({ action: z.enum(["accept", "decline"]) })
+        .parse(body);
       return NextResponse.json(
-        await serialized(() => requestSellerAccess(path[1], user.id)),
+        await serialized(() =>
+          respondSellerInvitation(path[1], user.id, input.action),
+        ),
       );
     }
     if (path[0] === "seller" && path[2] === "submit") {
@@ -182,7 +197,7 @@ async function handle(
       )
         throw new ApiError(
           403,
-          "Only the buyer-approved seller account can submit work.",
+          "Only the assigned seller account can submit work.",
         );
       const result = await inWorkspace(agreement.workspaceId, () =>
         serialized(() =>
@@ -201,15 +216,20 @@ async function handle(
         ) {
           const input = z
             .object({
-              action: z.enum(["approve", "renew"]),
-              requestId: z.string().optional(),
+              action: z.enum(["invite", "renew"]),
+              accountId: z.string().trim().min(1).max(128).optional(),
             })
             .parse(body);
+          if (input.action === "invite")
+            return inviteSellerAccount(
+              idSchema.parse(path[1]),
+              (await buyerWorkspace())!,
+              input.accountId || "",
+            );
           return manageSellerAccess(
             idSchema.parse(path[1]),
             (await buyerWorkspace())!,
             input.action,
-            input.requestId,
           );
         }
         if (route === "ai/generate")

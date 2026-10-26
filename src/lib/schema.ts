@@ -28,7 +28,11 @@ export const briefSchema = z.object({
   deadline: daySchema.nullable(),
 });
 export const agreementSchema = briefSchema
-  .extend({ plan: planSchema, aiSource: z.enum(["live", "fallback", "demo"]) })
+  .extend({
+    plan: planSchema,
+    aiSource: z.enum(["live", "fallback", "demo"]),
+    sellerAccountId: z.string().trim().min(1).max(128).optional(),
+  })
   .superRefine((v, ctx) => {
     if (v.plan.milestones.reduce((n, m) => n + m.amount, 0) !== v.totalAmount)
       ctx.addIssue({

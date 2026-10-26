@@ -23,11 +23,15 @@ import { api, Notice, Status } from "./common";
 export function AgreementForm({
   mode,
   judgeDemo = false,
+  accounts = false,
 }: {
   mode: string;
   judgeDemo?: boolean;
+  accounts?: boolean;
 }) {
   const router = useRouter();
+  const [sellerAccountId, setSellerAccountId] = useState("");
+  const [identityConfirmed, setIdentityConfirmed] = useState(false);
   const [brief, setBrief] = useState({
     title: "",
     sellerEmail: "",
@@ -85,8 +89,15 @@ export function AgreementForm({
     setBusy("Creating agreement…");
     setError("");
     try {
+      if (accounts && sellerAccountId.trim() && !identityConfirmed)
+        throw new Error(
+          "Confirm that you received this account ID directly from your seller.",
+        );
       const body = agreementSchema.parse({
         ...input(),
+        ...(accounts && sellerAccountId.trim()
+          ? { sellerAccountId: sellerAccountId.trim() }
+          : {}),
         plan,
         aiSource: source,
       });
@@ -159,9 +170,8 @@ export function AgreementForm({
                   required
                 />
                 <small>
-                  Use the email they sign in to Paylock with. In account mode,
-                  an invitation appears in their seller inbox. They request
-                  access; you approve it. No email is sent.
+                  Use the email they sign in to Paylock with. No email is sent
+                  automatically.
                 </small>
               </div>
               <div className="field">
@@ -180,6 +190,37 @@ export function AgreementForm({
                 />
               </div>
             </div>
+            {accounts && (
+              <div className="field">
+                <label htmlFor="seller-account">
+                  Seller’s Paylock account ID <span>optional</span>
+                </label>
+                <input
+                  id="seller-account"
+                  value={sellerAccountId}
+                  maxLength={128}
+                  onChange={(e) => {
+                    setSellerAccountId(e.target.value);
+                    setIdentityConfirmed(false);
+                  }}
+                />
+                <small>
+                  Ask your seller to copy this from Account. They accept your
+                  invitation once; you won’t need to approve them again. Leave
+                  blank to choose the recipient after saving.
+                </small>
+                {sellerAccountId.trim() && (
+                  <label className="invitation-confirmation">
+                    <input
+                      type="checkbox"
+                      checked={identityConfirmed}
+                      onChange={(e) => setIdentityConfirmed(e.target.checked)}
+                    />{" "}
+                    I received this account ID directly from my seller.
+                  </label>
+                )}
+              </div>
+            )}
             <div className="field">
               <label htmlFor="description">Your requirements</label>
               <textarea
