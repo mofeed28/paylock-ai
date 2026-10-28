@@ -514,3 +514,20 @@ The deployment backed up the database and environment under
 `/var/backups/paylock/ui-20261026`; all 12 existing table hashes were preserved.
 Read-only HTTPS/authentication checks and the saved USD 5 receipt passed after
 the switch. No payments, invitations or access grants were changed by UI testing.
+
+
+## 2026-10-28 — Live seller-routing test found a repeat-referral mismatch
+
+The saved seller's original tracking lookup still matched its immutable merchant,
+but PayPal's merchant-status response contained the tracking ID of another saved
+connection attempt. Payment eligibility, confirmed email and platform capture
+permission were all true. Refresh correctly stopped before creating an order.
+
+For already bound merchants, status refresh now relies on the exact original
+tracking lookup plus pinned merchant identity, and checks current permissions.
+New unbound connections still require the detail tracking ID to match. Tests cover
+new-binding mismatch, repeat referral, wrong original tracking and revoked
+permission; duplicate merchant ownership protection remains in place.
+The observed two-response difference was confirmed against the live sandbox;
+PayPal documents the separate tracking lookup and merchant-status endpoints at
+https://developer.paypal.com/platforms/checkout/save-payment-methods/onboarding/platform/.

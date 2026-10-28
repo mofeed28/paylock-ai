@@ -46,6 +46,7 @@ test("seller onboarding verifies ownership and permissions, pins recipient and b
   let confirmed = true;
   let statusCode = 200;
   let wrongTracking = false;
+  let laterReferral = false;
   let destination = "SELLER1234567";
   let callbackUrl =
     "https://www.sandbox.paypal.com/bizsignup/partner/entry?token=test";
@@ -103,7 +104,10 @@ test("seller onboarding verifies ownership and permissions, pins recipient and b
       if (requestedTracking) tracking = requestedTracking;
       return response({
         merchant_id: destination,
-        tracking_id: wrongTracking ? "someone-else" : tracking,
+        tracking_id:
+          wrongTracking || (laterReferral && !requestedTracking)
+            ? "someone-else"
+            : tracking,
         payments_receivable: true,
         primary_email_confirmed: confirmed,
         oauth_integrations: [
@@ -236,6 +240,17 @@ test("seller onboarding verifies ownership and permissions, pins recipient and b
       /different seller identity/,
     );
     wrongTracking = false;
+    laterReferral = true;
+    await assert.rejects(refreshSellerPayPal("seller"), /confirm ownership/);
+    assert.equal(
+      (
+        await db.payPalConnection.findUniqueOrThrow({
+          where: { userId: "seller" },
+        })
+      ).merchantId,
+      null,
+    );
+    laterReferral = false;
     confirmed = false;
     assert.equal(
       (await refreshSellerPayPal("seller")).status,
@@ -249,6 +264,26 @@ test("seller onboarding verifies ownership and permissions, pins recipient and b
     );
     permissions = true;
     assert.equal((await refreshSellerPayPal("seller")).status, "READY");
+    laterReferral = true;
+    assert.equal(
+      (await refreshSellerPayPal("seller")).status,
+      "READY",
+      "a later referral cannot invalidate an already bound merchant with a matching original lookup",
+    );
+    wrongTracking = true;
+    await assert.rejects(
+      refreshSellerPayPal("seller"),
+      /different seller identity/,
+    );
+    wrongTracking = false;
+    permissions = false;
+    assert.equal(
+      (await refreshSellerPayPal("seller")).status,
+      "ACTION_REQUIRED",
+      "permission checks still apply after re-referral",
+    );
+    permissions = true;
+    laterReferral = false;
     await startSellerPayPal("stranger", true);
     await assert.rejects(refreshSellerPayPal("stranger"), /already connected/);
     await inWorkspace("account:buyer", async () => {

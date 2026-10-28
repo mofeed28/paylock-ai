@@ -170,9 +170,13 @@ export async function refreshSellerPayPal(userId: string) {
     const detail = (await platformPayPal(
       `${base}/${found.merchant_id}`,
     )) as MerchantStatus;
+    // A later referral for the same merchant can replace the status endpoint's
+    // tracking_id. For a previously bound connection, the original tracking
+    // lookup above still has to match both our tracking ID and immutable merchant.
+    // New connections must also match the status tracking ID before binding.
     if (
       detail.merchant_id !== found.merchant_id ||
-      detail.tracking_id !== row.trackingId
+      (!row.merchantId && detail.tracking_id !== row.trackingId)
     )
       throw new ApiError(
         409,
