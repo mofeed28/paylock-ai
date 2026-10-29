@@ -72,10 +72,25 @@ The user confirmed PayPal's final permission grant, and the hosted status check
 verified merchant identity, confirmed email, payment eligibility and the platform's
 authorization/capture permission. The saved seller now shows Connected for sandbox
 payments. PayPal also displayed a further profile-completion flow; no additional
-identity information was submitted. A seller-routed sandbox transaction remains
-pending. Complete transaction testing with distinct
-platform, seller and buyer sandbox accounts before presenting the feature as
-end-to-end verified. Also test normal Checkout SDK callbacks in a regular browser.
+identity information was submitted.
+
+On October 29, a fresh agreement completed the seller-routed sandbox workflow
+with distinct platform, seller and buyer accounts. The invited seller accepted,
+the buyer authorized USD 5, live Bedrock requested a revision to incomplete text
+evidence, and corrected evidence passed both criteria. Buyer approval captured
+USD 5 to the connected seller. PayPal returned COMPLETED for capture
+`7JF45713HK321441W`; the order payee matched the pinned seller merchant. One
+capture event was recorded and the other USD 1 milestone remained unfunded.
+
+Scope: agreement creation, invitation acceptance, submission, decisions and
+payment reconciliation used authenticated app APIs. PayPal approval used its
+hosted sandbox checkout in the browser, followed by Paylock's authorization
+recovery endpoint. The hosted review and ledger were visually checked. This
+verified written-evidence review, not the website browser agent. The embedded
+SDK button did not open a popup in the in-app browser; normal SDK callbacks in
+a regular browser still need verification. The prior day's unapproved order
+returned 404 after the overnight pause; it remains unpaid. Automatic replacement
+of expired unpaid checkout orders is not implemented yet.
 
 Production remains disabled. PayPal partner approval is required before going
 live. Add signature-verified MERCHANT.ONBOARDING.COMPLETED and

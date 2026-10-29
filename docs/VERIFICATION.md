@@ -409,3 +409,40 @@ The deployment backed up the database and environment under
 `/var/backups/paylock/ui-20261026`; all 12 existing table hashes were preserved.
 Read-only HTTPS/authentication checks and the saved USD 5 receipt passed after
 the switch. No payments, invitations or access grants were changed by UI testing.
+
+## 2026-10-29 — Seller-routed sandbox payment verified
+
+Seller refresh fix `5bcc927` deployed October 28 to
+`/opt/paylock/releases/seller-check-20261028`. All 28 Linux tests, lint, normal
+Turbopack production build/TypeScript and both HTTP suites passed. All 12 existing
+table hashes were preserved; backup is under
+`/var/backups/paylock/seller-check-20261028`. Public HTTPS, anonymous access
+boundaries, database integrity and the prior receipt checks passed.
+
+Fresh agreement `cmvtqkbvx000apdeyixan2dzu` completed on October 29:
+
+- The specifically invited permanent seller account accepted without buyer
+  reapproval. PayPal refresh verified the existing connected merchant.
+- PayPal order `8SH70367BS353615E` specified AUTHORIZE, USD 5 and the pinned
+  seller merchant `LTJFUUKVMGAPQ`, distinct from the platform.
+- Sandbox buyer approved through PayPal's hosted checkout. The app recovery
+  endpoint recorded authorization `1TF68141PB3279455`.
+- Live Bedrock (`us.amazon.nova-2-lite-v1:0`) found one of two criteria missing
+  in the first written submission and recommended revision. Payment remained
+  AUTHORIZED. Corrected text then passed both criteria and recommended release.
+- Authenticated buyer approval captured USD 5. Provider readback returned
+  COMPLETED for `7JF45713HK321441W` and the order confirmed the intended payee.
+  The app recorded exactly one capture, marked the milestone RELEASED/CAPTURED,
+  and left the second USD 1 milestone UNFUNDED.
+- Provider breakdown: USD 5 gross, USD 0.47 sandbox fee, USD 4.53 net; the
+  seller's converted receivable was ILS 13.62. These are simulated funds.
+- Hosted agreement and payment ledger visibly show the live review and receipt.
+  Private evidence export and screenshots were saved outside tracked source.
+
+Limitations: setup/submission/decisions used authenticated app APIs; this is not
+an all-UI interaction test. Embedded SDK popup/callback remains unverified in a
+regular browser; direct hosted checkout plus recovery was used. This exercise
+checks written evidence, not independent website inspection. The October 28
+unapproved order was unavailable (404) after the overnight pause and was not
+authorized or captured. A fresh agreement was used; automatic expired-order
+replacement remains a follow-up. Production payments remain disabled.

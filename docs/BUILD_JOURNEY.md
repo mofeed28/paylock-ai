@@ -531,3 +531,23 @@ permission; duplicate merchant ownership protection remains in place.
 The observed two-response difference was confirmed against the live sandbox;
 PayPal documents the separate tracking lookup and merchant-status endpoints at
 https://developer.paypal.com/platforms/checkout/save-payment-methods/onboarding/platform/.
+
+## 2026-10-29 — Completed a seller-routed USD 5 sandbox transaction
+
+Deployed the repeat-referral fix after 28 tests, lint, Linux production build and
+both HTTP suites passed. Database backup and all 12 table-preservation checks
+passed. The real seller connection now refreshes successfully.
+
+A new permanent-account agreement completed invitation acceptance, USD 5 PayPal
+sandbox authorization, a live Bedrock revision on incomplete written evidence,
+corrected evidence passing both criteria, buyer approval and seller capture.
+Provider receipt `7JF45713HK321441W` is COMPLETED and the order payee matches the
+pinned merchant. The ledger contains one capture; the USD 1 second milestone
+stays unfunded. No real money was used.
+
+The embedded checkout popup did not open in the in-app browser. PayPal's hosted
+approval page plus the existing recovery endpoint completed authorization.
+The normal SDK callback still needs a regular-browser check. Yesterday's unpaid
+order became unavailable during the overnight pause; automatic expired-order
+replacement also remains outstanding. The evidence and exact test scope are
+recorded in VERIFICATION.md and PAYPAL_SELLERS.md, including API versus UI steps.
