@@ -551,3 +551,12 @@ The normal SDK callback still needs a regular-browser check. Yesterday's unpaid
 order became unavailable during the overnight pause; automatic expired-order
 replacement also remains outstanding. The evidence and exact test scope are
 recorded in VERIFICATION.md and PAYPAL_SELLERS.md, including API versus UI steps.
+
+
+## 2026-11-02 — Expired-order recovery, configurable model quotas, and submission docs
+
+- Added unapproved expired-order recovery in `recoverAuthorization` (`src/lib/service.ts`): when PayPal returns HTTP 404 (`RESOURCE_NOT_FOUND`) for an `UNFUNDED` milestone with no authorization, the stale `ORDER` payment event is archived as `EXPIRED`, `orderId` is cleared while keeping `payeeMerchantId` and `payeeUserId` pinned, and `createOrder` issues a fresh PayPal order with a distinct `PayPal-Request-Id` key.
+- Added optional `DEMO_MONTHLY_MODEL_LIMIT` and `DEMO_DAILY_WORKSPACE_LIMIT` environment overrides in `src/lib/demo-limits.ts` (preserving the default 150/month and 20/day limits).
+- Aligned `/agent` (`src/components/agent-studio.tsx`, `src/lib/agent-service.ts`) and `/judge` (`src/app/(buyer)/judge/page.tsx`) with `AUTH_MODE=accounts` so website-verification agreements can optionally invite `sellerAccountId` at creation time and show mode-accurate instructions.
+- Updated `README.md`, `docs/DEVPOST.md`, `docs/SUBMISSION_CHECKLIST.md`, and `docs/DEMO_SCRIPT.md` to reflect all verified milestones through October 29, 2026.
+- Verified locally with all 28 unit/workflow tests (`npm test`), ESLint (`npm run lint`), TypeScript (`npm run typecheck`), production Next.js build (`npm run build`), and both isolated production HTTP suites (`scripts/verify-judge-http.mjs` and `scripts/verify-accounts-http.mjs`).

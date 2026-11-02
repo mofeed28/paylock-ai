@@ -1,49 +1,39 @@
 # Paylock AI submission checklist
 
-Updated October 15, 2026. Deadline: November 12, 2026, 12:00 PM PST.
+Updated November 2, 2026. Deadline: November 12, 2026, 12:00 PM PST.
 Requirements: https://paypalaihackathon.devpost.com/
 
-## Ready
+## Ready & verified
 
-- Meaningful PayPal Orders authorization and Payments capture implementation.
-- Live Amazon Bedrock / Amazon Nova 2 Lite planning and evidence verification.
-- Hosted HTTPS judge demo with isolated, access-code-protected workspaces.
-- MIT license at the repository root, source code and local setup instructions.
-- Automated checks for payment permissions, duplicate capture, evidence handling,
-  workspace isolation, model fallback and the browser revision loop.
-- Clear buyer requirements, seller submission view and payment decision flow.
-- Hosted $5 PayPal sandbox authorization, live Nova browser verification and
-  manual capture completed October 15. Independent PayPal lookup confirmed
-  COMPLETED, USD 5.00. See `VERIFICATION.md` for the evidence record.
+- **PayPal Orders v2 (`AUTHORIZE`) + Payments v2 (`Capture`)**: Verified with real PayPal Sandbox transactions, deterministic `PayPal-Request-Id` idempotency, lost-callback authorization recovery (`POST /api/paypal/recover-authorization`), and expired unapproved order reset.
+- **PayPal Partner Referrals v2 + Multiparty Seller Routing**: Sellers connect their own Business PayPal sandbox account (`/account`), verified via Merchant Integrations v1 and paid via `PayPal-Auth-Assertion` (`7JF45713HK321441W`, `COMPLETED` to seller merchant `LTJFUUKVMGAPQ` on October 29, 2026).
+- **Live Amazon Bedrock Converse (`us.amazon.nova-2-lite-v1:0`)**: Verified for milestone drafting, criterion-by-criterion evidence review with quote validation, and sequential Playwright browser tool calling.
+- **Hosted HTTPS deployment (`https://paylock-demo.52.202.219.38.sslip.io`)**: Hardened with permanent Better Auth accounts (`AUTH_MODE=accounts`), isolated buyer/seller workspaces, and configurable AI usage quotas (`DEMO_MONTHLY_MODEL_LIMIT` / `DEMO_DAILY_WORKSPACE_LIMIT`).
+- **Complete test & build verification**: 28 automated unit/workflow tests (`npm test`) and two full-stack HTTP suites (`scripts/verify-judge-http.mjs`, `scripts/verify-accounts-http.mjs`) pass alongside `npm run lint`, `npm run typecheck`, and `npm run build`.
+- **MIT License & Documentation**: `LICENSE` at repo root, `.env.example`, `README.md`, `docs/BUILD_JOURNEY.md`, `docs/VERIFICATION.md`, `docs/DEVPOST.md`, and `docs/DEMO_SCRIPT.md`.
 
-## Finish before submitting
+## Finish before submitting on Devpost
 
-- Publish the repository only with the owner's approval. It is currently private.
-  Before publication, scan tracked files and Git history for credentials and
-  personal data. Do not publish `.env`, databases, private judge codes or SSH keys.
-- Rehearse a fresh judge session from login, including access instructions.
-  Confirm remaining model allowance before judging; logging in again creates
-  a fresh workspace and does not recover earlier session work.
-- Record the working product using `DEMO_SCRIPT.md`; public YouTube video below
-  three minutes. No stock music or unauthorized third-party media.
-- Finalize `DEVPOST.md`, naming Bedrock/Nova and the PayPal APIs actually shown.
-  Disclose that the judge tests both roles, the merchant is preconfigured, and
-  offline walkthrough payments are simulated. Do not call this regulated escrow.
-- Add the public repository, demo URL, video URL and private judge instructions
-  to Devpost. Check entrant eligibility and official rules, then submit.
+1. **Publish the GitHub repository**:
+   - Confirm no `.env`, `work/`, SQLite `.db` files, SSH keys, or access codes are tracked (`git status` / `git log`).
+   - Switch the repository visibility to **Public** and verify the MIT license appears in the GitHub About sidebar.
+2. **Check hosted demo quota & credentials**:
+   - Confirm `DEMO_MONTHLY_MODEL_LIMIT` on the Lightsail server has ample headroom for November judging (e.g. `DEMO_MONTHLY_MODEL_LIMIT="500"`).
+   - Provide pre-created Buyer and connected Seller login credentials (or enrollment code) in the private Devpost judging notes so judges can test immediately without needing to complete Partner Referrals onboarding from scratch.
+3. **Record and upload the <3:00 YouTube demo video**:
+   - Follow [`docs/DEMO_SCRIPT.md`](DEMO_SCRIPT.md) (target 2:35–2:45).
+   - Show the real hosted flow: milestone agreement, PayPal sandbox authorization, AI/browser inspection catching a missing requirement (`HTTP 404` or missing criterion), revision submission, passing re-verification, and PayPal sandbox capture (`COMPLETED` receipt in the ledger).
+   - Upload to YouTube as **Public** (or Unlisted if permitted, though Public is safest per Devpost rules).
+4. **Submit the Devpost form**:
+   - Paste the polished text from [`docs/DEVPOST.md`](DEVPOST.md).
+   - Attach the public GitHub repository URL, public YouTube video link, hosted demo URL, and private judge login instructions before **November 12, 2026 at 12:00 PM PST**.
 
-## Private judge instructions template
+## Private judge instructions template (for Devpost testing notes)
 
-Demo: https://paylock-demo.52.202.219.38.sslip.io/login
+Demo URL: `https://paylock-demo.52.202.219.38.sslip.io/login`
 
-Access code: insert privately in the judging instructions; never put it here.
-
-Start with the guide. “Browser walkthrough” runs a prepared revision example
-with simulated payments. “PayPal sandbox verification” uses the hosted public
-storefront and a $5 verification milestone; a Personal sandbox buyer login is
-needed for checkout. The separate $100 handoff need not be authorized.
-Use “Try seller view” and “Back to buyer view” in the same session.
-
-The demo uses test funds only. Browser evidence checks exact headings, delivery
-text, the purchase destination and mobile overflow, with JavaScript disabled.
-A passing destination check does not prove that product checkout works.
+- **Fastest 2-minute walkthrough (no PayPal login required):**
+  Sign in with the provided Buyer demo account (or create an account with the enrollment code), open **Guide (`/judge`) → Try the guided demo (`/agent`)**, and click **Try the browser agent**. Run browser verification to watch Chromium + Amazon Nova 2 Lite catch the broken purchase link (`HTTP 404`), request a revision, click **Submit corrected page & recheck**, and observe policy-bound capture.
+- **Live $5 PayPal Sandbox + Multiparty Seller flow:**
+  Sign in with the provided Buyer and pre-connected Seller demo accounts (or inspect completed agreement `cmvtqkbvx000apdeyixan2dzu` and capture receipt `7JF45713HK321441W` in the workspace ledger). To run a fresh `$5` sandbox transaction, create an agreement inviting the Seller's Account ID (shown on the Seller's `/account` page), accept the invitation from `/seller`, authorize the `$5` milestone with a Personal PayPal sandbox buyer account, submit evidence as Seller, and approve capture as Buyer.
+- All payments use PayPal Sandbox test funds only. Browser checks run with JavaScript disabled against approved HTTPS origins.

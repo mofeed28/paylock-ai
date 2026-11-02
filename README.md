@@ -1,4 +1,4 @@
-> Development status: private hackathon build. PayPal sandbox authorization and a $200 capture have been exercised; the capture was independently read back as COMPLETED. Amazon Nova 2 Lite has passed live Bedrock planning, evidence-review and tool-result checks. The protected judge demo is hosted on Lightsail with HTTPS; live Nova browser verification, revision, simulated capture and hosted PayPal sandbox order creation have been exercised. See [the build journey](docs/BUILD_JOURNEY.md).
+> Development status: private hackathon build. PayPal sandbox authorization and captures have been exercised across local ($200 capture `9D99696660319874E`), hosted legacy ($5 capture `5SF27921LV186002H`), permanent-account ($5 capture `7GP376298T3177443`), and Partner Referrals seller-routed ($5 capture `7JF45713HK321441W` to connected merchant `LTJFUUKVMGAPQ`) flows, each independently read back as COMPLETED. Amazon Nova 2 Lite has passed live Bedrock planning, evidence-review, and sequential browser tool-result checks on the HTTPS Lightsail deployment. See [the build journey](docs/BUILD_JOURNEY.md) and [verification notes](docs/VERIFICATION.md).
 
 # Paylock AI
 
@@ -6,7 +6,7 @@
 
 A working PayPal AI Hackathon MVP for small freelance projects: turn a brief into measurable milestones, collect evidence, inspect an AI review, and capture a PayPal sandbox authorization after manual approval or an explicit, time-limited buyer policy.
 
-This repository is a **private sandbox beta with optional permanent accounts**, not a regulated escrow service or a production marketplace. Buyers own persistent workspaces and invite specific seller accounts, which accept once to join. New account-based sandbox agreements require a connected seller; legacy agreements keep their original test merchant. Seller onboarding is implemented but awaits Platform sandbox credentials and external end-to-end verification. Practice mode is usable without external credentials.
+This repository is a **private sandbox beta with optional permanent accounts**, not a regulated escrow service or a production marketplace. In permanent-account mode (`AUTH_MODE=accounts`), buyers own persistent workspaces and invite specific seller accounts, which accept once to join and connect their own PayPal Business sandbox account via Partner Referrals v2; orders, authorizations, and captures route to the pinned seller merchant via `PayPal-Auth-Assertion`. Legacy and single-session judge agreements keep their original test merchant. Practice mode is usable without external credentials.
 
 See [permanent accounts and seller invitations](docs/ACCOUNTS.md) for setup, access rules and remaining production-launch requirements. Email verification and password-reset mail need a sender before open enrollment.
 
@@ -121,10 +121,13 @@ Endpoints:
 | `POST /api/paypal/create-order`    | Create an AUTHORIZE order from a milestone ID               |
 | `POST /api/paypal/authorize-order` | Verify the bound order and persist its authorization        |
 | `POST /api/paypal/capture-order`   | Capture or reconcile a pending capture after buyer approval |
+| `POST /api/paypal/recover-authorization` | Recover an approved order after a lost callback, or reset an expired unapproved order |
+| `POST /api/paypal/seller/connect`  | Create a PayPal Partner Referrals v2 onboarding link for the signed-in seller account |
+| `POST /api/paypal/seller/refresh`  | Verify seller merchant ownership, primary email, and THIRD_PARTY auth/capture grants |
 
 PayPal requests only target `api-m.sandbox.paypal.com`. Provider failures are surfaced; they never silently become practice payments. Successful order, authorization, and capture responses are stored in `PaymentEvent.rawJson`. Secrets remain server-side; the public client ID is intended for the JS SDK. The browser-visible evidence export omits seller bearer tokens and raw provider payloads.
 
-**Payment limitations:** this is authorization/capture, not true escrow or payouts. Capture settles to the configured merchant; `sellerEmail` does not route funds to arbitrary sellers. Authorizations last up to 29 days, with the best capture success during the first three days. The app enforces an expiration date even in practice; reauthorization, voids, refunds, webhooks, multi-merchant onboarding, and automatic reconciliation are not implemented. An internal dispute only blocks Paylock release; it is not a PayPal case and does not extend a hold. A terminal failed capture needs operator reconciliation; the app conservatively keeps it blocked.
+**Payment scope and guardrails:** this is PayPal Orders v2 authorization and Payments v2 delayed capture, not regulated escrow or standalone payouts. In `AUTH_MODE=accounts`, sandbox agreements pin the invited seller's verified `merchantId` and route orders, authorizations, and captures using `PayPal-Auth-Assertion` and `PayPal-Partner-Attribution-Id`; in single-session mode (`legacy` routing), capture settles to the configured sandbox merchant. Unapproved orders that expire in PayPal (HTTP 404) can be reset through `recover-authorization` without unpinning the seller recipient. Authorizations last up to 29 days, with the best capture success during the first three days. Reauthorization of expired holds, voids, refunds, webhooks, and background reconciliation remain outside MVP scope. An internal dispute blocks Paylock release; it is not a PayPal case and does not extend a hold.
 
 Reference: [PayPal authorize and delay capture](https://developer.paypal.com/checkout/delay-capture/).
 
@@ -178,7 +181,7 @@ npm test
 npm run build
 ```
 
-Tests cover missing/corrected HTML, custom product checks, unsafe links, hidden/comment/script decoys, artifact fingerprints, model/check conflicts, duplicate demo prevention, revision history, cent conservation, date and URL validation, prompt-injection fallback, model citation checks, serial mutation behavior, and an isolated SQLite workflow: revision, seller authorization, dispute blocking, reopening, capture idempotency, and expiration. The same workflow exercises PayPal HTTP contracts with a mocked provider, including pending capture reconciliation. Those tests do not replace an actual sandbox checkout.
+Tests (`npm test`, 28 suites) cover permanent account migration, Better Auth session & seller invitation isolation, seller Partner Referrals v2 onboarding & recipient pinning, Playwright browser revision loops, payment-permission enforcement, SSRF/DNS-pinning target validation, Bedrock Converse tool loops, HTML source checks, cent conservation, prompt-injection fallback, and the complete SQLite payment lifecycle (including lost-callback recovery, expired-order reset, and pending-capture reconciliation). Two additional production HTTP suites (`node scripts/verify-judge-http.mjs` and `node scripts/verify-accounts-http.mjs`) exercise built Next.js servers end to end.
 
 See [the recorded build journey](docs/BUILD_JOURNEY.md), [verification notes](docs/VERIFICATION.md), [demo script](docs/DEMO_SCRIPT.md), and [submission draft](docs/DEVPOST.md).
 

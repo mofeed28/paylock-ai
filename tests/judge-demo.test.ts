@@ -83,6 +83,9 @@ test("judge sessions isolate agreements and payment actions, reject forged sessi
       inWorkspace(b, () => reserveModelCall({ text: "hello" })),
       /allowance/,
     );
+    process.env.DEMO_MONTHLY_MODEL_LIMIT = "151";
+    await inWorkspace(b, () => reserveModelCall({ text: "hello" }));
+    delete process.env.DEMO_MONTHLY_MODEL_LIMIT;
     process.env.DEMO_EXPIRES_AT = new Date(0).toISOString();
     assert.equal(demoAvailable(), false);
     assert.equal(sessionWorkspace(first), null);

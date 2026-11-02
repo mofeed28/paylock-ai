@@ -10,10 +10,14 @@ export async function reserveModelCall(payload: unknown) {
     throw new Error("Demo model input limit reached");
   const month = new Date().toISOString().slice(0, 7);
   const day = new Date().toISOString().slice(0, 10);
+  const monthlyLimit =
+    Number(process.env.DEMO_MONTHLY_MODEL_LIMIT) || 150;
+  const dailyLimit =
+    Number(process.env.DEMO_DAILY_WORKSPACE_LIMIT) || 20;
   await db.$transaction(async (tx) => {
     for (const [key, limit] of [
-      [`models:${month}`, 150],
-      [`models:${workspaceId()}:${day}`, 20],
+      [`models:${month}`, monthlyLimit],
+      [`models:${workspaceId()}:${day}`, dailyLimit],
     ] as const) {
       const changed =
         await tx.$executeRaw`INSERT INTO "DemoUsage" ("key", "count") VALUES (${key}, 1) ON CONFLICT("key") DO UPDATE SET "count" = "count" + 1 WHERE "count" < ${limit}`;

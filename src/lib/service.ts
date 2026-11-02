@@ -290,7 +290,10 @@ export async function createOrder(id: string) {
         payeeUserId: m.agreement.sellerUserId,
       },
     });
-  const key = `order:${id}`;
+  const expiredOrders = await db.paymentEvent.count({
+    where: { milestoneId: id, type: "ORDER", status: "EXPIRED" },
+  });
+  const key = expiredOrders ? `order:${id}:${expiredOrders}` : `order:${id}`;
   const raw = await paymentApi(merchantId)(
     "/v2/checkout/orders",
     "POST",
@@ -355,10 +358,42 @@ export async function recoverAuthorization(id: string) {
   assertOpen(m);
   if (!m.orderId) return { status: "NOT_STARTED" };
   const merchantId = await paymentRecipient(m);
-  const order = await paymentApi(merchantId)(
-    `/v2/checkout/orders/${encodeURIComponent(m.orderId)}`,
-    "GET",
-  );
+  let order;
+  try {
+    order = await paymentApi(merchantId)(
+      `/v2/checkout/orders/${encodeURIComponent(m.orderId)}`,
+      "GET",
+    );
+  } catch (e) {
+    if (
+      m.paymentStatus === "UNFUNDED" &&
+      !m.authorizationId &&
+      e instanceof ApiError &&
+      /RESOURCE_NOT_FOUND|\b404\b/.test(e.message)
+    ) {
+      const expiredOrders = await db.paymentEvent.count({
+        where: { milestoneId: m.id, type: "ORDER", status: "EXPIRED" },
+      });
+      const currentKey = expiredOrders
+        ? `order:${m.id}:${expiredOrders}`
+        : `order:${m.id}`;
+      await db.$transaction([
+        db.paymentEvent.updateMany({
+          where: { operationKey: currentKey, milestoneId: m.id, type: "ORDER" },
+          data: {
+            operationKey: `expired-order:${m.id}:${m.orderId}`,
+            status: "EXPIRED",
+          },
+        }),
+        db.milestone.update({
+          where: { id: m.id },
+          data: { orderId: null },
+        }),
+      ]);
+      return { status: "EXPIRED_RESET" };
+    }
+    throw e;
+  }
   const unit = order.purchase_units?.[0];
   if (
     order.id !== m.orderId ||

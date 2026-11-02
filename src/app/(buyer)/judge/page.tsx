@@ -77,13 +77,14 @@ export default function Page() {
             <span className="eyebrow">TRY THE PAYPAL INTEGRATION</span>
             <h2>Verify a website. Capture $5.</h2>
             <p>
-              Create a real sandbox agreement for the hosted storefront.
-              Authorize test funds, submit the website from seller view, and
-              inspect the AI’s evidence before payment.
+              {accountsEnabled()
+                ? "Create a real sandbox agreement for the hosted storefront. Invite a connected seller account, authorize test funds, and inspect the AI’s evidence before payment."
+                : "Create a real sandbox agreement for the hosted storefront. Authorize test funds, submit the website from seller view, and inspect the AI’s evidence before payment."}
             </p>
             <p className="fine-print">
-              Requires your Personal PayPal sandbox login. A separate $100
-              handoff milestone stays unpaid unless you authorize it.
+              {accountsEnabled()
+                ? "Requires a Personal PayPal sandbox buyer login and a connected Business PayPal sandbox seller account. A separate $100 handoff milestone stays unpaid unless you authorize it."
+                : "Requires your Personal PayPal sandbox login. A separate $100 handoff milestone stays unpaid unless you authorize it."}
             </p>
             <Button asChild variant="outline">
               <Link href="/agent#sandbox-website">

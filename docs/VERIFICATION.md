@@ -446,3 +446,11 @@ checks written evidence, not independent website inspection. The October 28
 unapproved order was unavailable (404) after the overnight pause and was not
 authorized or captured. A fresh agreement was used; automatic expired-order
 replacement remains a follow-up. Production payments remain disabled.
+
+
+## 2026-11-02 — Expired-order reset, quota overrides, and submission docs verified
+
+- `recoverAuthorization` (`src/lib/service.ts`) now handles HTTP 404 (`RESOURCE_NOT_FOUND`) on `UNFUNDED` milestones without an authorization by archiving the expired `ORDER` event (`expired-order:${milestoneId}:${orderId}`, status `EXPIRED`) and clearing `orderId` while preserving pinned `payeeMerchantId` and `payeeUserId`, allowing `createOrder` to create a replacement order with `order:${milestoneId}:${expiredOrders}`.
+- `reserveModelCall` (`src/lib/demo-limits.ts`) supports optional `DEMO_MONTHLY_MODEL_LIMIT` and `DEMO_DAILY_WORKSPACE_LIMIT` environment variables while keeping 150/month and 20/day defaults.
+- `AgentStudio` (`src/components/agent-studio.tsx`) and `createAgentJob` (`src/lib/agent-service.ts`) support optional `sellerAccountId` invitations when `AUTH_MODE=accounts` is active.
+- All 28 unit/workflow tests (`npm test`), `npm run lint`, `npm run typecheck`, `npm run build`, `node scripts/verify-judge-http.mjs`, and `node scripts/verify-accounts-http.mjs` passed locally.

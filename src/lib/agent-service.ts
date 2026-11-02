@@ -26,6 +26,7 @@ export const agentJobSchema = browserPolicySchema
   .omit({ fixture: true })
   .extend({
     sellerEmail: z.string().email().max(254),
+    sellerAccountId: z.string().trim().min(1).max(128).optional(),
     amount: z.number().int().min(100).max(1000000),
   });
 export async function createAgentJob(input: unknown, demo = false) {
@@ -48,6 +49,7 @@ export async function createAgentJob(input: unknown, demo = false) {
         ? AGENT_DEMO_TITLE
         : `${policy.heading} · website verification`,
       sellerEmail: v.sellerEmail,
+      ...(v.sellerAccountId ? { sellerAccountId: v.sellerAccountId } : {}),
       description:
         "Verify the delivered product page with browser evidence before payment. The buyer controls a milestone-specific capture policy. Only the listed browser requirements are in scope.",
       totalAmount: v.amount + 10000,

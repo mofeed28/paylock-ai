@@ -83,7 +83,9 @@ export function PayPalButton({
         setMessage(
           result.status === "NOT_STARTED"
             ? "Start with the PayPal button above. There is no checkout to recover yet."
-            : "PayPal is still waiting for your approval. Finish checkout, then check again.",
+            : result.status === "EXPIRED_RESET"
+              ? "The previous unapproved PayPal order expired in the sandbox and was cleared. Use the PayPal button above to start a fresh checkout."
+              : "PayPal is still waiting for your approval. Finish checkout, then check again.",
         );
       }
     } catch (e) {

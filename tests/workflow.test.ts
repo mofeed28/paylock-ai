@@ -217,6 +217,8 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
       }
       if (url.endsWith("/checkout/orders/ORDER_TEST")) {
         assert.equal(init?.method, "GET");
+        if (orderStatus === "NOT_FOUND")
+          return Response.json({ name: "RESOURCE_NOT_FOUND" }, { status: 404 });
         return Response.json({
           id: "ORDER_TEST",
           intent: "AUTHORIZE",
@@ -297,6 +299,14 @@ test("complete isolated SQLite workflow: evidence, revision, dispute, authorizat
       assert.equal(
         requests.filter((r) => r.url.endsWith("/authorize")).length,
         0,
+      );
+      orderStatus = "NOT_FOUND";
+      assert.equal((await recoverAuthorization(sm.id)).status, "EXPIRED_RESET");
+      assert.equal((await milestone(sm.id)).orderId, null);
+      await createOrder(sm.id);
+      assert.equal(
+        requests.filter((r) => r.url.endsWith("/checkout/orders")).length,
+        2,
       );
       orderStatus = "APPROVED";
       assert.equal((await recoverAuthorization(sm.id)).status, "AUTHORIZED");

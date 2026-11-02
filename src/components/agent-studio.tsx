@@ -7,13 +7,17 @@ import { api, Notice } from "./common";
 
 export function AgentStudio({
   demoWebsiteUrl = "",
+  accounts = false,
 }: {
   demoWebsiteUrl?: string;
+  accounts?: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [useExample, setUseExample] = useState(false);
+  const [sellerAccountId, setSellerAccountId] = useState("");
+  const [identityConfirmed, setIdentityConfirmed] = useState(false);
   async function create(path: string, values: unknown) {
     setBusy(true);
     setError("");
@@ -105,12 +109,14 @@ export function AgentStudio({
             <ol>
               <li>Review the requirements below and create the agreement.</li>
               <li>
-                Authorize the $5 verification milestone with a Personal PayPal
-                sandbox account.
+                {accounts
+                  ? "Invite the seller’s Paylock account and wait for them to accept and connect their Business PayPal sandbox account, then authorize the $5 verification milestone with a Personal PayPal sandbox account."
+                  : "Authorize the $5 verification milestone with a Personal PayPal sandbox account."}
               </li>
               <li>
-                Optionally enable the exact-amount payment permission, then open
-                seller view and submit the website.
+                {accounts
+                  ? "Optionally enable the exact-amount payment permission, then have the seller submit the website from their seller workspace."
+                  : "Optionally enable the exact-amount payment permission, then open seller view and submit the website."}
               </li>
               <li>
                 Live AI inspects the site. Passing checks allow capture under
@@ -144,9 +150,18 @@ export function AgentStudio({
           key={useExample ? "example" : "custom"}
           onSubmit={(e) => {
             e.preventDefault();
+            if (accounts && sellerAccountId.trim() && !identityConfirmed) {
+              setError(
+                "Confirm that you received this account ID directly from your seller.",
+              );
+              return;
+            }
             const data = Object.fromEntries(new FormData(e.currentTarget));
             void create("agent/jobs", {
               ...data,
+              ...(accounts && sellerAccountId.trim()
+                ? { sellerAccountId: sellerAccountId.trim() }
+                : {}),
               amount: Math.round(Number(data.amount) * 100),
             });
           }}
@@ -203,9 +218,41 @@ export function AgentStudio({
             ))}
           </div>
           <p className="muted">
-            You confirm these requirements as the buyer. Seller email is contact
-            information; no invitation is sent.
+            {accounts
+              ? "You confirm these requirements as the buyer. Use the email your seller signs in to Paylock with; no email is sent automatically."
+              : "You confirm these requirements as the buyer. Seller email is contact information; no invitation is sent."}
           </p>
+          {accounts && (
+            <div className="field">
+              <label htmlFor="seller-account">
+                Seller’s Paylock account ID <span>optional</span>
+              </label>
+              <input
+                id="seller-account"
+                value={sellerAccountId}
+                maxLength={128}
+                onChange={(e) => {
+                  setSellerAccountId(e.target.value);
+                  setIdentityConfirmed(false);
+                }}
+              />
+              <small>
+                Ask your seller to copy this from Account. They accept your
+                invitation once; leave blank to choose the recipient after
+                saving.
+              </small>
+              {sellerAccountId.trim() && (
+                <label className="invitation-confirmation">
+                  <input
+                    type="checkbox"
+                    checked={identityConfirmed}
+                    onChange={(e) => setIdentityConfirmed(e.target.checked)}
+                  />{" "}
+                  I received this account ID directly from my seller.
+                </label>
+              )}
+            </div>
+          )}
           <div className="field">
             <label htmlFor="amount">Verification milestone · USD</label>
             <input
