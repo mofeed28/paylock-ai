@@ -1,7 +1,9 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
+  ArrowLeftRight,
   ArrowUpRight,
   ChevronDown,
   FolderOpen,
@@ -12,6 +14,7 @@ import {
   ScanEye,
   FlaskConical,
 } from "lucide-react";
+import { Button } from "./ui/button";
 
 export function Shell({
   children,
@@ -23,8 +26,29 @@ export function Shell({
   accounts?: boolean;
 }) {
   const path = usePathname();
+  const router = useRouter();
+  const [switching, setSwitching] = useState(false);
   const seller = path.startsWith("/seller");
   if (path === "/login") return <>{children}</>;
+  async function switchRole() {
+    const targetRole = seller ? "buyer" : "seller";
+    const targetPath = seller ? "/agreements" : "/seller";
+    setSwitching(true);
+    try {
+      const r = await fetch("/api/demo-role", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role: targetRole }),
+      });
+      if (r.ok) {
+        window.location.assign(targetPath);
+        return;
+      }
+      router.push(targetPath);
+    } finally {
+      setSwitching(false);
+    }
+  }
   const title = seller
     ? "Selling"
     : path.startsWith("/agreements")
@@ -138,10 +162,27 @@ export function Shell({
       <div className="workspace-main">
         <header className="workspace-topbar">
           <span>{title}</span>
-          <span className="sandbox-label">
-            <i />
-            Sandbox · Test payments
-          </span>
+          <div className="button-row">
+            {accounts && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={switching}
+                onClick={switchRole}
+              >
+                <ArrowLeftRight size={15} />
+                {switching
+                  ? "Switching…"
+                  : seller
+                    ? "Switch to Buyer"
+                    : "Switch to Connected Seller"}
+              </Button>
+            )}
+            <span className="sandbox-label">
+              <i />
+              Sandbox · Test payments
+            </span>
+          </div>
         </header>
         <main>{children}</main>
         <footer>

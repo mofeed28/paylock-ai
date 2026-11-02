@@ -1,6 +1,7 @@
 import { accountAuth } from "@/lib/account-auth";
 import { accountsEnabled } from "@/lib/workspace";
 import { equal, guardOrigin, ApiError } from "@/lib/auth";
+import { cookies } from "next/headers";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,6 +13,17 @@ async function handle(request: Request) {
     );
   try {
     guardOrigin(request);
+    if (
+      new URL(request.url).pathname === "/api/auth/sign-out" &&
+      request.headers.get("cookie")?.includes("paylock-role=")
+    ) {
+      const c = await cookies();
+      c.delete("paylock-role");
+      c.delete("paylock-quick-role");
+      if (!request.headers.get("cookie")?.includes("better-auth")) {
+        return Response.json({ success: true });
+      }
+    }
     // Private beta enrollment. Emails are contact labels, never authorization claims.
     if (new URL(request.url).pathname === "/api/auth/sign-up/email") {
       if (

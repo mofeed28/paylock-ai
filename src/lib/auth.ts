@@ -58,13 +58,137 @@ export async function buyerWorkspace(): Promise<string | null> {
   const value = (await cookies()).get("paylock-buyer")?.value || "";
   return sessionWorkspace(value);
 }
+export function roleSession(userId: string) {
+  const expiry = String(Date.now() + 8 * 3600000);
+  const payload = `role.${expiry}.${userId}`;
+  return `${payload}.${sign(payload)}`;
+}
+export function roleSessionUserId(value: string): string | null {
+  if (!accountsEnabled() || !process.env.BUYER_ACCESS_KEY) return null;
+  const [prefix, expiry, userId, sig, extra] = value.split(".");
+  if (
+    prefix !== "role" ||
+    extra ||
+    !userId ||
+    !sig ||
+    !Number.isFinite(Number(expiry)) ||
+    Number(expiry) <= Date.now()
+  )
+    return null;
+  return equal(sig, sign(`role.${expiry}.${userId}`)) ? userId : null;
+}
+export async function hasQuickRoleSession() {
+  if (!accountsEnabled()) return false;
+  const value = (await cookies()).get("paylock-role")?.value || "";
+  return !!roleSessionUserId(value);
+}
+export async function resolveDemoAccount(role: "buyer" | "seller") {
+  const { db } = await import("./db");
+  const findSeller = async () => {
+    const envEmail = process.env.DEMO_SELLER_EMAIL?.trim().toLowerCase();
+    if (envEmail) {
+      const byEmail = await db.user.findUnique({ where: { email: envEmail } });
+      if (byEmail) return byEmail;
+    }
+    const ready = await db.payPalConnection.findFirst({
+      where: { status: "READY" },
+      orderBy: { updatedAt: "desc" },
+      include: { user: true },
+    });
+    if (ready) return ready.user;
+    const anyConn = await db.payPalConnection.findFirst({
+      orderBy: { updatedAt: "desc" },
+      include: { user: true },
+    });
+    if (anyConn) return anyConn.user;
+    return db.user.upsert({
+      where: { email: envEmail || "seller@demo.paylock.local" },
+      update: {},
+      create: {
+        id: "demo-seller-account",
+        name: "Demo Seller",
+        email: envEmail || "seller@demo.paylock.local",
+      },
+    });
+  };
+  const seller = await findSeller();
+  if (role === "seller") return seller;
+  const envBuyer = process.env.DEMO_BUYER_EMAIL?.trim().toLowerCase();
+  if (envBuyer) {
+    const byEmail = await db.user.findUnique({ where: { email: envBuyer } });
+    if (byEmail && byEmail.id !== seller.id) return byEmail;
+  }
+  const latestAgreement = await db.agreement.findFirst({
+    where: {
+      workspaceId: { startsWith: "account:" },
+      NOT: { workspaceId: `account:${seller.id}` },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  if (latestAgreement) {
+    const ownerId = latestAgreement.workspaceId.replace(/^account:/, "");
+    const owner = await db.user.findUnique({ where: { id: ownerId } });
+    if (owner) return owner;
+  }
+  const otherUser = await db.user.findFirst({
+    where: { id: { not: seller.id } },
+    orderBy: { createdAt: "asc" },
+  });
+  if (otherUser) return otherUser;
+  return db.user.upsert({
+    where: { email: envBuyer || "buyer@demo.paylock.local" },
+    update: {},
+    create: {
+      id: "demo-buyer-account",
+      name: "Demo Buyer",
+      email: envBuyer || "buyer@demo.paylock.local",
+    },
+  });
+}
+export async function connectedDemoSeller() {
+  if (!accountsEnabled()) return null;
+  const { db } = await import("./db");
+  const me = await currentAccount();
+  const ready = await db.payPalConnection.findFirst({
+    where: {
+      status: "READY",
+      ...(me ? { userId: { not: me.id } } : {}),
+    },
+    orderBy: { updatedAt: "desc" },
+    include: { user: true },
+  });
+  if (ready) {
+    return {
+      id: ready.user.id,
+      email: ready.user.email,
+      name: ready.user.name,
+      merchantId: ready.merchantId,
+    };
+  }
+  const seller = await resolveDemoAccount("seller");
+  if (me && seller.id === me.id) return null;
+  return {
+    id: seller.id,
+    email: seller.email,
+    name: seller.name,
+    merchantId: null,
+  };
+}
 export async function currentAccount() {
   if (!accountsEnabled()) return null;
   const { accountAuth } = await import("./account-auth");
-  return (
+  const sessionUser =
     (await accountAuth().api.getSession({ headers: await headers() }))?.user ??
-    null
-  );
+    null;
+  if (sessionUser) return sessionUser;
+  const roleCookie = (await cookies()).get("paylock-role")?.value || "";
+  const userId = roleSessionUserId(roleCookie);
+  if (!userId) return null;
+  const { db } = await import("./db");
+  return db.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true },
+  });
 }
 export async function isBuyer() {
   return !!(await buyerWorkspace());

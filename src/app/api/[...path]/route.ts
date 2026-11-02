@@ -9,6 +9,9 @@ import {
   requireBuyer,
   serialized,
   session,
+  roleSession,
+  hasQuickRoleSession,
+  resolveDemoAccount,
   buyerWorkspace,
   currentAccount,
 } from "@/lib/auth";
@@ -136,6 +139,55 @@ async function handle(
       );
       return NextResponse.json(result, {
         headers: { "Cache-Control": "no-store" },
+      });
+    }
+    if (route === "demo-role") {
+      if (!accountsEnabled())
+        throw new ApiError(404, "Demo role switching requires account mode.");
+      const input = z
+        .object({
+          role: z.enum(["buyer", "seller"]),
+          code: z.string().max(512).optional(),
+        })
+        .parse(body);
+      const validBuyerKey =
+        !!process.env.BUYER_ACCESS_KEY &&
+        !!input.code &&
+        equal(input.code, process.env.BUYER_ACCESS_KEY);
+      const validSellerKey =
+        input.role === "seller" &&
+        !!process.env.SELLER_ACCESS_KEY &&
+        !!input.code &&
+        equal(input.code, process.env.SELLER_ACCESS_KEY);
+      if (
+        !validBuyerKey &&
+        !validSellerKey &&
+        !(await hasQuickRoleSession())
+      ) {
+        throw new ApiError(401, "Incorrect demo access code.");
+      }
+      const user = await serialized(() => resolveDemoAccount(input.role));
+      const secure =
+        judgeDemo() || new URL(request.url).protocol === "https:";
+      const c = await cookies();
+      c.set("paylock-role", roleSession(user.id), {
+        httpOnly: true,
+        sameSite: "strict",
+        secure,
+        path: "/",
+        maxAge: 8 * 3600,
+      });
+      c.set("paylock-quick-role", input.role, {
+        httpOnly: false,
+        sameSite: "strict",
+        secure,
+        path: "/",
+        maxAge: 8 * 3600,
+      });
+      return NextResponse.json({
+        ok: true,
+        role: input.role,
+        user: { id: user.id, name: user.name, email: user.email },
       });
     }
     if (route === "login") {

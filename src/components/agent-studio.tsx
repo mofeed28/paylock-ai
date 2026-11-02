@@ -8,9 +8,11 @@ import { api, Notice } from "./common";
 export function AgentStudio({
   demoWebsiteUrl = "",
   accounts = false,
+  demoSeller = null,
 }: {
   demoWebsiteUrl?: string;
   accounts?: boolean;
+  demoSeller?: { id: string; email: string; name: string } | null;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -127,7 +129,13 @@ export function AgentStudio({
               <Button
                 variant="outline"
                 disabled={busy}
-                onClick={() => setUseExample(true)}
+                onClick={() => {
+                  setUseExample(true);
+                  if (demoSeller) {
+                    setSellerAccountId(demoSeller.id);
+                    setIdentityConfirmed(true);
+                  }
+                }}
               >
                 Fill with test storefront requirements
               </Button>
@@ -207,7 +215,7 @@ export function AgentStudio({
                       ? name === "targetUrl"
                         ? demoWebsiteUrl
                         : name === "sellerEmail"
-                          ? "seller@example.com"
+                          ? demoSeller?.email || "seller@example.com"
                           : placeholder
                       : undefined
                   }
@@ -236,6 +244,20 @@ export function AgentStudio({
                   setIdentityConfirmed(false);
                 }}
               />
+              {demoSeller && (
+                <div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setSellerAccountId(demoSeller.id);
+                      setIdentityConfirmed(true);
+                    }}
+                  >
+                    Use connected sandbox seller ({demoSeller.email})
+                  </Button>
+                </div>
+              )}
               <small>
                 Ask your seller to copy this from Account. They accept your
                 invitation once; leave blank to choose the recipient after

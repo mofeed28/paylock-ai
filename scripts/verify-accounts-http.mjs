@@ -451,8 +451,26 @@ try {
     401,
     "previous password no longer works",
   );
+  assert.equal(
+    (await post("demo-role", null, { role: "buyer", code: "wrong-code" }))
+      .status,
+    401,
+  );
+  const quickBuyer = await post("demo-role", null, { role: "buyer", code });
+  assert.equal(quickBuyer.status, 200);
+  const quickCookie = cookieOf(quickBuyer);
+  assert.equal(
+    (await get(`/api/agreements/${a.id}/export`, quickCookie)).status,
+    200,
+    "judge quick-access buyer resolves the existing agreement owner",
+  );
+  const quickSeller = await post("demo-role", quickCookie, { role: "seller" });
+  assert.equal(quickSeller.status, 200);
+  const sellerQuickCookie = cookieOf(quickSeller);
+  assert.equal((await get("/seller", sellerQuickCookie)).status, 200);
+  assert.equal((await post("auth/sign-out", sellerQuickCookie)).status, 200);
   console.log(
-    "Account HTTP checks passed: enrollment, CSRF, persistent login, buyer/seller isolation, targeted invitations, seller acceptance, submission and revocation.",
+    "Account HTTP checks passed: enrollment, CSRF, persistent login, judge quick-role switch, buyer/seller isolation, targeted invitations, seller acceptance, submission and revocation.",
   );
 } finally {
   if (child && child.exitCode === null) {

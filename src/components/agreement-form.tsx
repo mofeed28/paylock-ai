@@ -24,10 +24,12 @@ export function AgreementForm({
   mode,
   judgeDemo = false,
   accounts = false,
+  demoSeller = null,
 }: {
   mode: string;
   judgeDemo?: boolean;
   accounts?: boolean;
+  demoSeller?: { id: string; email: string; name: string } | null;
 }) {
   const router = useRouter();
   const [sellerAccountId, setSellerAccountId] = useState("");
@@ -204,6 +206,21 @@ export function AgreementForm({
                     setIdentityConfirmed(false);
                   }}
                 />
+                {demoSeller && (
+                  <div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setBrief({ ...brief, sellerEmail: demoSeller.email });
+                        setSellerAccountId(demoSeller.id);
+                        setIdentityConfirmed(true);
+                      }}
+                    >
+                      Use connected sandbox seller ({demoSeller.email})
+                    </Button>
+                  </div>
+                )}
                 <small>
                   Ask your seller to copy this from Account. They accept your
                   invitation once; you won’t need to approve them again. Leave

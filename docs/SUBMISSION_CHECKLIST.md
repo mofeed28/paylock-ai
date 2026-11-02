@@ -32,8 +32,14 @@ Requirements: https://paypalaihackathon.devpost.com/
 
 Demo URL: `https://paylock-demo.52.202.219.38.sslip.io/login`
 
-- **Fastest 2-minute walkthrough (no PayPal login required):**
-  Sign in with the provided Buyer demo account (or create an account with the enrollment code), open **Guide (`/judge`) → Try the guided demo (`/agent`)**, and click **Try the browser agent**. Run browser verification to watch Chromium + Amazon Nova 2 Lite catch the broken purchase link (`HTTP 404`), request a revision, click **Submit corrected page & recheck**, and observe policy-bound capture.
-- **Live $5 PayPal Sandbox + Multiparty Seller flow:**
-  Sign in with the provided Buyer and pre-connected Seller demo accounts (or inspect completed agreement `cmvtqkbvx000apdeyixan2dzu` and capture receipt `7JF45713HK321441W` in the workspace ledger). To run a fresh `$5` sandbox transaction, create an agreement inviting the Seller's Account ID (shown on the Seller's `/account` page), accept the invitation from `/seller`, authorize the `$5` milestone with a Personal PayPal sandbox buyer account, submit evidence as Seller, and approve capture as Buyer.
+Access code: `<insert your BUYER_ACCESS_KEY privately in Devpost>`
+
+1. **One-Click Sign-In & Role Switching:**
+   Paste the Demo Access Code on `/login` and click **Enter as Buyer** or **Enter as Connected Seller** (no signup or password required). Once inside, use the **Switch to Connected Seller / Switch to Buyer** button in the top bar at any time to flip between the Buyer workspace and the PayPal-connected Seller workspace (`LTJFUUKVMGAPQ`).
+2. **Fastest 2-Minute Walkthrough (No PayPal Login Needed):**
+   Open **Browser demo (`/agent`) → Try the browser agent**. Run browser verification to watch Chromium + Amazon Nova 2 Lite catch the broken purchase link (`HTTP 404`), request a revision, click **Submit corrected page & recheck**, and observe policy-bound capture.
+3. **Live $5 PayPal Sandbox + Multiparty Seller Flow:**
+   - Inspect completed agreement `cmvtqkbvx000apdeyixan2dzu` and verified seller-routed capture `7JF45713HK321441W` in the Buyer workspace/ledger, **or**
+   - Create a fresh `$5` sandbox agreement on `/agent#sandbox-website` (click **Fill with test storefront requirements**, which automatically fills the connected Seller's email and Account ID) or `/agreements/new` (click **Use connected sandbox seller**).
+   - Click **Switch to Connected Seller** in the top bar to accept the invitation and submit work, then click **Switch to Buyer** to authorize/capture `$5` in PayPal Sandbox.
 - All payments use PayPal Sandbox test funds only. Browser checks run with JavaScript disabled against approved HTTPS origins.
