@@ -41,7 +41,7 @@ export function AccountLogin({ next }: { next: string }) {
   }
   return (
     <div className="card form-card">
-      <span className="eyebrow">JUDGE QUICK ACCESS · PAYPAL SANDBOX</span>
+      <span className="eyebrow">JUDGE QUICK ACCESS · PERMANENT WORKSPACE</span>
       <h2>Step into the workspace.</h2>
       <p className="muted">
         Enter the submission access code to open the pre-configured Buyer
