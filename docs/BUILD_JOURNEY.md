@@ -560,3 +560,10 @@ recorded in VERIFICATION.md and PAYPAL_SELLERS.md, including API versus UI steps
 - Aligned `/agent` (`src/components/agent-studio.tsx`, `src/lib/agent-service.ts`) and `/judge` (`src/app/(buyer)/judge/page.tsx`) with `AUTH_MODE=accounts` so website-verification agreements can optionally invite `sellerAccountId` at creation time and show mode-accurate instructions.
 - Updated `README.md`, `docs/DEVPOST.md`, `docs/SUBMISSION_CHECKLIST.md`, and `docs/DEMO_SCRIPT.md` to reflect all verified milestones through October 29, 2026.
 - Verified locally with all 28 unit/workflow tests (`npm test`), ESLint (`npm run lint`), TypeScript (`npm run typecheck`), production Next.js build (`npm run build`), and both isolated production HTTP suites (`scripts/verify-judge-http.mjs` and `scripts/verify-accounts-http.mjs`).
+
+
+## 2026-11-03 — Deployed Judge Quick-Access & Seller Role Switching (`quick-role-20261103`)
+
+- Deployed commit `ce8fa70` to `/opt/paylock/releases/quick-role-20261103` on the AWS Lightsail instance (`https://paylock-demo.52.202.219.38.sslip.io`) after all 28 Linux tests, ESLint, production Next.js build, and both HTTP verification suites (`verify-judge-http.mjs` and `verify-accounts-http.mjs`) passed on the host.
+- Backed up `/var/lib/paylock/demo.db` and `/etc/paylock.env` to `/var/backups/paylock/quick-role-20261103`. All 12 existing data tables passed SHA-256 row-hash preservation checks: 13 agreements, 33 milestones, 12 submissions, 17 payment events, 51 timeline events, 8 agent runs, 9 quota rows, 5 users, 10 sessions, 5 auth accounts, 4 seller access rows, and 2 PayPal connections.
+- Post-deployment read-only checks verified HTTPS, anonymous access boundaries, SQLite integrity, Bedrock/PayPal sandbox configuration, and preserved USD 5 capture receipts.

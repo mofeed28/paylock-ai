@@ -454,3 +454,11 @@ replacement remains a follow-up. Production payments remain disabled.
 - `reserveModelCall` (`src/lib/demo-limits.ts`) supports optional `DEMO_MONTHLY_MODEL_LIMIT` and `DEMO_DAILY_WORKSPACE_LIMIT` environment variables while keeping 150/month and 20/day defaults.
 - `AgentStudio` (`src/components/agent-studio.tsx`) and `createAgentJob` (`src/lib/agent-service.ts`) support optional `sellerAccountId` invitations when `AUTH_MODE=accounts` is active.
 - All 28 unit/workflow tests (`npm test`), `npm run lint`, `npm run typecheck`, `npm run build`, `node scripts/verify-judge-http.mjs`, and `node scripts/verify-accounts-http.mjs` passed locally.
+
+
+## 2026-11-03 — Judge quick-access release deployed to Lightsail
+
+- Deployed `ce8fa70` to `/opt/paylock/releases/quick-role-20261103` with backup under `/var/backups/paylock/quick-role-20261103`.
+- All 28 Linux unit/workflow tests, ESLint, production Next.js build, `scripts/verify-judge-http.mjs`, and `scripts/verify-accounts-http.mjs` (including `POST /api/demo-role` judge quick-role switching) passed on the host.
+- All 12 table row counts and SHA-256 hashes were preserved across the switch (`Agreement`: 13, `Milestone`: 33, `Submission`: 12, `PaymentEvent`: 17, `TimelineEvent`: 51, `AgentRun`: 8, `DemoUsage`: 9, `User`: 5, `Session`: 10, `Account`: 5, `SellerAccessRequest`: 4, `PayPalConnection`: 2).
+- Public HTTPS login (`https://paylock-demo.52.202.219.38.sslip.io/login`), unauthenticated access boundaries, database integrity, and existing USD 5 captured milestone checks passed.
